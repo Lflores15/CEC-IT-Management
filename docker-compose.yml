@@ -1,0 +1,61 @@
+version: '3.8'
+
+services: 
+  db: 
+    image: mariadb:11.4
+    container_name: cec_it_management
+    restart: always
+    env_file: .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: cec_it_management
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports: 
+      - "3306:3306"
+    volumes: 
+      - db_data:/var/lib/mysql  
+      - ./init_db/:/docker-entrypoint-initdb.d/
+    networks: 
+      - cec_it_network
+
+  php:
+    build: .
+    container_name: cec_it_php
+    restart: always
+    depends_on:
+      - db
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - .:/var/www/html   # ✅ Mount everything, including `/includes/`
+    ports:
+      - "8080:80"
+    networks:
+      - cec_it_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: cec_it_pma    
+    restart: always
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "8081:80"
+    volumes:
+      - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
+    networks:
+      - cec_it_network
+
+networks:
+  cec_it_network:
+    driver: bridge
+
+volumes:
+  db_data:
