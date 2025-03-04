@@ -18,11 +18,12 @@ WORKDIR /var/www/html
 # Copy Everything (src, includes, Forms, etc.)
 COPY . /var/www/html/
 
-# Set File Permissions
-RUN chown -R www-data:www-data /var/www/html
+# Set Correct File Permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
 
 # Expose Port 80
 EXPOSE 80
 
 # Start Apache
-CMD ["apache2-foreground"]
+CMD ["apachectl", "-D", "FOREGROUND"]
