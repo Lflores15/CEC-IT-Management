@@ -10,6 +10,7 @@ if (!isset($_SESSION["user_id"])) {
 
 $user_id = $_SESSION["user_id"];
 $username = $_SESSION["username"];
+$emp_id = ["emp_id"];
 
 // ✅ Fetch user information from database
 $stmt = $conn->prepare("SELECT email, role FROM Users WHERE user_id = ?");
@@ -30,7 +31,7 @@ $pendingReturns = $pendingReturnQuery->fetch_assoc()["pending"];
 
 // ✅ Fetch assigned devices
 $stmt = $conn->prepare("SELECT device_name, asset_tag, category, status FROM Devices WHERE assigned_to = ?");
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param("i", $emp_id);
 $stmt->execute();
 $result = $stmt->get_result();
 

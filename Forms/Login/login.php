@@ -26,12 +26,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION["username"] = $username;
             $_SESSION["role"] = $role;
 
-            // ✅ Redirect based on user role
-            if ($role === 'admin') {
-                header("Location: ../Admin/admin_dashboard.php");
-            } else {
-                header("Location: ../Users/user_dashboard.php");
-            }
+            // ✅ Redirect to dashboard
+            header("Location: ../Dashboard/dashboard.php");
             exit();
         } else {
             echo "❌ Incorrect password!";
