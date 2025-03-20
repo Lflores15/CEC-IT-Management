@@ -83,7 +83,7 @@ $conn->close();
                 labels: ['Active', 'Decommissioned', 'Lost', 'Pending Return', 'Shelf'],
                 datasets: [{
                     data: [<?php echo $counts["active"]; ?>, <?php echo $counts["decommissioned"]; ?>, <?php echo $counts["lost"]; ?>, <?php echo $counts["pending"]; ?>, <?php echo $counts["shelf"]; ?>],
-                    backgroundColor: ['#28a745', '#ff9800', '#dc3545', '#ffc107', '#17a2b8']
+                    backgroundColor: ['#28a745', '#606162', '#dc3545', '#ffc107', '#17a2b8']
                 }]
             }
         });
