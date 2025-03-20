@@ -126,7 +126,6 @@ body {
     text-decoration: none;
     padding: 10px;
     display: block;
-    margin-bottom: 10px;
     border-radius: 5px;    
 }
 
@@ -134,10 +133,62 @@ body {
     background: #0056b3;
 }
 
+/* Sidebar Dropdown */
+.dropdown {
+    position: relative;
+    display: block;
+}
+
+/* Dropdown Button - Same Style as Sidebar Links */
+.dropdown-btn {
+    background: none;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+}
+
+/* Hover Effect */
+.dropdown-btn:hover {
+    background: #0056b3;
+    width: 100%;
+    border-radius: 5px;
+}
+
+/* Dropdown Content - Initially Hidden */
+.dropdown-content {
+    display: none;
+    flex-direction: column;
+    background: #3a4b5c;
+    padding-left: 15px;
+}
+
+/* Submenu Links */
+.dropdown-content a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 8px;
+    font-size: 14px;
+}
+
+/* Hover Effects for Submenu */
+.dropdown-content a:hover {
+    background: #007bff;
+}
+
+/* Show Dropdown When Active */
+.dropdown.open .dropdown-content {
+    display: flex !important;
+}
+
 /* Main Content */
 .main-content {
     margin-top: 80px;
-    margin-left: 220px;
+    margin-left: 100px;
     padding: 20px;
 }
 
