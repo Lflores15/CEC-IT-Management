@@ -10,16 +10,16 @@ INSERT INTO Employees (employee_id, first_name, last_name, login_id, email, phon
 -- 2. Insert Sample Devices (IT asset tracking)
 -- ==============================================
 INSERT INTO Devices (device_name, asset_tag, serial_number, category, brand, model, os, cpu, ram, storage, status, assigned_to, location, purchase_date, warranty_expiry, notes) VALUES
-    ('Dell XPS 15', 'CEC-001', 'SN123456', 'laptop', 'Dell', 'XPS 15', 'Windows 10', 'Intel i7-9750H', 16, 512, 'Active', 
+    ('Dell XPS 15', 'CEC-LT001', 'SN123456', 'laptop', 'Dell', 'XPS 15', 'Windows 10', 'Intel i7-9750H', 16, 512, 'Active', 
         (SELECT emp_id FROM Employees WHERE employee_id = 'EMP1001'), 'Head Office', '2022-01-15', '2025-01-15', 'Used by IT department'),
     
-    ('MacBook Pro', 'CEC-1002', 'SN654321', 'laptop', 'Apple', 'MacBook Pro 16', 'macOS Monterey', 'Apple M1 Max', 32, 1024, 'Active', 
+    ('Dell XPS 16', 'CEC-LT1002', 'SN654321', 'laptop', 'Dell', 'XPS 16', 'Windows 11', 'Intel i7-9750H', 32, 1024, 'Active', 
         (SELECT emp_id FROM Employees WHERE employee_id = 'EMP1002'), 'Remote Worker', '2023-05-20', '2026-05-20', 'For remote work'),
 
-    ('iPhone 13', 'CEC-2001', 'IP13SN789', 'iPhone', 'Apple', 'iPhone 13', 'iOS 16', NULL, NULL, 128, 'Active', 
+    ('iPhone 13', 'CEC-PH2001', 'IP13SN789', 'iPhone', 'Apple', 'iPhone 13', 'iOS 16', NULL, NULL, 128, 'Active', 
         (SELECT emp_id FROM Employees WHERE employee_id = 'EMP1001'), 'Field Work', '2023-03-10', '2025-03-10', 'Work phone'),
 
-    ('Samsung Galaxy Tab', 'CEC-3001', 'SGT1001', 'tablet', 'Samsung', 'Galaxy Tab S8', 'Android 13', NULL, NULL, 256, 'Active', 
+    ('Samsung Galaxy Tab', 'CEC-TAB3001', 'TB13SN789', 'tablet', 'Samsung', 'Galaxy Tab S8', 'Android 13', NULL, NULL, 256, 'Active', 
         (SELECT emp_id FROM Employees WHERE employee_id = 'EMP1002'), 'Warehouse', '2022-07-25', '2024-07-25', 'Tablet for inventory tracking');
 
 -- ==============================================
@@ -51,10 +51,10 @@ INSERT INTO Tablets (device_id, responsible_party, type, carrier, phone_number, 
 -- 7. Insert Sample Assignments (Track which employee has which device)
 -- ==============================================
 INSERT INTO Assignments (device_id, emp_id, assigned_at, status) VALUES
-    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-001'), (SELECT emp_id FROM Employees WHERE employee_id = 'EMP1001'), NOW(), 'Active'),
-    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-1002'), (SELECT emp_id FROM Employees WHERE employee_id = 'EMP1002'), NOW(), 'Active'),
-    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-2001'), (SELECT emp_id FROM Employees WHERE employee_id = 'EMP1001'), NOW(), 'Active'),
-    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-3001'), (SELECT emp_id FROM Employees WHERE employee_id = 'EMP1002'), NOW(), 'Active');
+    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-LT001'), (SELECT emp_id FROM Employees WHERE employee_id = 'EMP1001'), NOW(), 'Active'),
+    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-LT1002'), (SELECT emp_id FROM Employees WHERE employee_id = 'EMP1002'), NOW(), 'Active'),
+    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-PH2001'), (SELECT emp_id FROM Employees WHERE employee_id = 'EMP1001'), NOW(), 'Active'),
+    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-TAB3001'), (SELECT emp_id FROM Employees WHERE employee_id = 'EMP1002'), NOW(), 'Active');
     
 -- ==============================================
 -- Insert Generic Sample Users
