@@ -26,26 +26,26 @@ INSERT INTO Devices (device_name, asset_tag, serial_number, category, brand, mod
 -- 3. Insert Sample Laptops (For laptop-specific details)
 -- ==============================================
 INSERT INTO Laptops (device_id, backup_type, internet_policy, backup_removed, sinton_backup, midland_backup, c2_backup, actions_needed) VALUES
-    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-001'), 'Full Backup', 'Restricted', TRUE, FALSE, TRUE, FALSE, 'Needs OS update'),
-    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-1002'), 'Incremental Backup', 'Unrestricted', FALSE, FALSE, FALSE, TRUE, 'Battery replacement required');
+    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-LT001'), 'Full Backup', 'Restricted', TRUE, FALSE, TRUE, FALSE, 'Needs OS update'),
+    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-LT1002'), 'Incremental Backup', 'Unrestricted', FALSE, FALSE, FALSE, TRUE, 'Battery replacement required');
 
 -- ==============================================
 -- 4. Insert Sample Decommissioned Laptops (For tracking decommissioned laptops)
 -- ==============================================
 INSERT INTO Decommissioned_Laptops (laptop_id, broken, duplicate, decommission_status, additional_notes) VALUES
-    ((SELECT id FROM Laptops WHERE device_id = (SELECT device_id FROM Devices WHERE asset_tag = 'CEC-001')), TRUE, FALSE, 'Destroyed', 'Dropped and motherboard failure');
+    ((SELECT id FROM Laptops WHERE device_id = (SELECT device_id FROM Devices WHERE asset_tag = 'CEC-LT001')), TRUE, FALSE, 'Destroyed', 'Dropped and motherboard failure');
 
 -- ==============================================
 -- 5. Insert Sample iPhones (For tracking iPhone-specific details)
 -- ==============================================
 INSERT INTO iPhones (device_id, responsible_party, carrier, phone_number, previous_owner, notes) VALUES
-    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-2001'), 'IT Department', 'AT&T', '555-6789', 'John Doe', 'Company-provided mobile device');
+    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-PH2001'), 'IT Department', 'AT&T', '555-6789', 'John Doe', 'Company-provided mobile device');
 
 -- ==============================================
 -- 6. Insert Sample Tablets (For tracking tablet-specific details)
 -- ==============================================
 INSERT INTO Tablets (device_id, responsible_party, type, carrier, phone_number, imei, notes) VALUES
-    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-3001'), 'Operations', 'Work', 'T-Mobile', '555-9876', '356938035643809', 'Assigned to warehouse team');
+    ((SELECT device_id FROM Devices WHERE asset_tag = 'CEC-TAB3001'), 'Operations', 'Work', 'T-Mobile', '555-9876', '356938035643809', 'Assigned to warehouse team');
 
 -- ==============================================
 -- 7. Insert Sample Assignments (Track which employee has which device)
