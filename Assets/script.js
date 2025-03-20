@@ -4,12 +4,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (profileBtn) {
         profileBtn.addEventListener("click", function (event) {
-            event.stopPropagation(); // Prevents immediate closing
+            event.stopPropagation(); 
             profileDropdown.classList.toggle("active");
         });
     }
 
-    // Close dropdown when clicking outside
     document.addEventListener("click", function (event) {
         if (!profileDropdown.contains(event.target)) {
             profileDropdown.classList.remove("active");
@@ -53,4 +52,28 @@ document.addEventListener("DOMContentLoaded", function () {
     filterTag.addEventListener("input", filterTable);
     filterCategory.addEventListener("change", filterTable);
     filterStatus.addEventListener("change", filterTable);
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("JavaScript Loaded ✅"); // Debugging Check
+
+    // Select all dropdown buttons
+    const dropdownBtns = document.querySelectorAll(".dropdown-btn");
+
+    dropdownBtns.forEach((btn) => {
+        btn.addEventListener("click", function () {
+            console.log(`Clicked on: ${this.textContent}`);
+
+            // Toggle dropdown visibility
+            const dropdownContainer = this.parentElement;
+            dropdownContainer.classList.toggle("open");
+
+            // Close other dropdowns if one is opened
+            dropdownBtns.forEach(otherBtn => {
+                if (otherBtn !== btn) {
+                    otherBtn.parentElement.classList.remove("open");
+                }
+            });
+        });
+    });
 });

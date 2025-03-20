@@ -70,35 +70,6 @@ $conn->close();
             </div>
         </section>
 
-        <!-- Devices Table -->
-        <section>
-            <h3>Assigned Devices</h3>
-            <?php if (empty($devices)) : ?>
-                <p>No assigned devices.</p>
-            <?php else : ?>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Device Name</th>
-                            <th>Asset Tag</th>
-                            <th>Category</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($devices as $device) : ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($device["device_name"]); ?></td>
-                                <td><?php echo htmlspecialchars($device["asset_tag"]); ?></td>
-                                <td><?php echo htmlspecialchars($device["category"]); ?></td>
-                                <td><?php echo htmlspecialchars($device["status"]); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php endif; ?>
-       
-
         <!-- Chart.js Section -->
             <h3>Device Status Overview</h3>
             <canvas id="deviceChart" style="max-width: 600px; max-height: 400px;"></canvas>        
