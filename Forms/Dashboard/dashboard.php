@@ -3,7 +3,6 @@ session_start();
 require_once "../../PHP/config.php";
 require_once "../../includes/navbar.php"; 
 
-// Redirect to login if not logged in
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../Login/login.php");
     exit();
@@ -11,9 +10,8 @@ if (!isset($_SESSION["user_id"])) {
 
 $user_id = $_SESSION["user_id"];
 $username = $_SESSION["username"];
-$emp_id = $_SESSION["emp_id"] ?? null; // Ensure $emp_id is correctly retrieved
+$emp_id = $_SESSION["emp_id"] ?? null;
 
-// Fetch user information
 $stmt = $conn->prepare("SELECT email, role FROM Users WHERE user_id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -21,26 +19,19 @@ $stmt->bind_result($email, $role);
 $stmt->fetch();
 $stmt->close();
 
-// Fetch device statistics
-$totalDevicesQuery = $conn->query("SELECT COUNT(*) as total FROM Devices");
-$activeDevicesQuery = $conn->query("SELECT COUNT(*) as active FROM Devices WHERE status = 'Active'");
-$pendingReturnQuery = $conn->query("SELECT COUNT(*) as pending FROM Devices WHERE status = 'Pending Return'");
+$query = "
+    SELECT 
+        (SELECT COUNT(*) FROM Devices) AS total, 
+        (SELECT COUNT(*) FROM Devices WHERE status = 'Active') AS active, 
+        (SELECT COUNT(*) FROM Decommissioned_Laptops) AS decommissioned, 
+        (SELECT COUNT(*) FROM Devices WHERE status = 'Lost') AS lost, 
+        (SELECT COUNT(*) FROM Devices WHERE status = 'Pending Return') AS pending, 
+        (SELECT COUNT(*) FROM Devices WHERE status = 'Shelf') AS shelf
+";
 
-$totalDevices = $totalDevicesQuery->fetch_assoc()["total"];
-$activeDevices = $activeDevicesQuery->fetch_assoc()["active"];
-$pendingReturns = $pendingReturnQuery->fetch_assoc()["pending"];
+$result = $conn->query($query);
+$counts = $result->fetch_assoc();
 
-// Fetch all devices
-$stmt = $conn->prepare("SELECT device_name, asset_tag, category, status FROM Devices");
-$stmt->execute();
-$result = $stmt->get_result();
-
-$devices = [];
-while ($row = $result->fetch_assoc()) {
-    $devices[] = $row;
-}
-
-$stmt->close();
 $conn->close();
 ?>
 
@@ -54,40 +45,48 @@ $conn->close();
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-        <!-- Stat Cards -->
-        <section class="dashboard-cards">
-            <div class="card total">
-                <h3>Total Devices</h3>
-                <p><?php echo $totalDevices; ?></p>
-            </div>
-            <div class="card active">
-                <h3>Active Devices</h3>
-                <p><?php echo $activeDevices; ?></p>
-            </div>
-            <div class="card pending">
-                <h3>Pending Returns</h3>
-                <p><?php echo $pendingReturns; ?></p>
-            </div>
-        </section>
-
-        <!-- Chart.js Section -->
-            <h3>Device Status Overview</h3>
-            <canvas id="deviceChart" style="max-width: 600px; max-height: 400px;"></canvas>        
-        <script>
-            var ctx = document.getElementById('deviceChart').getContext('2d');
-            var deviceChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Active', 'Pending Return', 'Total Devices'],
-                    datasets: [{
-                        data: [<?php echo $activeDevices; ?>, <?php echo $pendingReturns; ?>, <?php echo $totalDevices; ?>],
-                        backgroundColor: ['#28a745', '#ff9800', '#17a2b8']
-                    }]
-                }
-            });
-        </script>
-    </div>
+    <h2>Device Status Overview</h2>
+    <section class="dashboard-cards">
+        <div class="card total">
+            <h3>Total Devices</h3>
+            <p><?php echo $counts["total"]; ?></p>
+        </div>
+        <div class="card active">
+            <h3>Active Devices</h3>
+            <p><?php echo $counts["active"]; ?></p>
+        </div>
+        <div class="card decommissioned">
+            <h3>Decommissioned</h3>
+            <p><?php echo $counts["decommissioned"]; ?></p>
+        </div>
+        <div class="card lost">
+            <h3>Lost Devices</h3>
+            <p><?php echo $counts["lost"]; ?></p>
+        </div>
+        <div class="card pending">
+            <h3>Pending Return</h3>
+            <p><?php echo $counts["pending"]; ?></p>
+        </div>
+        <div class="card shelf">
+            <h3>On Shelf</h3>
+            <p><?php echo $counts["shelf"]; ?></p>
+        </div>
     </section>
 
+    <canvas id="deviceChart" style="max-width: 600px; max-height: 400px;"></canvas>        
+
+    <script>
+        var ctx = document.getElementById('deviceChart').getContext('2d');
+        var deviceChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Active', 'Decommissioned', 'Lost', 'Pending Return', 'Shelf'],
+                datasets: [{
+                    data: [<?php echo $counts["active"]; ?>, <?php echo $counts["decommissioned"]; ?>, <?php echo $counts["lost"]; ?>, <?php echo $counts["pending"]; ?>, <?php echo $counts["shelf"]; ?>],
+                    backgroundColor: ['#28a745', '#ff9800', '#dc3545', '#ffc107', '#17a2b8']
+                }]
+            }
+        });
+    </script>
 </body>
 </html>

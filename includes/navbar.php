@@ -7,7 +7,11 @@ if (!isset($_SESSION["user_id"])) {
 
 // Get the current page name dynamically
 $pageTitle = "CEC-IT"; // Default title
-$currentPage = basename($_SERVER['PHP_SELF'], ".php"); // Extracts filename without extension
+$currentPage = basename($_SERVER['PHP_SELF'], ".php"); 
+
+// Determine if we are on an asset-related page
+$assetPages = ["asset_Dashboard", "laptop_Dashboard", "pc_Dashboard", "phone_Dashboard", "tablet_Dashboard"];
+$isAssetPage = in_array($currentPage, $assetPages);
 
 // Set custom titles for each page
 $pageTitles = [
@@ -18,7 +22,7 @@ $pageTitles = [
     "pc_Dashboard" => "PCs",
     "phone_Dashboard" => "Phones",
     "tablet_Dashboard" => "Tablets",
-    "users" => "Users",
+    "user_Dashboard" => "Users",
     "settings" => "Settings",
 ];
 
@@ -63,7 +67,7 @@ if (array_key_exists($currentPage, $pageTitles)) {
 
         <!-- Assets Dropdown -->
         <div class="dropdown">
-            <button class="dropdown-btn">Assets ▼</button>
+            <button class="dropdown-btn">Assets</button>
             <div class="dropdown-content">
                 <a href="../Dashboard/asset_Dashboard.php">All Assets</a>
                 <a href="../Dashboard/laptop_Dashboard.php">Laptops</a>
@@ -73,12 +77,12 @@ if (array_key_exists($currentPage, $pageTitles)) {
             </div>
         </div>
 
-        <a href="../Users/users.php" class="<?php echo ($currentPage == 'users') ? 'active' : ''; ?>">Users</a>
+        <a href="../Users/user_Dashboard.php" class="<?php echo ($currentPage == 'users') ? 'active' : ''; ?>">Users</a>
         <a href="../Settings/settings.php" class="<?php echo ($currentPage == 'settings') ? 'active' : ''; ?>">Settings</a>
     </div>
 
     <!-- Main Content Wrapper -->
-    <div class="main-content">
+    <div class="<?php echo $isAssetPage ? 'asset-content' : 'main-content'; ?>">
 
     <!-- Script Link -->
     <script src="../../Assets/script.js?v=<?php echo time(); ?>"></script>

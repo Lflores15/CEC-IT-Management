@@ -6,7 +6,11 @@ body {
     background-color: #f4f4f4;
 }
 
-/* Top Navbar - Full Width */
+h2 {
+    text-align: center;
+}
+
+/* Top Navbar */
 .top-navbar {
     position: fixed;
     top: 0;
@@ -21,20 +25,18 @@ body {
     z-index: 1000;
 }
 
-/* Left Side (Logo) */
+/* Navbar Content */
 .top-navbar .logo {
     height: 40px;
-    margin-right: auto; /* Pushes the rest of navbar to the right */
+    margin-right: auto;
 }
 
-/* Right Side (Search + Profile Dropdown) */
 .navbar-right {
     display: flex;
     align-items: center;
-    gap: 15px; /* Spacing between elements */
+    gap: 15px;
 }
 
-/* Search Bar */
 .top-navbar input {
     padding: 8px;
     width: 250px;
@@ -45,10 +47,9 @@ body {
 /* Profile Dropdown */
 .profile-dropdown {
     position: relative;
-    margin-right: 30px; 
+    margin-right: 30px;
 }
 
-/* Profile Button */
 .profile-btn {
     background: none;
     color: white;
@@ -60,7 +61,6 @@ body {
     align-items: center;
 }
 
-/* Dropdown Content */
 .profile-dropdown-content {
     display: none;
     position: absolute;
@@ -73,30 +73,7 @@ body {
     border-radius: 5px;
 }
 
-/* Ensure Dropdown Stays Within Screen */
-@media (max-width: 768px) {
-    .profile-dropdown-content {
-        left: auto;
-        right: 10px;
-    }
-}
-
-/* Dropdown Links */
-.profile-dropdown-content a {
-    color: #333;
-    padding: 12px;
-    display: block;
-    text-decoration: none;
-    font-size: 14px;
-}
-
-/* Hover Effect */
-.profile-dropdown-content a:hover {
-    background: #007bff;
-    color: white;
-}
-
-/* Show Dropdown on Click */
+/* Show Dropdown */
 .profile-dropdown.active .profile-dropdown-content {
     display: block;
 }
@@ -112,21 +89,15 @@ body {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    padding-right: 10px;
 }
 
 /* Sidebar Links */
-.sidebar h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
 .sidebar a {
     color: white;
     text-decoration: none;
     padding: 10px;
     display: block;
-    border-radius: 5px;    
+    border-radius: 5px;
 }
 
 .sidebar a:hover {
@@ -139,7 +110,6 @@ body {
     display: block;
 }
 
-/* Dropdown Button - Same Style as Sidebar Links */
 .dropdown-btn {
     background: none;
     color: white;
@@ -151,14 +121,14 @@ body {
     align-items: center;
 }
 
-/* Hover Effect */
+/* Sidebar Dropdown Hover */
 .dropdown-btn:hover {
     background: #0056b3;
     width: 100%;
     border-radius: 5px;
 }
 
-/* Dropdown Content - Initially Hidden */
+/* Sidebar Dropdown Content */
 .dropdown-content {
     display: none;
     flex-direction: column;
@@ -166,30 +136,23 @@ body {
     padding-left: 15px;
 }
 
-/* Submenu Links */
-.dropdown-content a {
-    display: block;
-    color: white;
-    text-decoration: none;
-    padding: 8px;
-    font-size: 14px;
-}
-
-/* Hover Effects for Submenu */
-.dropdown-content a:hover {
-    background: #007bff;
-}
-
-/* Show Dropdown When Active */
 .dropdown.open .dropdown-content {
     display: flex !important;
+    content: " ▲";
 }
 
-/* Main Content */
+/* Content Layout */
 .main-content {
     margin-top: 80px;
-    margin-left: 100px;
+    margin-left: 220px;
     padding: 20px;
+}
+
+.asset-content {
+    margin-top: 20px;
+    margin-left: 110px;
+    padding: 20px;
+    overflow-x: auto;
 }
 
 /* Dashboard Cards */
@@ -208,11 +171,14 @@ body {
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
     color: white;
+    margin-bottom: 10px;
+    margin-right: 3px;
+    margin-left: 10px;
 }
 
-/* Stat Box Colors */
+/* Status Card Colors */
 .card.total {
-    background: #17a2b8;
+    background: #343a40;
 }
 
 .card.active {
@@ -223,29 +189,25 @@ body {
     background: #ff9800;
 }
 
-.card.licenses {
-    background: #d81b60;
+.card.lost {
+    background: #dc3545;
 }
 
-/* Text Inside Cards */
-.card h3 {
-    font-size: 16px;
-    opacity: 0.8;
+.card.shelf {
+    background: #17a2b8;
 }
 
-.card p {
-    font-size: 24px;
-    font-weight: bold;
+.card.decommissioned {
+    background: #6c757d;
 }
 
-/* General Table Styles */
+/* Table */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
 }
 
-/* Device Table Styling */
 .device-table {
     background: #ffffff;
     border: 2px solid #007bff;
@@ -267,47 +229,155 @@ table {
     background: #f1f1f1;
 }
 
+/* Alternating Row Colors */
+.even-row {
+    background-color: #f9f9f9;
+}
+
+.odd-row {
+    background-color: #e6e6e6;
+}
+
+/* Sortable Columns */
+th.sortable {
+    cursor: pointer;
+    position: relative;
+    padding-right: 20px;
+    text-align: left;
+}
+
+th.sortable::after {
+    content: " ⇅";
+    font-size: 0.8em;
+    opacity: 0.6;
+    position: absolute;
+    right: 5px;
+}
+
+th.sortable.asc::after {
+    content: " ↑";
+    opacity: 1;
+}
+
+th.sortable.desc::after {
+    content: " ↓";
+    opacity: 1;
+}
+
 /* User Table Styling */
 .user-table {
+    width: 100%;
+    border-collapse: collapse;
     background: #ffffff;
     border: 2px solid #28a745;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .user-table th {
     background: #28a745;
     color: white;
-    padding: 10px;
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 2px solid #1e7e34;
+    cursor: pointer;
 }
 
 .user-table td {
-    padding: 10px;
+    padding: 12px;
     border-bottom: 1px solid #ddd;
     text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.user-table tr:nth-child(odd) {
+    background-color: #f1f1f1;
 }
 
 .user-table tr:hover {
-    background: #e8f5e9;
+    background-color: #e8f5e9 !important;
+    transition: 0.2s ease-in-out;
 }
 
-th, td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
+/* Sorting Icons */
+.user-table th.sortable::after {
+    content: " ⇅"; 
+    font-size: 0.8em;
+    opacity: 0.6;
+    position: relative;
+    margin-left: 8px;
 }
 
-th {
-    background: #007bff;
+.user-table th.sortable.asc::after {
+    content: " ↑";
+    opacity: 1;
+}
+
+.user-table th.sortable.desc::after {
+    content: " ↓";
+    opacity: 1;
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+    .user-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 30%;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.modal input, .modal select, .modal button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.modal button {
+    background-color: #007bff;
     color: white;
+    border: none;
+    cursor: pointer;
 }
 
-tr:hover {
-    background: #f1f1f1;
-}
-
-/* Logo Styling */
-img {
-    width: 100px;
-    height: 50px;
+.modal button:hover {
+    background-color: #0056b3;
 }
 
 /* Responsive Design */

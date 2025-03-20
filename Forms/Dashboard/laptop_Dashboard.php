@@ -3,14 +3,13 @@ session_start();
 require_once "../../PHP/config.php";
 require_once "../../includes/navbar.php";
 
-// Redirect to login if not logged in
+// Redirect if not logged in
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../Login/login.php");
     exit();
 }
 
-// Fetch laptops from the Devices table that are categorized as 'laptop'
-// and join additional details from Laptops and Decommissioned_Laptops tables.
+// Fetch laptops from the Devices table categorized as 'laptop'
 $query = "
     SELECT d.device_id, d.device_name, d.asset_tag, d.serial_number, d.brand, d.model, d.os, 
            d.cpu, d.ram, d.storage, d.status, d.assigned_to, d.location, d.purchase_date, d.warranty_expiry, d.notes,
@@ -23,16 +22,18 @@ $query = "
     ORDER BY d.device_name
 ";
 
-$stmt = $conn->prepare($query);
-$stmt->execute();
-$result = $stmt->get_result();
+$result = $conn->query($query);
+
+// Error Handling for Query Execution
+if (!$result) {
+    die("Database Query Failed: " . $conn->error);
+}
 
 $laptops = [];
 while ($row = $result->fetch_assoc()) {
     $laptops[] = $row;
 }
 
-$stmt->close();
 $conn->close();
 ?>
 
@@ -43,30 +44,49 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laptops Dashboard</title>
     <link rel="stylesheet" href="../../Assets/styles.css">
+    <script src="../../Assets/script.js?v=<?php echo time(); ?>"></script> 
 </head>
 <body>
-    <div class="main-content">
+    <div class="asset-content">
         <h2>Laptops Dashboard</h2>
 
+         <!-- Filters -->
+         <div class="filters">
+            <input type="text" id="filter-name" placeholder="Filter by Name">
+            <input type="text" id="filter-tag" placeholder="Filter by Asset Tag">
+            <select id="filter-category">
+                <option value="">All Categories</option>
+                <option value="laptop">Laptops</option>
+                <option value="desktop">Desktops</option>
+                <option value="iPhone">iPhones</option>
+                <option value="tablet">Tablets</option>
+            </select>
+            <select id="filter-status">
+                <option value="">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="Decommissioned">Decommissioned</option>
+            </select>
+        </div>
+
         <!-- Table for Laptops -->
-        <table class="device-table">
+        <table class="device-table" id="device-table">
             <thead>
                 <tr>
-                    <th>Device Name</th>
-                    <th>Asset Tag</th>
-                    <th>Serial Number</th>
-                    <th>Brand</th>
-                    <th>Model</th>
-                    <th>OS</th>
-                    <th>CPU</th>
-                    <th>RAM</th>
-                    <th>Storage</th>
-                    <th>Backup Type</th>
-                    <th>Internet Policy</th>
-                    <th>Status</th>
-                    <th>Decommissioned</th>
+                    <th class="sortable">Device Name</th>
+                    <th class="sortable">Asset Tag</th>
+                    <th class="sortable">Serial Number</th>
+                    <th class="sortable">Brand</th>
+                    <th class="sortable">Model</th>
+                    <th class="sortable">OS</th>
+                    <th class="sortable">CPU</th>
+                    <th class="sortable">RAM</th>
+                    <th class="sortable">Storage</th>
+                    <th class="sortable">Backup Type</th>
+                    <th class="sortable">Internet Policy</th>
+                    <th class="sortable">Status</th>
+                    <th class="sortable">Decommissioned</th>
                     <th>Decommission Notes</th>
-                    <th>Location</th>
+                    <th class="sortable">Location</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -76,8 +96,8 @@ $conn->close();
                         <td colspan="16">No laptops found.</td>
                     </tr>
                 <?php else : ?>
-                    <?php foreach ($laptops as $laptop) : ?>
-                        <tr>
+                    <?php foreach ($laptops as $index => $laptop) : ?>
+                        <tr class="<?php echo ($index % 2 == 0) ? 'even-row' : 'odd-row'; ?>">
                             <td><?php echo htmlspecialchars($laptop["device_name"]); ?></td>
                             <td><?php echo htmlspecialchars($laptop["asset_tag"]); ?></td>
                             <td><?php echo htmlspecialchars($laptop["serial_number"]); ?></td>
@@ -103,5 +123,8 @@ $conn->close();
             </tbody>
         </table>
     </div>
+    <script src="../../Assets/script.js?v=<?php echo time(); ?>"></script>
+
+    
 </body>
 </html>
