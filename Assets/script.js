@@ -145,3 +145,59 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Create Modal logic
+    const createModal = document.getElementById('createModal');
+    const openBtn = document.getElementById('openCreateModal');
+    const closeBtn = document.getElementById('closeCreateModal');
+
+    if (openBtn && closeBtn && createModal) {
+        openBtn.onclick = () => {
+            createModal.style.display = 'block';
+        };
+
+        closeBtn.onclick = () => {
+            createModal.style.display = 'none';
+        };
+
+        window.onclick = (event) => {
+            if (event.target === createModal) {
+                createModal.style.display = 'none';
+            }
+        };
+    }
+
+    // Delete Modal logic
+    const deleteModal = document.getElementById("deleteModal");
+    const closeDeleteModal = document.getElementById("closeDeleteModal");
+    const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+
+    if (deleteModal && closeDeleteModal && cancelDeleteBtn) {
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const userId = this.dataset.id;
+                const username = this.dataset.username;
+
+                document.getElementById('delete-user-id').value = userId;
+                document.getElementById('delete-username').textContent = username;
+
+                deleteModal.style.display = "block";
+            });
+        });
+
+        closeDeleteModal.onclick = () => {
+            deleteModal.style.display = "none";
+        };
+
+        cancelDeleteBtn.onclick = () => {
+            deleteModal.style.display = "none";
+        };
+
+        window.addEventListener("click", function (event) {
+            if (event.target === deleteModal) {
+                deleteModal.style.display = "none";
+            }
+        });
+    }
+});

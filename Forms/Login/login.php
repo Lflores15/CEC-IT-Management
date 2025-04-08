@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../PHP/config.php';
+require_once '../../includes/log_event.php'; // Make sure this is included
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST["username"]);
@@ -20,21 +21,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_result($user_id, $hashed_password, $role);
         $stmt->fetch();
 
-        // ✅ Verify hashed password using `password_verify()`
         if (password_verify($password, $hashed_password)) {
             $_SESSION["user_id"] = $user_id;
             $_SESSION["username"] = $username;
             $_SESSION["role"] = $role;
 
+            // ✅ Log success
+            logEvent("LOGIN_SUCCESS", "User '$username' successfully logged in", $username);
+
             // ✅ Redirect to dashboard
             header("Location: ../Dashboard/dashboard.php");
             exit();
-        } else {
-            echo "❌ Incorrect password!";
         }
-    } else {
-        echo "❌ User not found!";
     }
+
+    // ❌ Log and show generic error on failure
+    logEvent("LOGIN_FAIL", "Invalid login attempt for username '$username'");
+    echo "❌ Invalid username or password.";
 
     $stmt->close();
 }

@@ -74,7 +74,7 @@ $conn->close();
         <table class="device-table" id="device-table">
             <thead>
                 <tr>
-                    <th class="sortable" data-column="0">Device Name</th>
+                    <th class="sortable" data-column="0">Device Name</th> 
                     <th class="sortable" data-column="1">Asset Tag</th>
                     <th class="sortable" data-column="2">Category</th>
                     <th class="sortable" data-column="3">Brand</th>
@@ -104,7 +104,7 @@ $conn->close();
                 <?php else : ?>
                     <?php foreach ($devices as $device) : ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($device["device_name"]); ?></td>
+                            <td><?php echo htmlspecialchars($device["device_name"]); ?></td> 
                             <td><?php echo htmlspecialchars($device["asset_tag"]); ?></td>
                             <td><?php echo htmlspecialchars($device["category"]); ?></td>
                             <td><?php echo htmlspecialchars($device["brand"] ?? "N/A"); ?></td>
