@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             logEvent("LOGIN_SUCCESS", "User '$username' successfully logged in", $username);
 
             // ✅ Redirect to dashboard
-            header("Location: ../Dashboard/dashboard.php");
+            header("Location: ../Assets/dashboard.php");
             exit();
         }
     }
