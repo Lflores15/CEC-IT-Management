@@ -3,7 +3,7 @@ session_start();
 require_once "../../PHP/config.php";
 require_once "../../includes/navbar.php";
 
-// ✅ Admin-only access
+// Admin-only access
 if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'admin') {
     header("Location: ../Login/login.php");
     exit();
@@ -35,17 +35,9 @@ if (file_exists($logFile)) {
     <title>System Logs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/Assets/styles.css">
-    <style>
-        th {
-            cursor: pointer;
-        }
-        th:hover {
-            background-color: #e0e0e0;
-        }
-    </style>
 </head>
 <body>
-<div class="asset-content">
+<div class="asset-content-user">
     <h2>System Event Logs</h2>
 
     <?php if (empty($logEntries)): ?>

@@ -1,4 +1,3 @@
-/* General Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -10,7 +9,9 @@ h2 {
     text-align: center;
 }
 
-/* Top Navbar */
+/* =========================================
+   Top Navbar
+========================================= */
 .top-navbar {
     position: fixed;
     top: 0;
@@ -25,7 +26,6 @@ h2 {
     z-index: 1000;
 }
 
-/* Navbar Content */
 .top-navbar .logo {
     height: 40px;
     margin-right: auto;
@@ -44,7 +44,9 @@ h2 {
     border-radius: 5px;
 }
 
-/* Profile Dropdown */
+/* =========================================
+   Profile Dropdown
+========================================= */
 .profile-dropdown {
     position: relative;
     margin-right: 30px;
@@ -73,15 +75,17 @@ h2 {
     border-radius: 5px;
 }
 
-/* Show Dropdown */
 .profile-dropdown.active .profile-dropdown-content {
     display: block;
 }
 
-/* Sidebar */
+/* =========================================
+   Sidebar
+========================================= */
 .sidebar {
     position: fixed;
     top: 60px;
+    left: 0;
     width: 200px;
     height: calc(100% - 60px);
     background: #2d3e50;
@@ -89,9 +93,9 @@ h2 {
     padding: 20px;
     display: flex;
     flex-direction: column;
+    z-index: 999;
 }
 
-/* Sidebar Links */
 .sidebar a {
     color: white;
     text-decoration: none;
@@ -104,7 +108,6 @@ h2 {
     background: #0056b3;
 }
 
-/* Sidebar Dropdown */
 .dropdown {
     position: relative;
     display: block;
@@ -121,14 +124,12 @@ h2 {
     align-items: center;
 }
 
-/* Sidebar Dropdown Hover */
 .dropdown-btn:hover {
     background: #0056b3;
     width: 100%;
     border-radius: 5px;
 }
 
-/* Sidebar Dropdown Content */
 .dropdown-content {
     display: none;
     flex-direction: column;
@@ -138,24 +139,34 @@ h2 {
 
 .dropdown.open .dropdown-content {
     display: flex !important;
-    content: " ▲";
 }
 
-/* Content Layout */
+/* =========================================
+   Main Content
+========================================= */
 .main-content {
-    margin-top: 80px;
     margin-left: 220px;
     padding: 20px;
 }
 
 .asset-content {
-    margin-top: 20px;
-    margin-left: 110px;
+    margin-left: 230px;
     padding: 20px;
     overflow-x: auto;
 }
 
-/* Dashboard Cards */
+/* =========================================
+   User Content
+========================================= */
+.asset-content-user {
+    padding: 20px;
+    overflow-x: auto;
+}
+
+/* =========================================
+   Dashboard Cards - Enhanced Layout
+========================================= */
+
 .dashboard-cards {
     display: flex;
     justify-content: space-between;
@@ -176,40 +187,40 @@ h2 {
     margin-left: 10px;
 }
 
-/* Status Card Colors */
-.card.total {
-    background: #343a40;
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
 }
 
-.card.active {
-    background: #28a745;
+/* Status Colors */
+.card.total           { background-color: #343a40; }
+.card.active          { background-color: #28a745; }
+.card.decommissioned  { background-color: #6c757d; }
+.card.lost            { background-color: #dc3545; }
+.card.pending         { background-color: #fd7e14; }
+.card.shelf           { background-color: #17a2b8; }
+
+/* Card Text */
+.card h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #ffffff;
 }
 
-.card.pending {
-    background: #ff9800;
+.card p {
+    font-size: 1.8rem;
+    margin: 0;
+    color: #ffffff;
 }
 
-.card.lost {
-    background: #dc3545;
-}
-
-.card.shelf {
-    background: #17a2b8;
-}
-
-.card.decommissioned {
-    background: #606162;
-}
-
-/* Table */
-table {
+/* =========================================
+   Table Styles (Device)
+========================================= */
+.device-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
-}
-
-.device-table {
     background: #ffffff;
+    margin-top: 20px;
     border: 2px solid #007bff;
 }
 
@@ -217,6 +228,7 @@ table {
     background: #007bff;
     color: white;
     padding: 10px;
+    position: relative;
 }
 
 .device-table td {
@@ -229,21 +241,9 @@ table {
     background: #f1f1f1;
 }
 
-/* Alternating Row Colors */
-.even-row {
-    background-color: #f9f9f9;
-}
-
-.odd-row {
-    background-color: #e6e6e6;
-}
-
-/* Sortable Columns */
 th.sortable {
     cursor: pointer;
-    position: relative;
     padding-right: 20px;
-    text-align: left;
 }
 
 th.sortable::after {
@@ -264,7 +264,24 @@ th.sortable.desc::after {
     opacity: 1;
 }
 
-/* User Table Styling */
+/* Alternating row background colors */
+.device-table tbody tr:nth-child(odd) {
+    background-color: #fafafa;
+}
+
+.device-table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+/* Override hover to match your theme */
+.device-table tbody tr:hover {
+    background-color: #eaf4ff;
+    transition: background-color 0.2s;
+}
+
+/* =========================================
+   Table Styles (User Table)
+========================================= */
 .user-table {
     width: 100%;
     border-collapse: collapse;
@@ -305,12 +322,10 @@ th.sortable.desc::after {
     transition: 0.2s ease-in-out;
 }
 
-/* Sorting Icons */
 .user-table th.sortable::after {
-    content: " ⇅"; 
+    content: " ⇅";
     font-size: 0.8em;
     opacity: 0.6;
-    position: relative;
     margin-left: 8px;
 }
 
@@ -324,114 +339,258 @@ th.sortable.desc::after {
     opacity: 1;
 }
 
-/* Responsive Table */
-@media (max-width: 768px) {
-    .user-table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
+/* =========================================
+   Device Details Page Styles
+========================================= */
+.device-details-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Modal */
+.device-details-container h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #222;
+}
+
+.section-title {
+    margin-top: 10px;
+    font-size: 20px;
+    color: #444;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+
+.device-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr ;
+    gap: 20px 30px;
+    margin-top: 20px;
+}
+
+.device-details-grid label {
+    font-weight: 600;
+    color: #333;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.device-details-grid div {
+    margin-bottom: 15px;
+}
+
+.back-link {
+    margin-top: 30px;
+    display: inline-block;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.action-buttons a {
+    text-align: center;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.action-buttons .edit-btn {
+    background-color: #28a745;
+}
+
+.action-buttons .edit-btn:hover {
+    background-color: #218838;
+}
+
+.action-buttons .delete-btn {
+    background-color: #dc3545;
+}
+
+.action-buttons .delete-btn:hover {
+    background-color: #c82333;
+}
+
+/* =========================================
+   Modal Styles
+========================================= */
 .modal {
     display: none;
     position: fixed;
-    z-index: 10;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 300px;
 }
 
 .modal-content {
-    background-color: white;
-    margin: 10% auto;
-    padding: 20px;
-    border-radius: 10px;
-    width: 30%;
     position: relative;
 }
 
-.close {
+.modal .close {
     position: absolute;
-    right: 15px;
+    right: 10px;
+    top: 5px;
     font-size: 20px;
     cursor: pointer;
 }
 
-.modal input, .modal select, .modal button {
+.modal input,
+.modal select,
+.modal button {
     width: 100%;
     margin-top: 10px;
     padding: 8px;
-    border: 1px solid #ccc;
     border-radius: 5px;
+    border: 1px solid #ccc;
 }
 
 .modal button {
     background-color: #007bff;
     color: white;
+    font-weight: bold;
     border: none;
-    cursor: pointer;
 }
 
 .modal button:hover {
     background-color: #0056b3;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
+/* =========================================
+   Device Details Page - Side by Side
+========================================= */
+.side-by-side-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    margin-top: 20px;
+    align-items: flex-start;
+}
+
+.device-details-grid {
+    flex: 1 1 calc(50% - 20px);
+    min-width: 300px;
+    padding: 20px;
+    background: #fff;
+}
+
+.device-details-grid h3.section-title {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+
+.device-details-grid div {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 6px 0;
+}
+
+.device-details-grid label {
+    font-weight: 600;
+    color: #333;
+    margin-right: 10px;
+    min-width: 140px;
+}
+
+/* =========================================
+   Responsive Fixes
+========================================= */
+@media screen and (max-width: 768px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 10px;
+    }
+
+    .asset-content,
+    .device-details-container {
+        margin-left: 0;
+        padding: 15px;
+    }
+
     .dashboard-cards {
         flex-direction: column;
         align-items: center;
     }
 
     .card {
-        width: 80%;
-        margin-bottom: 10px;
+        width: 90%;
+    }
+
+    .device-details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+@media screen and (max-width: 480px) {
+    .top-navbar input {
+        width: 100%;
+    }
+
+    .sidebar a {
+        padding: 5px;
     }
 
     .sidebar {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .dashboard-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        width: 90%;
+    }
+}
+@media screen and (max-width: 320px) {
+    .top-navbar input {
         width: 100%;
-        height: auto;
-        position: relative;
-        top: 60px;
     }
 
-    .main-content {
-        margin-left: 0;
+    .sidebar a {
+        padding: 5px;
     }
 
-    .top-navbar {
-        width: 100%;
-        left: 0;
+    .sidebar {
+        flex-direction: column;
+        align-items: center;
     }
-}
 
-.alert {
-    padding: 12px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    width: fit-content;
-    min-width: 300px;
-    font-weight: bold;
-    animation: fadein 0.5s ease-in-out;
-}
+    .dashboard-cards {
+        flex-direction: column;
+        align-items: center;
+    }
 
-.alert.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.alert.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-@keyframes fadein {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    .card {
+        width: 90%;
+    }
 }

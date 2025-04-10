@@ -200,4 +200,125 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+    
+});
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const table = document.getElementById("device-table");
+            const headers = table.querySelectorAll("th.sortable");
+            const filterInputs = document.querySelectorAll(".filters input, .filters select");
+
+            let sortDirection = {};
+
+            headers.forEach(header => {
+                let columnIndex = header.getAttribute("data-column");
+                sortDirection[columnIndex] = true;
+
+                header.addEventListener("click", () => {
+                    let rows = Array.from(table.querySelector("tbody").rows);
+                    let ascending = sortDirection[columnIndex];
+
+                    rows.sort((rowA, rowB) => {
+                        let cellA = rowA.cells[columnIndex].textContent.trim().toLowerCase();
+                        let cellB = rowB.cells[columnIndex].textContent.trim().toLowerCase();
+                        return ascending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+                    });
+
+                    sortDirection[columnIndex] = !ascending;
+                    table.querySelector("tbody").append(...rows);
+                });
+            });
+
+            function filterTable() {
+                let name = document.getElementById("filter-name").value.toLowerCase();
+                let tag = document.getElementById("filter-tag").value.toLowerCase();
+                let category = document.getElementById("filter-category").value.toLowerCase();
+                let status = document.getElementById("filter-status").value.toLowerCase();
+
+                document.querySelectorAll("#device-table tbody tr").forEach(row => {
+                    let rowText = row.textContent.toLowerCase();
+                    row.style.display = (rowText.includes(name) && rowText.includes(tag) && rowText.includes(category) && rowText.includes(status)) ? "" : "none";
+                });
+            }
+
+            filterInputs.forEach(input => input.addEventListener("input", filterTable));
+
+            // ✅ Make rows clickable
+            document.querySelectorAll(".clickable-row").forEach(row => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.href;
+                });
+            });
+        });
+
+
+
+        // Sortable columns
+const table = document.getElementById("device-table");
+if (table) {
+  const headers = table.querySelectorAll("th.sortable");
+  let sortDirection = 1;
+  let sortColumnIndex = null;
+
+  headers.forEach((header, index) => {
+    header.addEventListener("click", () => {
+      if (sortColumnIndex === index) sortDirection *= -1;
+      else {
+        sortColumnIndex = index;
+        sortDirection = 1;
+      }
+
+      const rows = Array.from(table.querySelectorAll("tbody > tr"));
+      rows.sort((a, b) => {
+        const cellA = a.children[index].textContent.trim().toLowerCase();
+        const cellB = b.children[index].textContent.trim().toLowerCase();
+        return cellA.localeCompare(cellB) * sortDirection;
+      });
+
+      const tbody = table.querySelector("tbody");
+      rows.forEach(row => tbody.appendChild(row));
+    });
+  });
+}
+
+// Edit Columns modal toggle
+const editBtn = document.getElementById("edit-columns-btn");
+const columnModal = document.getElementById("column-selector");
+
+if (editBtn && columnModal) {
+  editBtn.addEventListener("click", () => {
+    columnModal.style.display = columnModal.style.display === "none" ? "block" : "none";
+  });
+
+  document.getElementById("column-form")?.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch("update_columns.php", {
+      method: "POST",
+      body: formData
+    }).then(() => location.reload());
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const editBtn = document.getElementById("edit-columns-btn");
+    const columnModal = document.getElementById("column-selector");
+
+    if (editBtn && columnModal) {
+        editBtn.addEventListener("click", () => {
+            columnModal.style.display = columnModal.style.display === "none" ? "block" : "none";
+        });
+
+        const columnForm = document.getElementById("column-form");
+        if (columnForm) {
+            columnForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                fetch("update_columns.php", {
+                    method: "POST",
+                    body: formData
+                }).then(() => location.reload());
+            });
+        }
+    }
 });

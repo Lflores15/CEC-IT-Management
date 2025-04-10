@@ -8,6 +8,6 @@ if (!isset($_SESSION["username"])) {
 }
 
 // Redirect to the dashboard instead of displaying links
-header("Location: Forms/Dashboard/dashboard.php");
+header("Location: Forms/Assets/dashboard.php");
 exit();
 ?>

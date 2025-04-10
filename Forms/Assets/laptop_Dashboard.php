@@ -43,24 +43,16 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laptops Dashboard</title>
-    <link rel="stylesheet" href="../../Assets/styles.css">
-    <script src="../../Assets/script.js?v=<?php echo time(); ?>"></script> 
+    <link rel="stylesheet" href="/Assets/styles.css">
+    <script src="/Assets/script.js?v=<?php echo time(); ?>"></script> 
 </head>
 <body>
-    <div class="asset-content">
         <h2>Laptops Dashboard</h2>
 
          <!-- Filters -->
          <div class="filters">
             <input type="text" id="filter-name" placeholder="Filter by Name">
             <input type="text" id="filter-tag" placeholder="Filter by Asset Tag">
-            <select id="filter-category">
-                <option value="">All Categories</option>
-                <option value="laptop">Laptops</option>
-                <option value="desktop">Desktops</option>
-                <option value="iPhone">iPhones</option>
-                <option value="tablet">Tablets</option>
-            </select>
             <select id="filter-status">
                 <option value="">All Statuses</option>
                 <option value="Active">Active</option>
@@ -81,8 +73,8 @@ $conn->close();
                     <th class="sortable">CPU</th>
                     <th class="sortable">RAM</th>
                     <th class="sortable">Storage</th>
-                    <th class="sortable">Backup Type</th>
-                    <th class="sortable">Internet Policy</th>
+                    <!-- <th class="sortable">Backup Type</th> -->
+                    <!-- <th class="sortable">Internet Policy</th> --> 
                     <th class="sortable">Status</th>
                     <th class="sortable">Decommissioned</th>
                     <th>Decommission Notes</th>
@@ -107,8 +99,8 @@ $conn->close();
                             <td><?php echo htmlspecialchars($laptop["cpu"]); ?></td>
                             <td><?php echo htmlspecialchars($laptop["ram"]); ?></td>
                             <td><?php echo htmlspecialchars($laptop["storage"]); ?></td>
-                            <td><?php echo htmlspecialchars($laptop["backup_type"]); ?></td>
-                            <td><?php echo htmlspecialchars($laptop["internet_policy"]); ?></td>
+                          <!--  <td><?php echo htmlspecialchars($laptop["backup_type"]); ?></td> -->
+                          <!--  <td><?php echo htmlspecialchars($laptop["internet_policy"]); ?></td> -->
                             <td><?php echo htmlspecialchars($laptop["status"]); ?></td>
                             <td><?php echo ($laptop["decommission_status"] && $laptop["decommission_status"] != 'Decommissioned') ? htmlspecialchars($laptop["decommission_status"]) : "No"; ?></td>
                             <td><?php echo htmlspecialchars($laptop["decommission_notes"] ?? "N/A"); ?></td>
@@ -123,7 +115,7 @@ $conn->close();
             </tbody>
         </table>
     </div>
-    <script src="../../Assets/script.js?v=<?php echo time(); ?>"></script>
+    <script src="/Assets/script.js?v=<?php echo time(); ?>"></script>
 
     
 </body>

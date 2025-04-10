@@ -32,9 +32,6 @@ CREATE TABLE IF NOT EXISTS Devices (
     brand VARCHAR(255),
     model VARCHAR(255),
     os VARCHAR(255),
-    cpu VARCHAR(255),
-    ram INT,
-    storage INT,
     status ENUM ('Active', 'Pending Return', 'Shelf', 'Lost') DEFAULT 'Shelf',
     assigned_to INT NULL,  
     location VARCHAR(255),
@@ -48,6 +45,9 @@ CREATE TABLE IF NOT EXISTS Devices (
 CREATE TABLE IF NOT EXISTS Laptops (
     id INT AUTO_INCREMENT PRIMARY KEY,
     device_id INT UNIQUE, -- Links to Devices table
+    cpu VARCHAR(255),
+    ram INT,
+    storage INT,
     backup_type VARCHAR(255) NOT NULL,
     internet_policy VARCHAR(255),
     backup_removed BOOLEAN DEFAULT FALSE,

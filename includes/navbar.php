@@ -68,17 +68,17 @@ if (array_key_exists($currentPage, $pageTitles)) {
     <!-- Sidebar -->
     <div class="sidebar">
         <h2><?php echo $pageTitle; ?></h2>
-        <a href="../Dashboard/dashboard.php" class="<?php echo ($currentPage == 'dashboard') ? 'active' : ''; ?>">Dashboard</a>
+        <a href="../Assets/dashboard.php" class="<?php echo ($currentPage == 'dashboard') ? 'active' : ''; ?>">Dashboard</a>
 
         <!-- Assets Dropdown -->
         <div class="dropdown">
             <button class="dropdown-btn">Assets</button>
             <div class="dropdown-content">
-                <a href="../Dashboard/asset_Dashboard.php">All Assets</a>
-                <a href="../Dashboard/laptop_Dashboard.php">Laptops</a>
-                <a href="../Dashboard/pc_Dashboard.php">PCs</a>
-                <a href="../Dashboard/phone_Dashboard.php">Phones</a>
-                <a href="../Dashboard/tablet_Dashboard.php">Tablets</a>
+                <a href="../Assets/asset_Dashboard.php">All Assets</a>
+                <a href="../Assets/laptop_Dashboard.php">Laptops</a>
+                <a href="../Assets/pc_Dashboard.php">PCs</a>
+                <a href="../Assets/phone_Dashboard.php">Phones</a>
+                <a href="../Assets/tablet_Dashboard.php">Tablets</a>
             </div>
         </div>
         <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'admin'): ?>
