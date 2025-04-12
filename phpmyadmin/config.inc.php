@@ -12,4 +12,6 @@ $cfg['ShowDatabasesNavigationAsTree'] = true;
 $cfg['MaxNavigationItems'] = 100;
 $cfg['Servers'][1]['controluser'] = 'root';
 $cfg['Servers'][1]['controlpass'] = 'root';
+$cfg['Servers'][$i]['AllowLocalInfile'] = true;
+
 ?>

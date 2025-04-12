@@ -1,0 +1,165 @@
+status,internet_policy,asset_tag,login_id,first_name,last_name,employee_id,phone_number,cpu,ram,os
+active,Admin,CEC-LT001,dmoorhead,Darrin,Moorhead,1202,(361) 443-0990,i5-12500H,16,11
+active,Admin,CEC-LT002,hwatkins,Hanah,Watkins,,,Ultra 9 185H,32,11
+shelf,Default,CEC-LT003,,Office,IT,,,i7-1065G7,16,11
+active,Office,CEC-LT004,tpayne,Latricia,Payne,3393,(361) 813-3542,Ryzen 7 5825U,16,11
+active,Default,CEC-LT005,lwillis,Landon,Willis,9999,(361) 941-5127,i5-1240P,16,11
+active,Default,CEC-LT006,jonken,Jeffrey,Onken,,(432) 488-7934,i7-8750H,32,11
+shelf,Default,CEC-LT007,,Office,IT,1358,,i7-9750H,32,11
+active,Default,CEC-LT008,,Recovery,iPhone,2842,,,,
+shelf,Default,CEC-LT009,,Office,IT,,,Ultra 9 185H,,
+active,Default,CEC-LT010,jguajardo,Guajardo,Jeremy,3615,(361) 941-5121,i7-8750H,16,11
+open,Default,CEC-LT011,,,Open,3176,,,,
+active,Default,CEC-LT012,ereyes,Elias,Reyes,3239,(432) 230-8534,i7-8705G,16,11
+shelf,Default,CEC-LT013,,Office,IT,2523,,i3-1215U,8,11
+active,Default,CEC-LT014,pvillegas,PJ,Villegas,,(361) 587-2797,i5-8265U,8,10
+shelf,Default,CEC-LT015,,Office,Midland,1021,,i7-7700HQ,16,11
+open,Default,CEC-LT016,,,Open,3257,,,,
+active,Default,CEC-LT017,phenderson,Pat,Henderson,,(432) 465-0464,i7-8550U,16,11
+active,Exec,CEC-LT018,dduran,David,Duran,9999,(713) 392-9498,i7-1260P,32,11
+shelf,Default,CEC-LT019,,Office,Midland,,,,,11
+shelf,Default,CEC-LT020,,Office,IT,,,i3-1215U,8,11
+Active,Default,CEC-LT021,chines,Chanel,Hines,1525,(361) 424-0821,i7-8550U,16,11
+Active,Admin,CEC-LT022,aakers,Alexa,Akers,1062,(361) 677-2703,i7-10875H,32,11
+open,Default,CEC-LT023,,,Open,n/a,,,,
+active,Office,CEC-LT024,gtilley,Greg,Tilley,1009,(303) 638-7248,i9-8950HK,32,11
+active,Est,CEC-LT025,rmedina,Rene,Medina,1170,(361) 945-8744,i7-10875H,32,11
+open,Default,CEC-LT026,,,Open,1012,,,,
+active,Default,CEC-LT027,etorres,Eduardo,Torres,,(361) 587-2240,i5-1240P,16,11
+open,Default,CEC-LT028,,,Open,1024,,,,
+active,Default,CEC-LT029,oporras,Omar,Porras,3838,(432) 994-2797,i7-4610M,16,10
+shelf,Default,CEC-LT030,asifuentes,Office,IT,,,i5-1240P,8,11
+open,Default,CEC-LT031,,,Open,3120,,,,
+active,Est,CEC-LT032,mhernandez,Mathew,Hernandez,,(361) 424-4505,Ultra 7 155H,32,11
+Remove,Default,CEC-LT033,Camille,,Camille,,,i7-6500U,2,10
+shelf,Default,CEC-LT034,,office,Midland,,,,,11
+shelf,Default,CEC-LT035,,Office,IT,3335,,i3-1215U - 6,8,11
+active,Default,CEC-LT036,hgalindo,Hector,Galindo,2755,(361) 941-5199,i5-6200U,16,10
+active,Default,CEC-LT037,amott,Ada,Mott,2661,(361) 484-7680,i5-1240P,16,11
+shelf,Default,CEC-LT038,,Office,IT,3337,,i3-1215U,8,11
+active,Office,CEC-LT039,mvillarreal,Matthew,Villarreal,1082,(361) 945-3355,i7-3740QM,32,10
+shelf,Default,CEC-LT040,,Office,IT,3975,,i3-1215U,8,11
+active,Default,CEC-LT041,asowell,Aaron,Sowell,,(361) 946-1417,i5-8265U,16,11
+shelf,Default,CEC-LT042,,Office,IT,,,i5-1240P,16,11
+shelf,Default,CEC-LT043,,Office,Midland,,,i7-8550U,16,11
+active,Saftey,CEC-LT044,pchapman,Paul,Chapman,,(361) 945-2512,i7-7500U CPU,16,10
+active,Default,CEC-LT045,abovadilla,Andrew,Bovadilla,,(361) 945-5387,i7-11800H,16,11
+active,Admin,CEC-LT046,alugo,Armando,Lugo,,(432) 923-1324,i7-10750H,16,11
+shelf,Default,CEC-LT047,,Office,IT,,,i3-1215U,8,11
+active,Admin,CEC-LT048,krowe,Keith,Rowe,,(832) 721-6495,Ryzen 7 5825U,16,11
+active,Default,CEC-LT049,kwebb,Krysta,Webb,,,i7-9750H,32,11
+active,Office,CEC-LT050,jgarcia,Jose,Garcia,,(432) 465-0996,i5-1240P,16,11
+active,Default,CEC-LT051,rmartinez,Rudy,Martinez,,(361) 587-2105,i5-7200U,16,11
+active,Default,CEC-LT052,rmortensen,Reagan,Mortensen,,,Ultra 7 155H,16,11
+active,Exec,CEC-LT053,Camille,Camille,Cook,,(713) 392-6703,Ryzen 7 5700U,16,11
+shelf,Default,CEC-LT054,,Office,IT,,,i7-1260P,16,11
+active,Default,CEC-LT055,hoff,Jeff,Hoffman,,(361) 424-4138,i3-7100U,16,10
+active,Acct,CEC-LT056,awilson,Alexis,Wilson,,,Ultra 7 155H,16,11
+open,Default,CEC-LT057,,,Open,,,,,
+shelf,Default,CEC-LT058,,Office,IT,,,i3-1215U,8,11
+Active,Default,CEC-LT059,jpace,Jessie,Pace,,,i5-6200U,16,10
+active,Default,CEC-LT060,jwebb,Josh,Webb,,(361) 946-9200,i7-9750H,32,10
+shelf,Default,CEC-LT061,,Office,IT,,,i3-1215U,8,11
+shelf,Default,CEC-LT062,,Office,IT,,,i5-1240P,16,11
+Active,Default,CEC-LT063,sgarza,Sharon,Garza,,,Ultra 7 155H,16,11
+active,Default,CEC-LT064,mmcquire,Matthew,Mcguire,,(432) 488-6285,i7-7500U,12,10
+shelf,Default,CEC-LT065,,Office,IT,,,i5-1240P,16,11
+shelf,Default,CEC-LT066,,Charles,Tuley,,,Snap Dragon,16,11 ARM
+active,Default,CEC-LT067,jVanBlarcum,James,VanBlarcum,,(361) 587-2822,i3-7100U,8,10
+active,Default,CEC-LT068,jposas,Johnny,Posas,,(361) 480-5753,i7-4930MX,32,10
+shelf,Default,CEC-LT069,,Office,IT,,,i5-1135G7,8,11
+active,Admin,CEC-LT070,lbarrera,Luke,Barrera,,,Ultra 7 155H,16,11
+active,Office,CEC-LT071,cdobens,Christopher,Dobens,,(361) 945-1935,Ryzen 7 5825U,32,11
+active,Admin,CEC-LT072,hwoodward,Holly,Woodward,,,Ultra 7 155H,16,11
+open,Default,CEC-LT073,,,Open,,,,,
+shelf,Default,CEC-LT074,,Office,IT,,,i3-1215U,8,11
+shelf,Default,CEC-LT075,,Office,IT,,,i5-1135G7,8,11
+open,Default,CEC-LT076,,,Open,,,,,
+open,Default,CEC-LT077,,,Open,,,,,
+active,Default,CEC-LT078,rcancino,Roman,Cancino,,(361) 877-7567,i7-7700HQ,16,10
+active,Default,CEC-LT079,oflores,Oscar,Flores,1051,(432) 250-5740,i5-7200U,16,10
+active,Admin,CEC-LT080,abarrera,Arnold,Barrera,3343,(361) 215-0841,i7-11800H,32,11
+active,Exec,CEC-LT081,jsanchez,John,Sanchez,3326,,Ultra 9 185H,32,11
+active,Default,CEC-LT082,ghenderson,Gregg,Henderson,9999,(361) 424-4438,i3-7100U,16,10
+shelf,Default,CEC-LT083,,Office,IT,1379,,Ryzen 7 5700U,16,
+shelf,,CEC-LT084,,Office,Midland,1016,,i5-8250U,8,11
+active,Admin,CEC-LT085,rbeynek,Regina,Bedynek,3359,,Ultra 7 155H,16,11
+active,Default,CEC-LT086,lgonzalez,Leopoldo,Gonzalez,,(361) 290-1717,Ryzen 7 5700U,16,11
+active,Admin,CEC-LT087,moneill,Max,Oneill,,(361) 537-9311,Ryzen 7 5825U,16,11
+Active,Acct,CEC-LT088,btorres,Bonnie,Torres,,,Ultra 7 155H,16,11
+active,Default,CEC-LT089,cscott,Chloe,Scott,,,Ultra 7 155H,16,11
+shelf,Default,CEC-LT090,,Office,IT,,,i5-1230U,16,11
+active,Office,CEC-LT091,tfritsch,Taylor,Fritsch,,(432) 236-1933, i5-1240P ,16,10
+shelf,Default,CEC-LT092,,Office,Midland,,,i5-1240P,16,10
+active,Admin,CEC-LT093,ywillis,Yancey,Willis,,,Ultra 7 155H,16,11
+shelf,Default,CEC-LT094,,Office,Midland,3427,,Ryzen 7 5700U,16,11
+shelf,Default,CEC-LT095,,Office,IT,2020,,i3-1215U,8,11
+active,Safety,CEC-LT096,arodriguez,Augustin,Rodriguez,,(361) 437-2448,i9-8950HK,32,11
+active,Office,CEC-LT097,jbynum,Jayme,Bynum,,,i7-1255U,16,11
+active,Admin,CEC-LT098,ltowler,Lenny,Towler,,,Ultra 7 155H - 16,21,11
+active,Admin,CEC-LT099,bcobb,Brian,Cobb,,(361) 587-2257,i7-1260P,16,11
+shelf,Default,CEC-LT100,,Office,IT,,,i7-1360P,16,11
+active,Exec,CEC-LT101,jsanchez,Esquel,Sanchez,,(361) 215-4222,i7-1250U,16,11
+open,Default,CEC-LT102,,,Open,,,,,
+pending return,Default,CEC-LT103,djohnson,David,Johnson,,(432) 803-6268,i7-1260P,16,11
+pending return,Default,CEC-LT104,arusk,Andy,Rusk,,(832) 371-2322,Ryzen 7 5700U,16,11
+active,Est,CEC-LT105,amarroquin,Alexander,Marroquin,,(361) 726-6011,i7-1260P,16,11
+open,Default,CEC-LT106,,,Open,,,,,
+active,HR,CEC-LT107,sgracia,Sally,Gracia,,(361) 587-1446,Ultra 7 155H,16,11
+active,Acct,CEC-LT108,lhinojosa,Leti,Hinojosa,,,Ultra 7 155H,16,11
+active,Default,CEC-LT109,vcastillo,Victor,Castillo,,(361) 945-5313,i7-4800MQ,16,10
+active,HR,CEC-LT110,lcaracway,Lester,Caraway,,,Ultra 5 125U,16,11
+open,Default,CEC-LT111,,,Open,,,,,
+active,Default,CEC-LT112,syeats,Suzanne,Yeats,,(361) 587-1511,Ultra 5 125U,16,11
+shelf,Default,CEC-LT113,,Office,IT,,,i3-1215U,8,11
+open,Default,CEC-LT114,,,Open,,,,,
+active,Default,CEC-LT115,jbastrisky,Jeromy,Bastrisky,1113,(303) 587-1104,i7-3520M,16,10
+shelf,Default,CEC-LT116,,Office,IT,2271,,i3-1115G4,8,11
+active,HR,CEC-LT117,cscott,Chloe,Scott,2815,(361) 946-9627,Ultra 9 185H,32,11
+shelf,Default,CEC-LT118,,Office,IT,2136,,i5-1235U,8,10
+active,Default,CEC-LT119,boverstreet,Brian,Overstreet,1525,(432) 803-2864,Ryzen 5 5500U,16,11
+active,Office,CEC-LT120,dcavazos,David,Cavazos,1718,(361) 364-8129,Ryzen 5 5500U,16,11
+open,Default,CEC-LT121,,,Open,,,,,
+shelf,Default,CEC-LT122,,Office,IT,3195,,i7-12700H,64,11
+active,Default,CEC-LT123,kkanak,Kevin,Kanak,1202,(361) 215-2427,i3-7100U,16,10
+open,Default,CEC-LT124,,,Open,2522,,,,
+active,Default,CEC-LT125,rbynum,Robert,Bynum,,(903) 520-5248,i5-1235U,16,11
+active,Default,CEC-LT126,cmaldonado,Chris,Maldonado,1079,,i5-1235U,16,11
+active,Default,CEC-LT127,mgarza,Miguel,Garza,2665,(361) 424-1060,i5-1235U,16,11
+active,Office,CEC-LT128,jjennings,Jeremy,Jennings,3438,(361) 946-6673,i5-1235U,16,11
+shelf,Default,CEC-LT129,,Office,IT,,,i5-1235U,16,11
+active,Default,CEC-LT130,esanchez,Emily,Sanchez,1022,(361) 537-2321,i5-1235U,16,11
+pending return,Default,CEC-LT131,tbonds,Tim,Bonds,1071,(432) 215-4166,i5-1235U,16,11
+shelf,Default,CEC-LT132,,Office,IT,1024,,i5-1235U,16,11
+active,HR,CEC-LT133,arivard,Amy,Rivard,2894,(361) 424-4959,i5-1235U,16,11
+active,Admin,CEC-LT134,rbedynek,Allison,Adams,2907,,i5-1235U,16,11
+shelf,Admin,CEC-LT135,khurst,Kent,Hurst,2459,(361) 587-8161,i5-1230U,16,11
+active,Office,CEC-LT136,rchambers,Richard,Chambers,2913,(432) 755-1163,i5-1235U,16,11
+active,Office,CEC-LT137,jgamez,Josh,Gamez,3423,(432) 530-3901,i5-1235U,16,11
+shelf,Default,CEC-LT138,,Office,IT,2342,,i5-1235U,8,11
+shelf,Default,CEC-LT139,mkern,Office,IT,1059,,i5-1235U,8,11
+active,Admin,CEC-LT140,jchambers,Jennifer,Chambers,3001,(432) 269-4509,i7-1255U,16,11
+active,Default,CEC-LT141,kforeman,Kylie,Foreman,9999,(361) 945-2137,i5-1240P,16,10
+open,Default,CEC-LT142,,,Open,9999,,,,
+shelf,Default,CEC-LT143,,Office,Midland,9999,,i5-1240P,16,10
+active,Default,CEC-LT144,ccancino,Christopher,Cancino,,(361) 587-2622,i3-1115G4,8,11
+active,Default,CEC-LT145,rcuellar,Roberto,Cuellar,1077,(361) 945-7311,i3-1115G4,8,11
+active,Default,CEC-LT146,cmaldonado,Chris,Maldonado,,(361) 364-8636,i3-1115G4,8,11
+active,Default,CEC-LT147,jjonathan,Jonathan,Jardon,,(361) 364-8432,i3-1115G4,8,11
+active,Default,CEC-LT148,rseidel,Randy,Seidel,9999,(361) 815-8417,i3-1115G4,8,11
+open,Default,CEC-LT149,,,Open,3258,,,,
+active,Admin,CEC-LT150,ttumlinson,Trey,Tumlinson,1114,(361) 946-6467,i7-1260P,16,11
+shelf,Default,CEC-LT151,,Office,IT,1817,,i3-1115G4,8,11
+shelf,Default,CEC-LT152,,Office,IT,1014,,i7-1260P,16,11
+active,Est,CEC-LT153,modom,Michael,Odom,1754,(832) 784-2261,i7-1260P,16,11
+active,Default,CEC-LT154,gsagers,Galvin,Sagers,2139,(361) 424-4874,i7-1260P,16,11
+active,Exec,CEC-LT155,dcook,Daniel,Cook,1715,(432) 530-3050,i7-1255U,32,11
+active,Default,CEC-LT156,ngarcia,Noel,Garcia,2798,(361) 364-8810,i7-8565U,16,11
+active,Default,CEC-LT157,avanblarcum,Andrew,VanBlarcum,1013,(361) 438-1278,i7-1255U,32,11
+shelf,Default,CEC-LT158,abovadilla,Andres,Bovadilla,1064,,i5-1240P,16,11
+shelf,Default,CEC-LT159,,Office,IT,9999,,i5-1240P,16,11
+active,Admin,CEC-LT160,alucio,AJ,Lucio,1096,(361) 424-4699,i7-1360P,16,11
+shelf,Default,CEC-LT161,,Office,IT,2921,,i7-1360P,16,11
+open,Default,CEC-LT162,,,Open,1016,,,,
+shelf,Default,CEC-LT163,,Office,IT,,,i7-1360P,16,11
+shelf,Default,CEC-LT164,,Office,IT,,,i7-1360P,16,11

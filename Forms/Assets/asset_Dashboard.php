@@ -38,7 +38,7 @@ $visible_columns = $_SESSION['visible_columns'] ?? array_keys($default_columns);
 
 $query = "
     SELECT d.device_id, d.device_name, d.asset_tag, d.serial_number, d.category, d.brand, d.model, d.os, 
-           d.cpu, d.ram, d.storage, d.status, d.assigned_to, d.location, d.purchase_date, d.warranty_expiry, d.notes,
+           l.cpu, l.ram, l.storage, d.status, d.assigned_to, d.location, d.purchase_date, d.warranty_expiry, d.notes,
            l.backup_type, l.internet_policy,
            dl.decommission_status,
            iph.responsible_party, iph.carrier, iph.phone_number,
@@ -50,6 +50,7 @@ $query = "
     LEFT JOIN Tablets t ON d.device_id = t.device_id
     ORDER BY d.device_name
 ";
+
 
 $stmt = $conn->prepare($query);
 $stmt->execute();

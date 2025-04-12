@@ -3,12 +3,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-session_start();
-if (!isset($_SESSION["user_id"])) {
-    header("Location: ../Login/login.php");
-    exit();
-}
-
 // Get the current page name dynamically
 $pageTitle = "CEC-IT"; // Default title
 $currentPage = basename($_SERVER['PHP_SELF'], ".php"); 
@@ -70,15 +64,15 @@ if (array_key_exists($currentPage, $pageTitles)) {
         <h2><?php echo $pageTitle; ?></h2>
         <a href="../Assets/dashboard.php" class="<?php echo ($currentPage == 'dashboard') ? 'active' : ''; ?>">Dashboard</a>
 
+
+        
         <!-- Assets Dropdown -->
         <div class="dropdown">
             <button class="dropdown-btn">Assets</button>
             <div class="dropdown-content">
                 <a href="../Assets/asset_Dashboard.php">All Assets</a>
                 <a href="../Assets/laptop_Dashboard.php">Laptops</a>
-                <a href="../Assets/pc_Dashboard.php">PCs</a>
                 <a href="../Assets/phone_Dashboard.php">Phones</a>
-                <a href="../Assets/tablet_Dashboard.php">Tablets</a>
             </div>
         </div>
         <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'admin'): ?>
