@@ -1,0 +1,27 @@
+<?php
+/**
+ * Minimal phpMyAdmin configuration file
+ *
+ * This configuration forces a cookie login prompt,
+ * defines a blowfish secret, and enables local infile.
+ */
+
+// Provide a random blowfish secret string (at least 32 characters long)
+$cfg['blowfish_secret'] = 'my_random_secret_key_1234567890abcdef'; 
+$cfg['CheckConfigurationPermissions'] = false;
+// Initialize server configuration array.
+$i = 0; 
+
+// Define the first server
+$cfg['Servers'][$i]['host'] = 'db';    // Change this if your DB host is different (e.g. 'localhost')
+$cfg['Servers'][$i]['port'] = 3306;      // Adjust if you use a non-standard port
+$cfg['Servers'][$i]['auth_type'] = 'cookie'; // Use cookie-based authentication; this forces a login prompt.
+$cfg['Servers'][$i]['AllowLocalInfile'] = true;  // Enable local infile if necessary.
+$cfg['Servers'][$i]['AllowNoPassword'] = false;  // Always require a password.
+
+// No user or password here – phpMyAdmin will prompt for login.
+// End of server configuration.
+
+$cfg['UploadDir'] = '';
+$cfg['SaveDir'] = '';
+?>

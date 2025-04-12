@@ -3,6 +3,7 @@ version: '3.8'
 services: 
   db: 
     image: mariadb:11.4
+    command: --local-infile=1
     container_name: cec_it_management
     restart: always
     env_file: .env
@@ -50,7 +51,7 @@ services:
     ports:
       - "8081:80"
     volumes:
-      - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
+      - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php:ro
     networks:
       - cec_it_network
 
