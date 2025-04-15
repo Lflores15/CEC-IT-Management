@@ -12,3 +12,4 @@ function logToFile($filePath, $eventType, $message, $username) {
     $logEntry = "[$timestamp] [$eventType] [$username] $message" . PHP_EOL;
     file_put_contents($filePath, $logEntry, FILE_APPEND);
 }
+?>

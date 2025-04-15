@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $_SESSION["role"] = $role;
 
             logUserEvent("LOGIN_SUCCESS", "User '$username' successfully logged in", $username);
-            header("Location: ..../Assets/dashboard.php");
+            header("Location: ../Assets/dashboard.php");
             exit();
         }
     }
@@ -44,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
     <meta charset="UTF-8">
     <title>Secure Login</title>
-    <link rel="stylesheet" href="../..../Assets/styles.css"> 
+    <link rel="stylesheet" href="../../Assets/styles.css"> 
 </head>
 <body>
     <div class="login-modal modal">
