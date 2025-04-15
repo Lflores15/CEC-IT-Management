@@ -108,7 +108,7 @@ $result = $conn->query($query);
     <!-- Edit User Modal -->
     <div id="editModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <span class="close" id="closeEditModal">&times;</span>
             <h3>Edit User</h3>
             <form id="editUserForm">
                 <input type="hidden" id="edit-user-id" name="user_id">

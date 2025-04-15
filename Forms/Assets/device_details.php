@@ -102,7 +102,6 @@ if (!$device) {
 
         // Laptop-specific info
         if ($device['category'] === 'laptop') {
-            echo "<h4 class='section-subtitle'>Laptop Details</h4>";
             $laptop_fields = [
                 'Backup Type' => 'backup_type',
                 'Internet Policy' => 'internet_policy',
@@ -175,7 +174,7 @@ if (!$device) {
         </div>
     <?php endif; ?>
 
-    <a href="asset_Dashboard.php" class="back-link">← Back to Dashboard</a>
+    <a href="<?= htmlspecialchars($_GET['return_to'] ?? 'asset_Dashboard.php') ?>" class="back-link">← Back</a>
 </div>
 
 </body>

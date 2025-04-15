@@ -9,11 +9,12 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'admin') {
     exit();
 }
 
-$logFile = __DIR__ . "/../../logs/event_log.txt";
+$userlogFile = __DIR__ . "/../../logs/user_event_log.txt";
+$devicelogFile = __DIR__ . "/../../logs/device_event_log.txt";
 $logEntries = [];
 
-if (file_exists($logFile)) {
-    $lines = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+if (file_exists($userlogFile)) {
+    $lines = file($userlogFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach (array_reverse($lines) as $line) {
         preg_match('/\[(.*?)\] \[(.*?)\] \[(.*?)\] (.*)/', $line, $matches);
         if (count($matches) === 5) {

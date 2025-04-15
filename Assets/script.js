@@ -168,6 +168,43 @@ document.addEventListener("DOMContentLoaded", function () {
         };
     }
 
+    // Edit Modal logic
+const editModal = document.getElementById("editModal");
+const closeEditModal = document.getElementById("closeEditModal");
+
+if (editModal && closeEditModal) {
+    // Example: open modal dynamically with user data
+    document.querySelectorAll(".edit-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            const userId = this.dataset.id;
+            const username = this.dataset.username;
+            const email = this.dataset.email;
+            const role = this.dataset.role;
+
+            // Populate form fields
+            document.getElementById("edit-user-id").value = userId;
+            document.getElementById("edit-username").value = username;
+            document.getElementById("edit-email").value = email;
+            document.getElementById("edit-role").value = role;
+
+            // Show modal
+            editModal.style.display = "block";
+        });
+    });
+
+    // Close on "×" button
+    closeEditModal.onclick = () => {
+        editModal.style.display = "none";
+    };
+
+    // Close on outside click
+    window.addEventListener("click", function (event) {
+        if (event.target === editModal) {
+            editModal.style.display = "none";
+        }
+    });
+}
+
     // Delete Modal logic
     const deleteModal = document.getElementById("deleteModal");
     const closeDeleteModal = document.getElementById("closeDeleteModal");

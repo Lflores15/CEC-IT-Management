@@ -70,7 +70,7 @@ $conn->close();
 </head>
 <body>
 <div class="main-layout">
-    <h2>Asset Dashboard</h2>
+    <h2>All Assets</h2>
 
     <button id="edit-columns-btn">Edit Columns</button>
     <div id="column-selector" class="modal" style="display: none;">

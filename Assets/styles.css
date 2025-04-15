@@ -162,6 +162,44 @@ h2 {
     padding: 20px;
     overflow-x: auto;
 }
+.create-user-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.create-user-btn:hover {
+    background-color: #0056b3;
+}
+
+.edit-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.edit-btn:hover {
+    background-color: #218838;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.delete-btn:hover {
+    background-color: #c82333;
+}
 
 /* =========================================
    Dashboard Cards - Enhanced Layout
@@ -197,7 +235,7 @@ h2 {
 .card.active          { background-color: #28a745; }
 .card.decommissioned  { background-color: #6c757d; }
 .card.lost            { background-color: #dc3545; }
-.card.pending         { background-color: #fd7e14; }
+.card.pending         { background-color: #ffbb00; }
 .card.shelf           { background-color: #17a2b8; }
 
 /* Card Text */
@@ -517,6 +555,88 @@ th.sortable.desc::after {
 }
 
 /* =========================================
+   Login Form Styles
+========================================= */
+.login-modal {
+    display: flex !important; 
+    position: fixed;
+    z-index: 2000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 300px;
+}
+
+.login-form {
+    background: white;
+    padding: 25px 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-sizing: border-box;
+}
+
+.login-form h2 {
+    margin-bottom: 10px;
+    text-align: center;
+    color: #333;
+}
+
+.login-form label {
+    font-weight: bold;
+    color: #444;
+}
+
+.login-form input {
+    border: 1px solid gray;
+    border-radius: 6px;
+    outline: none;
+    width: 90%;
+    transition: border-color 0.3s;
+}
+
+.login-form input:focus {
+    border-color: #007bff;
+}
+
+.login-form button {
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-form button:hover {
+    background-color: #0056b3;
+}
+
+.login-error {
+    color: red;
+    margin-top: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; 
+    margin-bottom: 10px; 
+}
+
+/* =========================================
    Responsive Fixes
 ========================================= */
 @media screen and (max-width: 768px) {
@@ -592,5 +712,9 @@ th.sortable.desc::after {
 
     .card {
         width: 90%;
+    }
+    .login-form {
+        padding: 20px 15px; /* optional tweak */
+        max-width: 95%;
     }
 }
