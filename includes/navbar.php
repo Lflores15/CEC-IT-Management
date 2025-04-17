@@ -76,9 +76,7 @@ if (array_key_exists($currentPage, $pageTitles)) {
             <div class="dropdown-content">
                 <a href="../Assets/asset_Dashboard.php">All Assets</a>
                 <a href="../Assets/laptop_Dashboard.php">Laptops</a>
-                <a href="../Assets/pc_Dashboard.php">PCs</a>
                 <a href="../Assets/phone_Dashboard.php">Phones</a>
-                <a href="../Assets/tablet_Dashboard.php">Tablets</a>
             </div>
         </div>
         <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'admin'): ?>

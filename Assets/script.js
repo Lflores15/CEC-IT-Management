@@ -42,33 +42,34 @@ document.addEventListener("DOMContentLoaded", function () {
     // Table Sorting
     const tables = document.querySelectorAll("table");
 
-    tables.forEach((table) => {
-        const headers = table.querySelectorAll("th.sortable");
+tables.forEach((table) => {
+    const headers = table.querySelectorAll("th.sortable");
 
-        headers.forEach((header, index) => {
-            header.addEventListener("click", function () {
-                let tbody = table.querySelector("tbody");
-                let rows = Array.from(tbody.rows);
-                let isAscending = header.classList.contains("asc");
+    headers.forEach((header, index) => {
+        header.addEventListener("click", function () {
+            const actualIndex = index + 1; // Offset for checkbox column
+            let tbody = table.querySelector("tbody");
+            let rows = Array.from(tbody.rows);
+            let isAscending = header.classList.contains("asc");
 
-                rows.sort((rowA, rowB) => {
-                    let cellA = rowA.cells[index].textContent.trim().toLowerCase();
-                    let cellB = rowB.cells[index].textContent.trim().toLowerCase();
+            rows.sort((rowA, rowB) => {
+                let cellA = rowA.cells[actualIndex]?.textContent.trim().toLowerCase() || "";
+                let cellB = rowB.cells[actualIndex]?.textContent.trim().toLowerCase() || "";
 
-                    if (!isNaN(cellA) && !isNaN(cellB)) {
-                        return isAscending ? cellA - cellB : cellB - cellA;
-                    }
-                    return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
-                });
-
-                headers.forEach(h => h.classList.remove("asc", "desc"));
-                header.classList.toggle("asc", !isAscending);
-                header.classList.toggle("desc", isAscending);
-
-                tbody.append(...rows);
+                if (!isNaN(cellA) && !isNaN(cellB)) {
+                    return isAscending ? cellA - cellB : cellB - cellA;
+                }
+                return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
             });
+
+            headers.forEach(h => h.classList.remove("asc", "desc"));
+            header.classList.toggle("asc", !isAscending);
+            header.classList.toggle("desc", isAscending);
+
+            tbody.append(...rows);
         });
     });
+});
 
     // Table Filtering
     const filterName = document.getElementById("filter-name");
@@ -279,18 +280,10 @@ if (editModal && closeEditModal) {
             }
 
             filterInputs.forEach(input => input.addEventListener("input", filterTable));
-
-            // ✅ Make rows clickable
-            document.querySelectorAll(".clickable-row").forEach(row => {
-                row.addEventListener("click", () => {
-                    window.location.href = row.dataset.href;
-                });
-            });
+            
         });
-
-
-
-        // Sortable columns
+        
+// Sortable columns
 const table = document.getElementById("device-table");
 if (table) {
   const headers = table.querySelectorAll("th.sortable");
@@ -357,5 +350,178 @@ document.addEventListener("DOMContentLoaded", function () {
                 }).then(() => location.reload());
             });
         }
+    }
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const editBtn = document.getElementById("edit-mode-btn");
+    const deleteBtn = document.getElementById("delete-selected-btn");
+    let editing = false;
+
+    // Toggle editing mode
+    editBtn.addEventListener("click", () => {
+        editing = !editing;
+        document.body.classList.toggle("editing-mode", editing);
+        editBtn.textContent = editing ? "Exit Edit Mode" : "Edit Table";
+
+        // Show/hide delete button
+        if (deleteBtn) {
+            deleteBtn.style.display = editing ? "inline-block" : "none";
+        }
+    });
+
+    document.querySelectorAll(".clickable-row").forEach(row => {
+        row.addEventListener("click", function (e) {
+            const isEditing = document.body.classList.contains("editing-mode");
+            const target = e.target;
+    
+            // 👇 Only block row navigation if not clicking on an input/select/checkbox
+            const isInteractive = target.closest("input, select, textarea, button, .inline-edit-input, .inline-edit-select");
+    
+            if (isEditing && !isInteractive) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+    
+            const href = this.getAttribute("data-href");
+            if (href && !isEditing) {
+                window.location.href = href;
+            }
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const openBtn = document.getElementById("open-create-modal");
+    const modal = document.getElementById("create-device-modal");
+    const closeBtn = document.getElementById("close-create-modal");
+    const form = document.getElementById("create-device-form");
+
+    openBtn.onclick = () => modal.style.display = "block";
+    closeBtn.onclick = () => modal.style.display = "none";
+    window.onclick = e => {
+        if (e.target === modal) modal.style.display = "none";
+    };
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        fetch("create_device.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.text())
+        .then(response => {
+            alert(response);
+            modal.style.display = "none";
+            form.reset();
+            location.reload();
+        })
+        .catch(err => alert("Error: " + err));
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const selectOptions = {
+        status: ['Active', 'Pending Return', 'Shelf', 'Lost', 'Decommissioned'],
+        internet_policy: [
+            { value: 'admin', label: 'Admin' },
+            { value: 'default', label: 'Default' },
+            { value: 'office', label: 'Office' }
+        ],
+        assigned_to: window.employeeOptions || []  // will be injected from PHP
+    };
+
+    document.querySelectorAll(".device-table td").forEach(cell => {
+        cell.addEventListener("click", function (e) {
+            if (!document.body.classList.contains("editing-mode")) return;
+            if (this.querySelector("input, select")) return;
+            e.stopPropagation();
+
+            const column = this.getAttribute("data-column");
+            const deviceId = this.getAttribute("data-id");
+            const currentText = this.textContent.trim();
+
+            if (!column || !deviceId) return;
+
+            if (selectOptions[column]) {
+                const select = document.createElement("select");
+                select.className = "inline-edit-select";
+            
+                if (column === "assigned_to") {
+                    selectOptions[column].forEach(opt => {
+                        const option = document.createElement("option");
+                        option.value = opt.id;
+                        option.textContent = opt.name;
+                        const currentId = cell.getAttribute('data-emp-id');
+                        if (opt.name === currentText) option.selected = true;
+                        select.appendChild(option);
+                    });
+                } else {
+                    selectOptions[column].forEach(opt => {
+                        const option = document.createElement("option");
+                        option.value = opt;
+                        option.textContent = opt;
+                        if (opt === currentText) option.selected = true;
+                        select.appendChild(option);
+                    });
+                }
+            
+                select.addEventListener("blur", () => {
+                    const newValue = select.value;
+                    sendUpdate(deviceId, column, newValue, cell, currentText);
+                });
+            
+                this.textContent = "";
+                this.appendChild(select);
+                select.focus();
+            
+            } else {
+                const input = document.createElement("input");
+                input.type = "text";
+                input.value = currentText;
+                input.className = "inline-edit-input";
+
+                input.addEventListener("blur", () => {
+                    const newValue = input.value.trim();
+                    sendUpdate(deviceId, column, newValue, cell, currentText);
+                });
+
+                input.addEventListener("keydown", e => {
+                    if (e.key === "Enter") input.blur();
+                    if (e.key === "Escape") this.textContent = currentText;
+                });
+
+                this.textContent = "";
+                this.appendChild(input);
+                input.focus();
+            }
+        });
+
+        
+    });
+
+    function sendUpdate(deviceId, column, value, cell, fallbackText) {
+        fetch("update_cell.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `device_id=${encodeURIComponent(deviceId)}&column=${encodeURIComponent(column)}&value=${encodeURIComponent(value)}`
+        })
+        .then(res => res.text())
+        .then(response => {
+            if (response === "success") {
+                cell.textContent = value;
+            } else {
+                cell.textContent = fallbackText;
+                alert("Update failed.");
+            }
+        })
+        .catch(() => {
+            cell.textContent = fallbackText;
+            alert("Error contacting server.");
+        });
     }
 });

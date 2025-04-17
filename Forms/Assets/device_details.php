@@ -174,7 +174,7 @@ if (!$device) {
         </div>
     <?php endif; ?>
 
-    <a href="<?= htmlspecialchars($_GET['return_to'] ?? 'asset_Dashboard.php') ?>" class="back-link">← Back</a>
+    <a href="<?= htmlspecialchars($_GET['return_to'] ?? 'laptop_Dashboard.php') ?>" class="back-link">← Back</a>
 </div>
 
 </body>

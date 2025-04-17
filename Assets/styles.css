@@ -58,27 +58,50 @@ h2 {
     border: none;
     cursor: pointer;
     font-size: 16px;
-    padding: 10px;
+    padding: 10px 15px;
     display: flex;
     align-items: center;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.profile-btn:hover,
+.profile-btn:focus {
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
 }
 
 .profile-dropdown-content {
     display: none;
     position: absolute;
-    top: 100%;
+    top: calc(100% + 10px);
     right: 0;
-    background: white;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    background: #ffffff;
+    min-width: 180px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
     z-index: 1000;
-    border-radius: 5px;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
+.profile-dropdown-content a {
+    display: block;
+    padding: 12px 16px;
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.profile-dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Toggle visibility */
 .profile-dropdown.active .profile-dropdown-content {
     display: block;
 }
-
 /* =========================================
    Sidebar
 ========================================= */
@@ -145,7 +168,18 @@ h2 {
    Main Content
 ========================================= */
 .main-content {
-    margin-left: 220px;
+    margin-left: 220px;/* Hide checkboxes by default */
+.delete-checkbox {
+    display: none;
+}
+
+/* Show checkboxes when body has .editing-mode */
+.editing-mode .delete-checkbox {
+    display: inline-block;
+    margin-right: 6px;
+    transform: scale(1.2);
+    cursor: pointer;
+}
     padding: 20px;
 }
 
@@ -160,17 +194,18 @@ h2 {
 ========================================= */
 .asset-content-user {
     padding: 20px;
+    padding-top: 40px;
     overflow-x: auto;
 }
 .create-user-btn {
     background-color: #007bff;
     color: white;
-    padding: 10px 20px;
+    padding: 8px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     margin-bottom: 10px;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .create-user-btn:hover {
@@ -180,10 +215,11 @@ h2 {
 .edit-btn {
     background-color: #28a745;
     color: white;
-    padding: 10px 20px;
+    padding: 8px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 14px;
 }
 .edit-btn:hover {
     background-color: #218838;
@@ -317,9 +353,89 @@ th.sortable.desc::after {
     transition: background-color 0.2s;
 }
 
+.create-device-btn{
+    background-color: #007bff;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-mode-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.edit-mode-btn:hover {
+    background-color: #218838;
+}
+
+.delete-checkbox {
+    display: none;
+}
+
+.editing-mode .delete-checkbox {
+    display: inline-block;
+    margin-right: 6px;
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+
 /* =========================================
-   Table Styles (User Table)
+   Clickable Row Behavior in Edit Mode
 ========================================= */
+/* Block row clicks in edit mode but allow inputs inside */
+.editing-mode .clickable-row {
+    pointer-events: auto;      /* Let child elements get pointer events */
+    opacity: 0.8;
+}
+
+.editing-mode .clickable-row {
+    pointer-events: auto;
+}
+
+.editing-mode .clickable-row td {
+    pointer-events: auto;
+}
+
+.editing-mode .clickable-row input,
+.editing-mode .clickable-row select,
+.editing-mode .clickable-row textarea {
+    pointer-events: auto;
+}
+
+.editing-mode .clickable-row td input,
+.editing-mode .clickable-row td select,
+.editing-mode .clickable-row td .inline-edit-input,
+.editing-mode .clickable-row td .inline-edit-select {
+    pointer-events: auto;      /* Re-enable interactions for form controls */
+    cursor: pointer;
+}
+
+.edit-only {
+    display: none;
+}
+
+.editing-mode .edit-only {
+    display: table-cell;
+}
+/* =========================================
+   Column Selector Modal Styles
+========================================= */
+
+
+
+
+
+
+
 .user-table {
     width: 100%;
     border-collapse: collapse;
@@ -464,6 +580,20 @@ th.sortable.desc::after {
 
 .action-buttons .delete-btn:hover {
     background-color: #c82333;
+}
+
+.edit-columns-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-columns-btn:hover {
+    background-color: #0056b3;
 }
 
 /* =========================================
@@ -633,8 +763,67 @@ th.sortable.desc::after {
     display: flex;
     flex-direction: column;
     gap: 5px; 
-    margin-bottom: 10px; 
+    margin-bottom: 20px; 
 }
+
+/* =========================================
+   Filters Container Styles
+========================================= */
+.filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin: 20px 0;
+    border-radius: 10px;
+    align-items: center;
+    padding-top: 40px;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.filters input[type="text"],
+.filters select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    min-width: 180px;
+    box-sizing: border-box;
+}
+
+.filters input[type="text"]:focus,
+.filters select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.filters select {
+    appearance: none; /* Hide default arrow in some browsers */
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #333;
+    min-width: 180px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg fill='%23666' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px 16px;
+    transition: border-color 0.2s;
+}
+
+.filters select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
 
 /* =========================================
    Responsive Fixes

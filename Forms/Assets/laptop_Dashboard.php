@@ -9,39 +9,32 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 $default_columns = [
-    'device_name' => 'Device Name',
-    'asset_tag' => 'Asset Tag',
-    'serial_number' => 'Serial #',
-    'category' => 'Category',
-    'brand' => 'Brand',
-    'model' => 'Model',
-    'os' => 'OS',
+    'status' => 'Status',
+    'internet_policy' => 'Internet Policy',
+    'asset_tag' => 'Asset Tag',    
+    'login_id' => 'Login ID',
+    'emp_first_name' => 'First Name',
+    'emp_last_name' => 'Last Name',
+    'employee_id' => 'Employee ID',
+    'phone_number' => 'Phone Number',
     'cpu' => 'CPU',
     'ram' => 'RAM (GB)',
-    'storage' => 'Storage (GB)',
-    'status' => 'Status',
-    'assigned_to' => 'Assigned To',
-    'location' => 'Location',
-    'purchase_date' => 'Purchase Date',
-    'warranty_expiry' => 'Warranty Expiry',
-    'backup_type' => 'Backup Type',
-    'internet_policy' => 'Internet Policy',
-    'decommission_status' => 'Decommissioned',
-    'responsible_party' => 'Responsible Party',
-    'notes' => 'Notes'
+    'os' => 'OS',
+    'assigned_to' => 'Assigned To' 
 ];
 
 $visible_columns = $_SESSION['visible_columns'] ?? array_keys($default_columns);
 
-// Fetch laptops from the Devices table categorized as 'laptop'
 $query = "
     SELECT d.device_id, d.device_name, d.asset_tag, d.serial_number, d.brand, d.model, d.os, 
            d.cpu, d.ram, d.storage, d.status, d.assigned_to, d.location, d.purchase_date, d.warranty_expiry, d.notes,
            l.backup_type, l.internet_policy, l.backup_removed, l.sinton_backup, l.midland_backup, l.c2_backup, l.actions_needed,
-           dl.broken, dl.duplicate, dl.decommission_status, dl.additional_notes AS decommission_notes
+           dl.broken, dl.duplicate, dl.decommission_status, dl.additional_notes AS decommission_notes,
+           e.first_name AS emp_first_name, e.last_name AS emp_last_name, e.login_id AS login_id, e.employee_id AS employee_id, e.phone_number AS phone_number
     FROM Devices d
     LEFT JOIN Laptops l ON d.device_id = l.device_id
     LEFT JOIN Decommissioned_Laptops dl ON l.id = dl.laptop_id
+    LEFT JOIN Employees e ON d.assigned_to = e.emp_id
     WHERE d.category = 'laptop'
     ORDER BY d.device_name
 ";
@@ -50,6 +43,15 @@ $stmt = $conn->prepare($query);
 $stmt->execute();
 $result = $stmt->get_result();
 $devices = $result->fetch_all(MYSQLI_ASSOC);
+// Fetch employee dropdown values before closing the connection
+$employeeOptions = [];
+$empQuery = $conn->query("SELECT emp_id, CONCAT(first_name, ' ', last_name) AS name FROM Employees ORDER BY name ASC");
+while ($row = $empQuery->fetch_assoc()) {
+    $employeeOptions[] = [
+        'id' => $row['emp_id'],
+        'name' => $row['name']
+    ];
+}
 $stmt->close();
 $conn->close();
 ?>
@@ -58,48 +60,42 @@ $conn->close();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Laptops</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laptops Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/Assets/styles.css">
-    <script src="/Assets/script.js?v=<?php echo time(); ?>"></script> 
+    <script src="/Assets/script.js?v=<?php echo time(); ?>" defer></script> 
 </head>
 <body>
 <div class="main-layout">
-    <h2>Laptops</h2>
-
-    <button id="edit-columns-btn">Edit Columns</button>
-    <div id="column-selector" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
-            <form id="column-form">
-                <h3>Select Visible Columns</h3>
-                <?php foreach ($default_columns as $key => $label): ?>
-                    <label>
-                        <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
-                        <?= htmlspecialchars($label) ?>
-                    </label><br>
-                <?php endforeach; ?>
-                <button type="submit">Apply</button>
-            </form>
-        </div>
-    </div>
-
     <div class="filters-container">
+        <button id="open-create-modal" class="create-device-btn">+ Create Device</button>
+        <button id="edit-mode-btn" class="edit-mode-btn">Edit Table</button>
+        <button id="edit-columns-btn" class="edit-columns-btn">Edit Columns</button>
+        <button id="delete-selected-btn" class="delete-btn" style="display: none;">Delete Selected</button>
+
+        <div id="column-selector" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
+                <form id="column-form">
+                    <h3>Select Visible Columns</h3>
+                     <?php foreach ($default_columns as $key => $label): ?>
+                        <label style="display: block; margin-bottom: 5px;">
+                            <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
+                            <?= htmlspecialchars($label) ?>
+                        </label>
+                    <?php endforeach; ?>
+    <button type="submit">Apply</button>
+</form>
+            </div>
+        </div>
+
         <div class="filters">
             <input type="text" id="filter-name" placeholder="Filter by Name">
             <input type="text" id="filter-tag" placeholder="Filter by Asset Tag">
         </div>
         <div class="filters">
-            <select id="filter-category">
-                <option value="">Filter by Category</option>
-                <option value="laptop">Laptops</option>
-                <option value="desktop">Desktops</option>
-                <option value="iPhone">iPhones</option>
-                <option value="tablet">Tablets</option>
-            </select>
             <select id="filter-status">
-                <option value="">Filter by Status</option>
+                <option value="Status">Filter by Status</option>
                 <option value="Active">Active</option>
                 <option value="Decommissioned">Decommissioned</option>
                 <option value="Lost">Lost</option>
@@ -113,18 +109,28 @@ $conn->close();
         <table class="device-table" id="device-table">
             <thead>
                 <tr>
+                    <th><input type="checkbox" id="select-all"></th>
                     <?php foreach ($visible_columns as $col): ?>
-                        <th class="sortable"><?= htmlspecialchars($default_columns[$col]) ?></th>
+                        <th class="sortable <?= $col === 'assigned_to' ? 'edit-only' : '' ?>">
+                            <?= htmlspecialchars($default_columns[$col]) ?>
+                        </th>
                     <?php endforeach; ?>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($devices)) : ?>
-                    <tr><td colspan="<?= count($visible_columns) ?>">No devices found.</td></tr>
+                    <tr><td colspan="<?= count($visible_columns) + 1 ?>">No devices found.</td></tr>
                 <?php else : ?>
                     <?php foreach ($devices as $device): ?>
-                        <tr class="clickable-row" data-href="device_details.php?id=<?= $device['device_id'] ?>&return_to=<?= urlencode(basename($_SERVER['PHP_SELF'])) ?>">                            <?php foreach ($visible_columns as $col): ?>
-                                <td><?= htmlspecialchars($device[$col] ?? 'N/A') ?></td>
+                        <tr class="clickable-row" data-href="device_details.php?id=<?= $device['device_id'] ?>">
+                            <td><input type="checkbox" class="row-checkbox delete-checkbox" value="<?= $device['device_id'] ?>"></td>
+                            <?php foreach ($visible_columns as $col): ?>
+                                <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ?  'class="edit-only"data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>                                <?php if ($col === 'assigned_to'): ?>
+                                    <?= htmlspecialchars(trim(($device['emp_first_name'] ?? '') . ' ' . ($device['emp_last_name'] ?? ''))) . ' (' . ($device['employee_id'] ?? 'N/A') . ')' ?>
+                                <?php else: ?>
+                                        <?= htmlspecialchars($device[$col] ?? 'N/A') ?>
+                                    <?php endif; ?>
+                                </td>
                             <?php endforeach; ?>
                         </tr>
                     <?php endforeach; ?>
@@ -133,5 +139,8 @@ $conn->close();
         </table>
     </div>
 </div>
+<script>
+    window.employeeOptions = <?= json_encode($employeeOptions) ?>;
+</script>
 </body>
 </html>

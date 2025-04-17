@@ -41,7 +41,6 @@ CREATE TABLE IF NOT EXISTS Devices (
     FOREIGN KEY (assigned_to) REFERENCES Employees(emp_id) ON DELETE SET NULL
 );
 
---  Create Laptops table (For tracking laptop-specific details)
 CREATE TABLE IF NOT EXISTS Laptops (
     id INT AUTO_INCREMENT PRIMARY KEY,
     device_id INT UNIQUE, -- Links to Devices table
@@ -49,7 +48,7 @@ CREATE TABLE IF NOT EXISTS Laptops (
     ram INT,
     storage INT,
     backup_type VARCHAR(255) NOT NULL,
-    internet_policy VARCHAR(255),
+    internet_policy ENUM('admin', 'default', 'office'),
     backup_removed BOOLEAN DEFAULT FALSE,
     sinton_backup BOOLEAN DEFAULT FALSE,
     midland_backup BOOLEAN DEFAULT FALSE,

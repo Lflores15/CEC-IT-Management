@@ -70,9 +70,8 @@ $conn->close();
 </head>
 <body>
 <div class="main-layout">
-    <h2>All Assets</h2>
-
-    <button id="edit-columns-btn">Edit Columns</button>
+    <div class="filters-container">
+    <button id="edit-columns-btn" class="edit-columns-btn">Edit Columns</button>
     <div id="column-selector" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
@@ -89,7 +88,7 @@ $conn->close();
         </div>
     </div>
 
-    <div class="filters-container">
+    
         <div class="filters">
             <input type="text" id="filter-name" placeholder="Filter by Name">
             <input type="text" id="filter-tag" placeholder="Filter by Asset Tag">
