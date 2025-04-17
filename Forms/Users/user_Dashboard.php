@@ -45,7 +45,6 @@ $result = $conn->query($query);
 <?php endif; ?>
 <body>
     <div class="asset-content-user">
-        <h2>Manage Users</h2>
         <button class="create-user-btn" id="openCreateModal">+ Create User</button>
         <table class="user-table">
             <thead>
