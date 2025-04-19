@@ -18,52 +18,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
 
     while (($data = fgetcsv($handle)) !== false) {
         $row = array_combine($headers, $data);
-        $backup_type = "None";
-        $device_id = $row["user_id"];
+        $employee_id = $row["user_id"];
 
-        echo "Trying to import: CPU={$row["cpu"]}, RAM={$row["ram"]}, Internet Policy={$row["internet_policy"]}, User ID={$row["user_id"]}<br>";
+        echo "Trying to import: CPU={$row["cpu"]}, RAM={$row["ram"]}, OS={$row["os"]}, EMP_ID={$employee_id}<br>";
 
-        // First, make sure device_id exists in Devices
-        $device_check = $conn->prepare("SELECT device_id FROM Devices WHERE device_id = ?");
-        if ($device_check) {
-            $device_check->bind_param("i", $device_id);
-            $device_check->execute();
-            $device_check->store_result();
-            if ($device_check->num_rows === 0) {
-                $insert_device = $conn->prepare("INSERT INTO Devices (device_id) VALUES (?)");
-                if ($insert_device) {
-                    $insert_device->bind_param("i", $device_id);
-                    $insert_device->execute();
-                }
-            }
-        }
-
-        // Insert into Laptops
-        $stmt = $conn->prepare("INSERT INTO Laptops (device_id, cpu, ram, internet_policy, backup_type) VALUES (?, ?, ?, ?, ?)");
-        if (!$stmt) {
-            die("Prepare failed (Laptops): " . $conn->error);
-        }
-
-        $stmt->bind_param(
-            "isiss",
-            $device_id,
-            $row["cpu"],
-            $row["ram"],
-            $row["internet_policy"],
-            $backup_type
-        );
-
-        if ($stmt->execute()) {
-            $inserted++;
-        } else {
-            echo "<span style='color:red;'>Insert failed: " . $stmt->error . "</span><br>";
-        }
-
-        // Insert employee if needed
-        if (!empty($row["user_id"])) {
+        // Insert into Employees if not exists
+        if (!empty($employee_id)) {
             $check_emp = $conn->prepare("SELECT employee_id FROM Employees WHERE employee_id = ?");
             if ($check_emp) {
-                $check_emp->bind_param("s", $row["user_id"]);
+                $check_emp->bind_param("s", $employee_id);
                 $check_emp->execute();
                 $check_emp->store_result();
                 if ($check_emp->num_rows === 0) {
@@ -71,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
                     if ($emp_stmt) {
                         $emp_stmt->bind_param(
                             "sssss",
-                            $row["user_id"],
+                            $employee_id,
                             $row["first_name"],
                             $row["last_name"],
                             $row["login_id"],
@@ -81,6 +44,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
                     }
                 }
             }
+        }
+
+        // Insert into Laptops
+        $stmt = $conn->prepare("INSERT INTO Laptops (status, internet_policy, asset_tag, login_id, employee_id, cpu, ram, os) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        if (!$stmt) {
+            die("Prepare failed (Laptops): " . $conn->error);
+        }
+
+        $stmt->bind_param(
+            "ssssssis",
+            $row["status"],
+            $row["internet_policy"],
+            $row["asset_tag"],
+            $row["login_id"],
+            $employee_id,
+            $row["cpu"],
+            $row["ram"],
+            $row["os"]
+        );
+
+        if ($stmt->execute()) {
+            $inserted++;
+        } else {
+            echo "<span style='color:red;'>Insert failed: " . $stmt->error . "</span><br>";
         }
     }
 

@@ -3,64 +3,37 @@ session_start();
 require_once "../../PHP/config.php";
 require_once "../../includes/navbar.php";
 
+// Redirect if not logged in
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../Login/login.php");
     exit();
 }
 
-$default_columns = [
-    'status' => 'Status',
-    'internet_policy' => 'Internet Policy',
-    'asset_tag' => 'Asset Tag',    
-    'login_id' => 'Login ID',
-    'emp_first_name' => 'First Name',
-    'emp_last_name' => 'Last Name',
-    'employee_id' => 'Employee ID',
-    'phone_number' => 'Phone Number',
-    'cpu' => 'CPU',
-    'ram' => 'RAM (GB)',
-    'os' => 'OS',
-    'assigned_to' => 'Assigned To' 
-];
-
-$visible_columns = $_SESSION['visible_columns'] ?? array_keys($default_columns);
-
+// Fetch laptops from the Devices table categorized as 'laptop'
 $query = "
     SELECT d.device_id, d.device_name, d.asset_tag, d.serial_number, d.brand, d.model, d.os, 
-           l.cpu, l.ram, l.storage, d.status, d.assigned_to, d.location, d.purchase_date, d.warranty_expiry, d.notes,
+           d.cpu, d.ram, d.storage, d.status, d.assigned_to, d.location, d.purchase_date, d.warranty_expiry, d.notes,
            l.backup_type, l.internet_policy, l.backup_removed, l.sinton_backup, l.midland_backup, l.c2_backup, l.actions_needed,
-           dl.broken, dl.duplicate, dl.decommission_status, dl.additional_notes AS decommission_notes,
-           e.first_name AS emp_first_name, e.last_name AS emp_last_name, e.login_id AS login_id, e.employee_id AS employee_id, e.phone_number AS phone_number
+           dl.broken, dl.duplicate, dl.decommission_status, dl.additional_notes AS decommission_notes
     FROM Devices d
     LEFT JOIN Laptops l ON d.device_id = l.device_id
     LEFT JOIN Decommissioned_Laptops dl ON l.id = dl.laptop_id
-    LEFT JOIN Employees e ON d.assigned_to = e.emp_id
     WHERE d.category = 'laptop'
     ORDER BY d.device_name
 ";
 
-$stmt = $conn->prepare($query);
-<<<<<<< Updated upstream
-if ( ! $stmt ) {
-    die("MySQL prepare error: " . $conn->error);
-=======
-if (!$stmt) {
-    die("Prepare failed: " . $conn->error);
->>>>>>> Stashed changes
+$result = $conn->query($query);
+
+// Error Handling for Query Execution
+if (!$result) {
+    die("Database Query Failed: " . $conn->error);
 }
-$stmt->execute();
-$result = $stmt->get_result();
-$devices = $result->fetch_all(MYSQLI_ASSOC);
-// Fetch employee dropdown values before closing the connection
-$employeeOptions = [];
-$empQuery = $conn->query("SELECT emp_id, CONCAT(first_name, ' ', last_name) AS name FROM Employees ORDER BY name ASC");
-while ($row = $empQuery->fetch_assoc()) {
-    $employeeOptions[] = [
-        'id' => $row['emp_id'],
-        'name' => $row['name']
-    ];
+
+$laptops = [];
+while ($row = $result->fetch_assoc()) {
+    $laptops[] = $row;
 }
-$stmt->close();
+
 $conn->close();
 ?>
 
@@ -68,119 +41,90 @@ $conn->close();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Laptops Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/Assets/styles.css">
-    <script src="/Assets/script.js?v=<?php echo time(); ?>" defer></script> 
+    <title>Laptops Dashboard</title>
+    <link rel="stylesheet" href="../../Assets/styles.css">
+    <script src="../../Assets/script.js?v=<?php echo time(); ?>"></script> 
 </head>
-
-<button id="open-import-laptop" class="create-device-btn">Import Laptops (CSV)</button>
-
 <body>
-<div class="main-layout">
-    <div class="filters-container">
-        <button id="open-create-modal" class="create-device-btn">+ Create Device</button>
-        <button id="edit-mode-btn" class="edit-mode-btn">Edit Table</button>
-        <button id="edit-columns-btn" class="edit-columns-btn">Edit Columns</button>
-        <button id="delete-selected-btn" class="delete-btn" style="display: none;">Delete Selected</button>
+    <div class="asset-content">
+        <h2>Laptops Dashboard</h2>
 
-        <div id="column-selector" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
-                <form id="column-form">
-                    <h3>Select Visible Columns</h3>
-                     <?php foreach ($default_columns as $key => $label): ?>
-                        <label style="display: block; margin-bottom: 5px;">
-                            <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
-                            <?= htmlspecialchars($label) ?>
-                        </label>
-                    <?php endforeach; ?>
-    <button type="submit">Apply</button>
-</form>
-            </div>
-        </div>
-
-        <div class="filters">
+         <!-- Filters -->
+         <div class="filters">
             <input type="text" id="filter-name" placeholder="Filter by Name">
             <input type="text" id="filter-tag" placeholder="Filter by Asset Tag">
-        </div>
-        <div class="filters">
+            <select id="filter-category">
+                <option value="">All Categories</option>
+                <option value="laptop">Laptops</option>
+                <option value="desktop">Desktops</option>
+                <option value="iPhone">iPhones</option>
+                <option value="tablet">Tablets</option>
+            </select>
             <select id="filter-status">
-                <option value="Status">Filter by Status</option>
+                <option value="">All Statuses</option>
                 <option value="Active">Active</option>
                 <option value="Decommissioned">Decommissioned</option>
-                <option value="Lost">Lost</option>
-                <option value="Pending Return">Pending Return</option>
-                <option value="Shelf">Shelf</option>
             </select>
         </div>
-    </div>
 
-    <div class="table-container">
+        <!-- Table for Laptops -->
         <table class="device-table" id="device-table">
             <thead>
                 <tr>
-                    <th><input type="checkbox" id="select-all"></th>
-                    <?php foreach ($visible_columns as $col): ?>
-                        <th class="sortable <?= $col === 'assigned_to' ? 'edit-only' : '' ?>">
-                            <?= htmlspecialchars($default_columns[$col]) ?>
-                        </th>
-                    <?php endforeach; ?>
+                    <th class="sortable">Device Name</th>
+                    <th class="sortable">Asset Tag</th>
+                    <th class="sortable">Serial Number</th>
+                    <th class="sortable">Brand</th>
+                    <th class="sortable">Model</th>
+                    <th class="sortable">OS</th>
+                    <th class="sortable">CPU</th>
+                    <th class="sortable">RAM</th>
+                    <th class="sortable">Storage</th>
+                    <th class="sortable">Backup Type</th>
+                    <th class="sortable">Internet Policy</th>
+                    <th class="sortable">Status</th>
+                    <th class="sortable">Decommissioned</th>
+                    <th>Decommission Notes</th>
+                    <th class="sortable">Location</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($devices)) : ?>
-                    <tr><td colspan="<?= count($visible_columns) + 1 ?>">No devices found.</td></tr>
+                <?php if (empty($laptops)) : ?>
+                    <tr>
+                        <td colspan="16">No laptops found.</td>
+                    </tr>
                 <?php else : ?>
-                    <?php foreach ($devices as $device): ?>
-                        <tr class="clickable-row" data-href="device_details.php?id=<?= $device['device_id'] ?>">
-                            <td><input type="checkbox" class="row-checkbox delete-checkbox" value="<?= $device['device_id'] ?>"></td>
-                            <?php foreach ($visible_columns as $col): ?>
-                                <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ?  'class="edit-only"data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>                                <?php if ($col === 'assigned_to'): ?>
-                                    <?= htmlspecialchars(trim(($device['emp_first_name'] ?? '') . ' ' . ($device['emp_last_name'] ?? ''))) . ' (' . ($device['employee_id'] ?? 'N/A') . ')' ?>
-                                <?php else: ?>
-                                        <?= htmlspecialchars($device[$col] ?? 'N/A') ?>
-                                    <?php endif; ?>
-                                </td>
-                            <?php endforeach; ?>
+                    <?php foreach ($laptops as $index => $laptop) : ?>
+                        <tr class="<?php echo ($index % 2 == 0) ? 'even-row' : 'odd-row'; ?>">
+                            <td><?php echo htmlspecialchars($laptop["device_name"]); ?></td>
+                            <td><?php echo htmlspecialchars($laptop["asset_tag"]); ?></td>
+                            <td><?php echo htmlspecialchars($laptop["serial_number"]); ?></td>
+                            <td><?php echo htmlspecialchars($laptop["brand"]); ?></td>
+                            <td><?php echo htmlspecialchars($laptop["model"]); ?></td>
+                            <td><?php echo htmlspecialchars($laptop["os"]); ?></td>
+                            <td><?php echo htmlspecialchars($laptop["cpu"]); ?></td>
+                            <td><?php echo htmlspecialchars($laptop["ram"]); ?></td>
+                            <td><?php echo htmlspecialchars($laptop["storage"]); ?></td>
+                            <td><?php echo htmlspecialchars($laptop["backup_type"]); ?></td>
+                            <td><?php echo htmlspecialchars($laptop["internet_policy"]); ?></td>
+                            <td><?php echo htmlspecialchars($laptop["status"]); ?></td>
+                            <td><?php echo ($laptop["decommission_status"] && $laptop["decommission_status"] != 'Decommissioned') ? htmlspecialchars($laptop["decommission_status"]) : "No"; ?></td>
+                            <td><?php echo htmlspecialchars($laptop["decommission_notes"] ?? "N/A"); ?></td>
+                            <td><?php echo htmlspecialchars($laptop["location"]); ?></td>
+                            <td>
+                                <a href="edit_laptop.php?id=<?php echo $laptop['device_id']; ?>">Edit</a> |
+                                <a href="delete_laptop.php?id=<?php echo $laptop['device_id']; ?>" onclick="return confirm('Are you sure?')">Delete</a>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
-</div>
-<script>
-    window.employeeOptions = <?= json_encode($employeeOptions) ?>;
-</script>
+    <script src="../../Assets/script.js?v=<?php echo time(); ?>"></script>
 
-<!-- Import Laptop CSV Modal -->
-<div id="importLaptopModal" class="modal">
-  <div class="modal-content">
-    <span id="closeImportLaptopModal" class="close">&times;</span>
-    <h2>Import Laptops from CSV</h2>
-    <form method="post" action="import_laptops.php" enctype="multipart/form-data">
-      <label for="csv_file">Choose CSV File:</label>
-      <input type="file" name="csv_file" accept=".csv" required>
-      <button type="submit" class="create-device-btn">Import</button>
-    </form>
-  </div>
-</div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const importModal = document.getElementById("importLaptopModal");
-  const openImportBtn = document.getElementById("open-import-laptop");
-  const closeImportBtn = document.getElementById("closeImportLaptopModal");
-
-  if (openImportBtn && closeImportBtn) {
-    openImportBtn.onclick = () => importModal.style.display = "block";
-    closeImportBtn.onclick = () => importModal.style.display = "none";
-    window.onclick = e => {
-      if (e.target === importModal) importModal.style.display = "none";
-    };
-  }
-});
-</script>
+    
 </body>
 </html>
