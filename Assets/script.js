@@ -372,7 +372,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.querySelectorAll(".clickable-row").forEach(row => {
-        row.addEventListener("click", function (e) {
+        row.addEventListener("dblclick", function (e) {
             const isEditing = document.body.classList.contains("editing-mode");
             const target = e.target;
     
