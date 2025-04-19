@@ -525,3 +525,34 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const deleteSelectedBtn = document.getElementById("delete-selected");
+    if (deleteSelectedBtn) {
+        deleteSelectedBtn.addEventListener("click", function () {
+            const selectedIds = Array.from(document.querySelectorAll(".row-select:checked")).map(cb =>
+                cb.closest("tr").getAttribute("data-id")
+            );
+
+            if (selectedIds.length === 0) return;
+            if (!confirm("Are you sure you want to delete the selected employees?")) return;
+
+            const formData = new URLSearchParams();
+            selectedIds.forEach(id => formData.append("employee_ids[]", id));
+
+            fetch("delete_employees.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData
+            })
+            .then(res => res.text())
+            .then(msg => {
+                if (msg.trim() === "success") location.reload();
+                else alert("Deletion failed: " + msg);
+            })
+            .catch(err => alert("Error deleting employees: " + err));
+        });
+    }
+});
