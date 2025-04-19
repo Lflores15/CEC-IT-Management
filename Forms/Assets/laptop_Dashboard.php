@@ -73,6 +73,9 @@ $conn->close();
     <link rel="stylesheet" href="/Assets/styles.css">
     <script src="/Assets/script.js?v=<?php echo time(); ?>" defer></script> 
 </head>
+
+<button id="open-import-laptop" class="create-device-btn">Import Laptops (CSV)</button>
+
 <body>
 <div class="main-layout">
     <div class="filters-container">
@@ -149,6 +152,35 @@ $conn->close();
 </div>
 <script>
     window.employeeOptions = <?= json_encode($employeeOptions) ?>;
+</script>
+
+<!-- Import Laptop CSV Modal -->
+<div id="importLaptopModal" class="modal">
+  <div class="modal-content">
+    <span id="closeImportLaptopModal" class="close">&times;</span>
+    <h2>Import Laptops from CSV</h2>
+    <form method="post" action="import_laptops.php" enctype="multipart/form-data">
+      <label for="csv_file">Choose CSV File:</label>
+      <input type="file" name="csv_file" accept=".csv" required>
+      <button type="submit" class="create-device-btn">Import</button>
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const importModal = document.getElementById("importLaptopModal");
+  const openImportBtn = document.getElementById("open-import-laptop");
+  const closeImportBtn = document.getElementById("closeImportLaptopModal");
+
+  if (openImportBtn && closeImportBtn) {
+    openImportBtn.onclick = () => importModal.style.display = "block";
+    closeImportBtn.onclick = () => importModal.style.display = "none";
+    window.onclick = e => {
+      if (e.target === importModal) importModal.style.display = "none";
+    };
+  }
+});
 </script>
 </body>
 </html>
