@@ -1,0 +1,4 @@
+[2025-04-17 18:48:35] [DELETE_USER] [aadams] User user1 was deleted by admin
+[2025-04-17 18:49:09] [CREATE_USER] [aadams] User 'dpena' was created by aadams
+[2025-04-17 18:50:17] [LOGIN_SUCCESS] [aadams] User 'aadams' successfully logged in
+[2025-04-19 03:44:29] [LOGIN_SUCCESS] [aadams] User 'aadams' successfully logged in
