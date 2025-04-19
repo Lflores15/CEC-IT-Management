@@ -40,8 +40,13 @@ $query = "
 ";
 
 $stmt = $conn->prepare($query);
+<<<<<<< Updated upstream
 if ( ! $stmt ) {
     die("MySQL prepare error: " . $conn->error);
+=======
+if (!$stmt) {
+    die("Prepare failed: " . $conn->error);
+>>>>>>> Stashed changes
 }
 $stmt->execute();
 $result = $stmt->get_result();
