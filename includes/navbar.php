@@ -21,10 +21,8 @@ $isAssetPage = in_array($currentPage, $assetPages);
 $pageTitles = [
     "dashboard" => "Dashboard",
     "assets" => "Assets",
-    "asset_Dashboard" => "All Assets",
     "laptop_Dashboard" => "Laptops",
     "pc_Dashboard" => "PCs",
-    "phone_Dashboard" => "Phones",
     "tablet_Dashboard" => "Tablets",
     "user_Dashboard" => "Users",
     "log_dashboard" => "Logs",
@@ -74,9 +72,7 @@ if (array_key_exists($currentPage, $pageTitles)) {
         <div class="dropdown">
             <button class="dropdown-btn">Assets</button>
             <div class="dropdown-content">
-                <a href="../Assets/asset_Dashboard.php">All Assets</a>
                 <a href="../Assets/laptop_Dashboard.php">Laptops</a>
-                <a href="../Assets/phone_Dashboard.php">Phones</a>
             </div>
         </div>
         <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'admin'): ?>
