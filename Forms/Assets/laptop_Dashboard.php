@@ -25,7 +25,8 @@ $default_columns = [
 
 $visible_columns = $_SESSION['visible_columns'] ?? array_keys($default_columns);
 
-$query = " SELECT d.device_id, d.asset_tag, d.serial_number, d.brand, d.model, d.os,
+$query = "
+    SELECT d.device_id, d.asset_tag, d.serial_number, d.brand, d.model, d.os, 
            l.cpu, l.ram, l.storage, d.status, d.assigned_to, d.location, d.purchase_date, d.warranty_expiry, d.notes,
            l.backup_type, l.internet_policy, l.backup_removed, l.sinton_backup, l.midland_backup, l.c2_backup, l.actions_needed,
            dl.broken, dl.duplicate, dl.decommission_status, dl.additional_notes AS decommission_notes,
@@ -39,13 +40,10 @@ $query = " SELECT d.device_id, d.asset_tag, d.serial_number, d.brand, d.model, d
 ";
 
 $stmt = $conn->prepare($query);
-if (!$stmt) {
-    die("Prepare failed: " . $conn->error);
-}
 $stmt->execute();
 $result = $stmt->get_result();
 $devices = $result->fetch_all(MYSQLI_ASSOC);
-// Fetch employee dropdown values before closing the connection
+
 $employeeOptions = [];
 $empQuery = $conn->query("SELECT emp_id, CONCAT(first_name, ' ', last_name) AS name FROM Employees ORDER BY name ASC");
 while ($row = $empQuery->fetch_assoc()) {
@@ -65,47 +63,17 @@ $conn->close();
     <title>Laptops Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/Assets/styles.css">
-    <script src="/Assets/script.js?v=<?php echo time(); ?>" defer></script> 
+    <script src="/Assets/script.js" defer></script>
 </head>
 <body>
 <div class="main-layout">
     <div class="filters-container">
+        <button id="edit-mode-btn" class="edit-mode-btn">Edit Table</button>
+        <button id="cancel-edit-btn" class="cancel-edit-btn" style="display: none;">Cancel</button>
         <button id="openImportLaptopModal" class="import-btn">Import CSV</button>
         <button id="open-create-modal" class="create-device-btn">+ Create Device</button>
-        <button id="edit-mode-btn" class="edit-mode-btn">Edit Table</button>
         <button id="edit-columns-btn" class="edit-columns-btn">Edit Columns</button>
         <button id="delete-selected-btn" class="delete-btn" style="display: none;">Delete Selected</button>
-
-        <div id="column-selector" class="modal" style="display: none;">
-<div class="laptop-modal-content">
-                <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
-                <form id="column-form">
-                    <h3>Select Visible Columns</h3>
-                     <?php foreach ($default_columns as $key => $label): ?>
-                        <label style="display: block; margin-bottom: 5px;">
-                            <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
-                            <?= htmlspecialchars($label) ?>
-                        </label>
-                    <?php endforeach; ?>
-    <button type="submit">Apply</button>
-</form>
-            </div>
-        </div>
-
-        <div class="filters">
-            <input type="text" id="filter-name" placeholder="Filter by Name">
-            <input type="text" id="filter-tag" placeholder="Filter by Asset Tag">
-        </div>
-        <div class="filters">
-            <select id="filter-status">
-                <option value="Status">Filter by Status</option>
-                <option value="Active">Active</option>
-                <option value="Decommissioned">Decommissioned</option>
-                <option value="Lost">Lost</option>
-                <option value="Pending Return">Pending Return</option>
-                <option value="Shelf">Shelf</option>
-            </select>
-        </div>
     </div>
 
     <div class="table-container">
@@ -128,9 +96,10 @@ $conn->close();
                         <tr class="clickable-row" data-href="device_details.php?id=<?= $device['device_id'] ?>">
                             <td><input type="checkbox" class="row-checkbox delete-checkbox" value="<?= $device['device_id'] ?>"></td>
                             <?php foreach ($visible_columns as $col): ?>
-                                <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ?  'class="edit-only"data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>                                <?php if ($col === 'assigned_to'): ?>
-                                    <?= htmlspecialchars(trim(($device['emp_first_name'] ?? '') . ' ' . ($device['emp_last_name'] ?? ''))) . ' (' . ($device['employee_id'] ?? 'N/A') . ')' ?>
-                                <?php else: ?>
+                                <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ?  'class="edit-only" data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>
+                                    <?php if ($col === 'assigned_to'): ?>
+                                        <?= htmlspecialchars(trim(($device['emp_first_name'] ?? '') . ' ' . ($device['emp_last_name'] ?? ''))) . ' (' . ($device['employee_id'] ?? 'N/A') . ')' ?>
+                                    <?php else: ?>
                                         <?= htmlspecialchars($device[$col] ?? 'N/A') ?>
                                     <?php endif; ?>
                                 </td>
@@ -142,61 +111,24 @@ $conn->close();
         </table>
     </div>
 </div>
-<script>
-    window.employeeOptions = <?= json_encode($employeeOptions) ?>;
-</script>
 
-<!-- Import Laptop CSV Modal -->
+<!-- Import Laptop Modal -->
 <div id="importLaptopModal" class="laptop-modal-content-wrapper">
   <div class="laptop-modal-content">
-    <div class="laptop-modal-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-      <h2 style="margin: 0;">Import Laptops from CSV</h2>
-      <span id="closeImportLaptopModal" class="close" style="font-size: 24px; cursor: pointer;">&times;</span>
+    <div class="laptop-modal-header">
+      <h2>Import Laptops from CSV</h2>
+      <span id="closeImportLaptopModal" class="close">&times;</span>
     </div>
-    <form id="importLaptopForm" method="post" action="import_laptops.php" enctype="multipart/form-data">
-      <input type="file" name="csv_file" accept=".csv" required>
+    <form id="import-laptop-form" method="post" enctype="multipart/form-data">
+      <input type="file" name="csvFile" id="csvFile" accept=".csv" required />
       <button type="submit">Import</button>
     </form>
     <div id="import-result-message" style="margin-top: 10px; display: none;"></div>
   </div>
 </div>
-</body>
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const importForm = document.querySelector("#importLaptopForm");
-        const resultMessage = document.getElementById("import-result-message");
-        const modal = document.getElementById("importLaptopModal");
-        const closeBtn = document.getElementById("closeImportLaptopModal");
-
-        if (importForm) {
-            importForm.addEventListener("submit", function (e) {
-                e.preventDefault();
-                const formData = new FormData(importForm);
-                fetch("import_laptops.php", {
-                    method: "POST",
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    resultMessage.textContent = data.message;
-                    resultMessage.style.display = "block";
-                    resultMessage.style.color = data.status === "success" ? "green" : "red";
-                })
-                .catch(error => {
-                    resultMessage.textContent = "Import failed: " + error.message;
-                    resultMessage.style.color = "red";
-                    resultMessage.style.display = "block";
-                });
-            });
-        }
-
-        if (closeBtn && modal) {
-            closeBtn.addEventListener("click", () => {
-                modal.style.display = "none";
-                resultMessage.style.display = "none";
-                importForm.reset();
-            });
-        }
-    });
+    window.employeeOptions = <?= json_encode($employeeOptions) ?>;
 </script>
+</body>
 </html>

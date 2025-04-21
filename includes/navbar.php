@@ -46,7 +46,7 @@ if (array_key_exists($currentPage, $pageTitles)) {
 
     <!-- Top Navbar -->
     <div class="top-navbar">
-        <img src="/Assets/CEC-Logo.png" alt="CEC-IT Logo" class="logo">
+        <img src="/../../Assets/CEC-Logo.png" alt="CEC-IT Logo" class="logo">
 
         <div class="navbar-right">
             <input type="text" placeholder="Search assets...">
