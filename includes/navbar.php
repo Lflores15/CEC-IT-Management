@@ -21,10 +21,8 @@ $isAssetPage = in_array($currentPage, $assetPages);
 $pageTitles = [
     "dashboard" => "Dashboard",
     "assets" => "Assets",
-    "asset_Dashboard" => "All Assets",
     "laptop_Dashboard" => "Laptops",
     "pc_Dashboard" => "PCs",
-    "phone_Dashboard" => "Phones",
     "tablet_Dashboard" => "Tablets",
     "user_Dashboard" => "Users",
     "log_dashboard" => "Logs",
@@ -79,6 +77,7 @@ if (array_key_exists($currentPage, $pageTitles)) {
         </div>
         <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'admin'): ?>
             <a href="../Users/user_Dashboard.php" class="<?php echo ($currentPage == 'users') ? 'active' : ''; ?>">Users</a>
+
             <a href="/Forms/Employees/employee_Dashboard.php" class="<?php echo ($currentPage == 'employees') ? 'active' : ''; ?>">Employees</a>
             <a href="../Admin/log_dashboard.php" class="<?php echo ($currentPage == 'logs') ? 'active' : ''; ?>">Logs</a>
         <?php endif; ?>

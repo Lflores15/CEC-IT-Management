@@ -486,12 +486,6 @@ let originalTableHTML = null;
     }
 
     document.querySelectorAll(".clickable-row").forEach(row => {
-        row.addEventListener("click", function (e) {
-        // Do nothing on single click to avoid accidental navigation
-            e.preventDefault();
-            e.stopPropagation();
-        });
-
         row.addEventListener("dblclick", function (e) {
             const isEditing = document.body.classList.contains("editing-mode");
             const href = this.getAttribute("data-href");
@@ -645,6 +639,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
 // Import Modal Script
 document.addEventListener("DOMContentLoaded", function () {
     const importModal = document.getElementById("importLaptopModal");
