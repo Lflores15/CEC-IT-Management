@@ -32,7 +32,8 @@ $query = " SELECT d.device_id, d.asset_tag, d.serial_number, d.brand, d.model, d
            e.first_name AS emp_first_name, e.last_name AS emp_last_name, e.login_id AS login_id, e.employee_id AS employee_id, e.phone_number AS phone_number
     FROM Devices d
     LEFT JOIN Laptops l ON d.device_id = l.device_id
-    LEFT JOIN Decommissioned_Laptops dl ON l.laptop_id = dl.laptop_id
+LEFT JOIN Decommissioned_Laptops dl
+  ON l.id = dl.laptop_id
     LEFT JOIN Employees e ON d.assigned_to = e.emp_id
     WHERE d.category = 'laptop'
     ORDER BY d.asset_tag
