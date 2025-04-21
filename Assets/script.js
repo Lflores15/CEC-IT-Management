@@ -363,7 +363,7 @@ document.addEventListener("DOMContentLoaded", function () {
     editBtn.addEventListener("click", () => {
         editing = !editing;
         document.body.classList.toggle("editing-mode", editing);
-        editBtn.textContent = editing ? "Exit Edit Mode" : "Edit Table";
+        editBtn.textContent = editing ? "Save Table" : "Edit Table";
 
         // Show/hide delete button
         if (deleteBtn) {
@@ -409,7 +409,7 @@ document.addEventListener("DOMContentLoaded", function () {
         e.preventDefault();
         const formData = new FormData(form);
 
-        fetch("create_device.php", {
+        fetch("create_laptop.php", {
             method: "POST",
             body: formData
         })
@@ -427,11 +427,7 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
     const selectOptions = {
         status: ['Active', 'Pending Return', 'Shelf', 'Lost', 'Decommissioned'],
-        internet_policy: [
-            { value: 'admin', label: 'Admin' },
-            { value: 'default', label: 'Default' },
-            { value: 'office', label: 'Office' }
-        ],
+        internet_policy: ['Admin', 'Default', 'Office'],
         assigned_to: window.employeeOptions || []  // will be injected from PHP
     };
 
@@ -447,12 +443,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!column || !deviceId) return;
 
-            if (selectOptions[column]) {
+            if (selectOptions[column?.toLowerCase()]) {
                 const select = document.createElement("select");
                 select.className = "inline-edit-select";
             
                 if (column === "assigned_to") {
-                    selectOptions[column].forEach(opt => {
+                    selectOptions[column.toLowerCase()].forEach(opt => {
                         const option = document.createElement("option");
                         option.value = opt.id;
                         option.textContent = opt.name;
@@ -461,11 +457,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         select.appendChild(option);
                     });
                 } else {
-                    selectOptions[column].forEach(opt => {
+                    selectOptions[column.toLowerCase()].forEach(opt => {
                         const option = document.createElement("option");
                         option.value = opt;
                         option.textContent = opt;
-                        if (opt === currentText) option.selected = true;
+                        if (opt.toLowerCase() === currentText.toLowerCase()) option.selected = true;
                         select.appendChild(option);
                     });
                 }

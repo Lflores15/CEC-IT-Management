@@ -33,7 +33,7 @@ $query = "
     LEFT JOIN Assignments a ON d.device_id = a.device_id AND a.status = 'Active'
     LEFT JOIN Employees e ON a.emp_id = e.emp_id
     LEFT JOIN Laptops l ON d.device_id = l.device_id
-    LEFT JOIN Decommissioned_Laptops dl ON l.id = dl.laptop_id
+    LEFT JOIN Decommissioned_Laptops dl ON l.laptop_id = dl.laptop_id
     LEFT JOIN iPhones iph ON d.device_id = iph.device_id
     LEFT JOIN Tablets t ON d.device_id = t.device_id
     WHERE d.device_id = ?

@@ -25,18 +25,17 @@ $default_columns = [
 
 $visible_columns = $_SESSION['visible_columns'] ?? array_keys($default_columns);
 
-$query = "
-    SELECT d.device_id, d.device_name, d.asset_tag, d.serial_number, d.brand, d.model, d.os, 
+$query = " SELECT d.device_id, d.asset_tag, d.serial_number, d.brand, d.model, d.os,
            l.cpu, l.ram, l.storage, d.status, d.assigned_to, d.location, d.purchase_date, d.warranty_expiry, d.notes,
            l.backup_type, l.internet_policy, l.backup_removed, l.sinton_backup, l.midland_backup, l.c2_backup, l.actions_needed,
            dl.broken, dl.duplicate, dl.decommission_status, dl.additional_notes AS decommission_notes,
            e.first_name AS emp_first_name, e.last_name AS emp_last_name, e.login_id AS login_id, e.employee_id AS employee_id, e.phone_number AS phone_number
     FROM Devices d
     LEFT JOIN Laptops l ON d.device_id = l.device_id
-    LEFT JOIN Decommissioned_Laptops dl ON l.id = dl.laptop_id
+    LEFT JOIN Decommissioned_Laptops dl ON l.laptop_id = dl.laptop_id
     LEFT JOIN Employees e ON d.assigned_to = e.emp_id
     WHERE d.category = 'laptop'
-    ORDER BY d.device_name
+    ORDER BY d.asset_tag
 ";
 
 $stmt = $conn->prepare($query);
@@ -71,13 +70,14 @@ $conn->close();
 <body>
 <div class="main-layout">
     <div class="filters-container">
+        <button id="openImportLaptopModal" class="import-btn">Import CSV</button>
         <button id="open-create-modal" class="create-device-btn">+ Create Device</button>
         <button id="edit-mode-btn" class="edit-mode-btn">Edit Table</button>
         <button id="edit-columns-btn" class="edit-columns-btn">Edit Columns</button>
         <button id="delete-selected-btn" class="delete-btn" style="display: none;">Delete Selected</button>
 
         <div id="column-selector" class="modal" style="display: none;">
-            <div class="modal-content">
+<div class="laptop-modal-content">
                 <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
                 <form id="column-form">
                     <h3>Select Visible Columns</h3>
@@ -145,5 +145,58 @@ $conn->close();
 <script>
     window.employeeOptions = <?= json_encode($employeeOptions) ?>;
 </script>
+
+<!-- Import Laptop CSV Modal -->
+<div id="importLaptopModal" class="laptop-modal-content-wrapper">
+  <div class="laptop-modal-content">
+    <div class="laptop-modal-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <h2 style="margin: 0;">Import Laptops from CSV</h2>
+      <span id="closeImportLaptopModal" class="close" style="font-size: 24px; cursor: pointer;">&times;</span>
+    </div>
+    <form id="importLaptopForm" method="post" action="import_laptops.php" enctype="multipart/form-data">
+      <input type="file" name="csv_file" accept=".csv" required>
+      <button type="submit">Import</button>
+    </form>
+    <div id="import-result-message" style="margin-top: 10px; display: none;"></div>
+  </div>
+</div>
 </body>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const importForm = document.querySelector("#importLaptopForm");
+        const resultMessage = document.getElementById("import-result-message");
+        const modal = document.getElementById("importLaptopModal");
+        const closeBtn = document.getElementById("closeImportLaptopModal");
+
+        if (importForm) {
+            importForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                const formData = new FormData(importForm);
+                fetch("import_laptops.php", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    resultMessage.textContent = data.message;
+                    resultMessage.style.display = "block";
+                    resultMessage.style.color = data.status === "success" ? "green" : "red";
+                })
+                .catch(error => {
+                    resultMessage.textContent = "Import failed: " + error.message;
+                    resultMessage.style.color = "red";
+                    resultMessage.style.display = "block";
+                });
+            });
+        }
+
+        if (closeBtn && modal) {
+            closeBtn.addEventListener("click", () => {
+                modal.style.display = "none";
+                resultMessage.style.display = "none";
+                importForm.reset();
+            });
+        }
+    });
+</script>
 </html>
