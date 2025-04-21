@@ -66,35 +66,16 @@ while (($row = fgetcsv($file)) !== false) {
             $empInsert->close();
         }
         $empCheck->close();
-        // Ensure assignedTo is set
-        $assignedTo = (int)$empId;
     }
 
     // Insert into Devices
-    $assignedTo = null;
-    if ($empIdParam !== null) {
-        $checkAssigned = $conn->prepare("SELECT emp_id FROM Employees WHERE emp_id = ?");
-        $checkAssigned->bind_param("i", $empIdParam);
-        $checkAssigned->execute();
-        $checkAssigned->store_result();
-        if ($checkAssigned->num_rows > 0) {
-            $assignedTo = $empIdParam;
-        }
-        $checkAssigned->close();
-    }
-
-    if ($assignedTo !== null) {
-        $deviceInsert = $conn->prepare("INSERT INTO Devices (asset_tag, status, os, assigned_to, category) VALUES (?, ?, ?, ?, 'laptop')");
-        $deviceInsert->bind_param("sssi", $assetTag, $data["status"], $os, $assignedTo);
-    } else {
-        $deviceInsert = $conn->prepare("INSERT INTO Devices (asset_tag, status, os, category) VALUES (?, ?, ?, 'laptop')");
-        $deviceInsert->bind_param("sss", $assetTag, $data["status"], $os);
-    }
+    $deviceInsert = $conn->prepare("INSERT INTO Devices (asset_tag, status, os, internet_policy, assigned_to, category) VALUES (?, ?, ?, ?, ?, 'laptop')");
     if (!$deviceInsert) {
         $errors[] = "Device insert prepare failed: " . $conn->error;
         logDeviceImport("Device insert prepare failed: " . $conn->error);
         continue;
     }
+    $deviceInsert->bind_param("ssssi", $assetTag, $data["status"], $os, $data["internet_policy"], $empIdParam);
     if (!$deviceInsert->execute()) {
         $errors[] = "Device insert failed: " . $deviceInsert->error;
         logDeviceImport("Device insert failed: " . $deviceInsert->error);
