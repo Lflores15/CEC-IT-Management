@@ -2,9 +2,9 @@
 -- 1. Insert Sample Employees (For device assignments)
 -- ==============================================
 INSERT INTO Employees (employee_id, first_name, last_name, login_id, email, phone_number) VALUES
-    ('EMP1001', 'John', 'Doe', 'jdoe', 'john.doe@example.com', '555-1234'),
-    ('EMP1002', 'Jane', 'Smith', 'jsmith', 'jane.smith@example.com', '555-5678'),
-    ('EMP1003', 'Alice', 'Johnson', 'ajohnson', 'alice.johnson@example.com', '555-7890');
+    ('1001', 'John', 'Doe', 'jdoe', 'john.doe@example.com', '555-1234'),
+    ('1002', 'Jane', 'Smith', 'jsmith', 'jane.smith@example.com', '555-5678'),
+    ('1003', 'Alice', 'Johnson', 'ajohnson', 'alice.johnson@example.com', '555-7890');
 
 -- ==============================================
 -- 2. Insert Sample Devices (IT asset tracking)
