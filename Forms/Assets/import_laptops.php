@@ -47,42 +47,45 @@ while (($row = fgetcsv($file)) !== false) {
     $cpu = trim($data["cpu"]);
     $ram = trim($data["ram"]);
     $os = trim($data["os"]);
-    $empId = trim($data["user_id"]);
-    $empIdParam = is_numeric($empId) ? (int)$empId : null;
+    $employeeId = trim($data["user_id"]);
     $assetTag = trim($data["asset_tag"]);
 
-    logDeviceImport("Trying to import: CPU=$cpu, RAM=$ram, OS=$os, EMP_ID=$empId");
+    logDeviceImport("Trying to import: CPU=$cpu, RAM=$ram, OS=$os, EMP_ID=$employeeId");
 
-    // Insert into Employees if not exists
-    if (!empty($empId)) {
-        $empCheck = $conn->prepare("SELECT emp_id FROM Employees WHERE emp_id = ?");
-        $empCheck->bind_param("s", $empId);
+    $assignedTo = null;
+
+    if (!empty($employeeId)) {
+        $empCheck = $conn->prepare("SELECT emp_id FROM Employees WHERE employee_id = ?");
+        $empCheck->bind_param("s", $employeeId);
         $empCheck->execute();
-        $empCheck->store_result();
-        if ($empCheck->num_rows === 0) {
-            $empInsert = $conn->prepare("INSERT INTO Employees (emp_id, first_name, last_name, login_id, phone_number) VALUES (?, ?, ?, ?, ?)");
-            $empInsert->bind_param("sssss", $empId, $data["first_name"], $data["last_name"], $data["login_id"], $data["phone_number"]);
-            $empInsert->execute();
-            $empInsert->close();
+        $empCheck->bind_result($empIdFound);
+        if ($empCheck->fetch()) {
+            $assignedTo = $empIdFound;
         }
         $empCheck->close();
-        // Ensure assignedTo is set
-        $assignedTo = (int)$empId;
+    }
+
+    if ($assignedTo === null && !empty($data["login_id"])) {
+        $empCheck = $conn->prepare("SELECT emp_id FROM Employees WHERE login_id = ?");
+        $empCheck->bind_param("s", $data["login_id"]);
+        $empCheck->execute();
+        $empCheck->bind_result($empIdFound);
+        if ($empCheck->fetch()) {
+            $assignedTo = $empIdFound;
+        }
+        $empCheck->close();
+    }
+
+    if ($assignedTo === null && ($data["first_name"] || $data["last_name"] || $data["login_id"])) {
+        $empInsert = $conn->prepare("INSERT INTO Employees (employee_id, first_name, last_name, login_id, phone_number) VALUES (?, ?, ?, ?, ?)");
+        $empInsert->bind_param("sssss", $employeeId, $data["first_name"], $data["last_name"], $data["login_id"], $data["phone_number"]);
+        if ($empInsert->execute()) {
+            $assignedTo = $empInsert->insert_id;
+        }
+        $empInsert->close();
     }
 
     // Insert into Devices
-    $assignedTo = null;
-    if ($empIdParam !== null) {
-        $checkAssigned = $conn->prepare("SELECT emp_id FROM Employees WHERE emp_id = ?");
-        $checkAssigned->bind_param("i", $empIdParam);
-        $checkAssigned->execute();
-        $checkAssigned->store_result();
-        if ($checkAssigned->num_rows > 0) {
-            $assignedTo = $empIdParam;
-        }
-        $checkAssigned->close();
-    }
-
     if ($assignedTo !== null) {
         $deviceInsert = $conn->prepare("INSERT INTO Devices (asset_tag, status, os, assigned_to, category) VALUES (?, ?, ?, ?, 'laptop')");
         $deviceInsert->bind_param("sssi", $assetTag, $data["status"], $os, $assignedTo);
@@ -105,8 +108,12 @@ while (($row = fgetcsv($file)) !== false) {
     $deviceInsert->close();
 
     // Insert into Laptops
+    $internet_policy = trim($data["internet_policy"]);
+    if (empty($cpu)) { $cpu = "N/A"; }
+    if (empty($ram)) { $ram = "N/A"; }
+    if (empty($internet_policy)) { $internet_policy = "N/A"; }
     $laptopInsert = $conn->prepare("INSERT INTO Laptops (device_id, cpu, ram, internet_policy) VALUES (?, ?, ?, ?)");
-    $laptopInsert->bind_param("isis", $deviceId, $cpu, $ram, $data["internet_policy"]);
+    $laptopInsert->bind_param("isis", $deviceId, $cpu, $ram, $internet_policy);
     if (!$laptopInsert->execute()) {
         $errors[] = "Laptop insert failed: " . $laptopInsert->error;
         logDeviceImport("Laptop insert failed: " . $laptopInsert->error);

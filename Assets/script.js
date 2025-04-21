@@ -1,6 +1,8 @@
+// ========== Script Initialization & UI Interaction Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
     console.log("JavaScript Loaded ✅");
 
+    // Handle profile dropdown menu toggle on click
     // Profile Dropdown
     const profileBtn = document.querySelector(".profile-btn");
     const profileDropdown = document.querySelector(".profile-dropdown");
@@ -12,12 +14,14 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Close profile dropdown if clicking outside
     document.addEventListener("click", function (event) {
         if (!profileDropdown.contains(event.target)) {
             profileDropdown.classList.remove("active");
         }
     });
 
+    // Handle expandable sidebar dropdown sections
     // Sidebar Dropdowns
     const dropdownBtns = document.querySelectorAll(".dropdown-btn");
     
@@ -39,6 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // Enable column sorting on tables
     // Table Sorting
     const tables = document.querySelectorAll("table");
 
@@ -71,6 +76,7 @@ tables.forEach((table) => {
     });
 });
 
+    // Setup filtering by name, tag, category, and status
     // Table Filtering
     const filterName = document.getElementById("filter-name");
     const filterTag = document.getElementById("filter-tag");
@@ -78,6 +84,7 @@ tables.forEach((table) => {
     const filterStatus = document.getElementById("filter-status");
 
     function filterTable() {
+        // Apply filters based on input values
         tables.forEach(table => {
             const rows = table.querySelectorAll("tbody tr");
 
@@ -106,6 +113,7 @@ tables.forEach((table) => {
     if (filterCategory) filterCategory.addEventListener("change", filterTable);
     if (filterStatus) filterStatus.addEventListener("change", filterTable);
 
+    // Setup logic for Edit User modal (opening, closing, form submission)
     // Modal Functionality
     const modal = document.getElementById("editModal");
     const closeModal = document.querySelector(".close");
@@ -148,6 +156,7 @@ tables.forEach((table) => {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+    // Setup logic for Create Device modal (opening, closing, form submission)
     // Create Modal logic
     const createModal = document.getElementById('createModal');
     const openBtn = document.getElementById('openCreateModal');
@@ -169,11 +178,12 @@ document.addEventListener("DOMContentLoaded", function () {
         };
     }
 
-    // Edit Modal logic
+// Edit Modal logic
 const editModal = document.getElementById("editModal");
 const closeEditModal = document.getElementById("closeEditModal");
 
 if (editModal && closeEditModal) {
+    // Setup dynamic population of Edit User modal fields
     // Example: open modal dynamically with user data
     document.querySelectorAll(".edit-btn").forEach(button => {
         button.addEventListener("click", function () {
@@ -206,6 +216,7 @@ if (editModal && closeEditModal) {
     });
 }
 
+    // Setup logic for Delete User modal (opening, closing)
     // Delete Modal logic
     const deleteModal = document.getElementById("deleteModal");
     const closeDeleteModal = document.getElementById("closeDeleteModal");
@@ -283,7 +294,7 @@ if (editModal && closeEditModal) {
             
         });
         
-// Sortable columns
+// Add sort functionality to each column header in the table
 const table = document.getElementById("device-table");
 if (table) {
   const headers = table.querySelectorAll("th.sortable");
@@ -311,7 +322,7 @@ if (table) {
   });
 }
 
-// Edit Columns modal toggle
+// Toggle modal for selecting visible table columns
 const editBtn = document.getElementById("edit-columns-btn");
 const columnModal = document.getElementById("column-selector");
 
@@ -355,7 +366,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 document.addEventListener("DOMContentLoaded", function () {
-    const editBtn = document.getElementById("edit-mode-btn");
+    // Toggle inline edit mode for table rows and handle click-to-edit behavior
+const editBtn = document.getElementById("edit-mode-btn");
+const cancelEditBtn = document.getElementById("cancel-edit-btn");
+let originalTableHTML = null;
     const deleteBtn = document.getElementById("delete-selected-btn");
     let editing = false;
 
@@ -363,37 +377,137 @@ document.addEventListener("DOMContentLoaded", function () {
     editBtn.addEventListener("click", () => {
         editing = !editing;
         document.body.classList.toggle("editing-mode", editing);
-        editBtn.textContent = editing ? "Save Table" : "Edit Table";
-
-        // Show/hide delete button
-        if (deleteBtn) {
-            deleteBtn.style.display = editing ? "inline-block" : "none";
+ 
+        if (editing) {
+            originalTableHTML = document.querySelector(".device-table tbody").innerHTML;
+            editBtn.textContent = "Save Table";
+            cancelEditBtn.style.display = "inline-block";
+            if (deleteBtn) deleteBtn.style.display = "inline-block";
+        } else {
+            editBtn.textContent = "Edit Table";
+            cancelEditBtn.style.display = "none";
+            if (deleteBtn) deleteBtn.style.display = "none";
+            bindRowEvents();
         }
     });
+    
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener("click", () => {
+            if (originalTableHTML) {
+                document.querySelector(".device-table tbody").innerHTML = originalTableHTML;
+            }
+            editing = false;
+            document.body.classList.remove("editing-mode");
+            editBtn.textContent = "Edit Table";
+            cancelEditBtn.style.display = "none";
+            if (deleteBtn) deleteBtn.style.display = "none";
+
+            // Re-enable double click handlers on reverted rows
+            document.querySelectorAll(".clickable-row").forEach(row => {
+                row.addEventListener("dblclick", function (e) {
+                    const isEditing = document.body.classList.contains("editing-mode");
+                    const href = this.getAttribute("data-href");
+                    if (!isEditing && href) {
+                        window.location.href = href;
+                    } else {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
+            });
+
+            // Rebind inline editing after cancel
+            document.querySelectorAll(".device-table td").forEach(cell => {
+                cell.addEventListener("dblclick", function (e) {
+                    if (!document.body.classList.contains("editing-mode")) return;
+                    if (this.querySelector("input, select")) return;
+                    e.stopPropagation();
+
+                    const column = this.getAttribute("data-column");
+                    const deviceId = this.getAttribute("data-id");
+                    const currentText = this.textContent.trim();
+
+                    if (!column || !deviceId) return;
+
+                    if (selectOptions[column?.toLowerCase()]) {
+                        const select = document.createElement("select");
+                        select.className = "inline-edit-select";
+
+                        if (column === "assigned_to") {
+                            selectOptions[column.toLowerCase()].forEach(opt => {
+                                const option = document.createElement("option");
+                                option.value = opt.id;
+                                option.textContent = opt.name;
+                                const currentId = cell.getAttribute('data-emp-id');
+                                if (opt.name === currentText) option.selected = true;
+                                select.appendChild(option);
+                            });
+                        } else {
+                            selectOptions[column.toLowerCase()].forEach(opt => {
+                                const option = document.createElement("option");
+                                option.value = opt;
+                                option.textContent = opt;
+                                if (opt.toLowerCase() === currentText.toLowerCase()) option.selected = true;
+                                select.appendChild(option);
+                            });
+                        }
+
+                        select.addEventListener("blur", () => {
+                            const newValue = select.value;
+                            sendUpdate(deviceId, column, newValue, cell, currentText);
+                        });
+
+                        this.textContent = "";
+                        this.appendChild(select);
+                        select.focus();
+                    } else {
+                        const input = document.createElement("input");
+                        input.type = "text";
+                        input.value = currentText;
+                        input.className = "inline-edit-input";
+
+                        input.addEventListener("blur", () => {
+                            const newValue = input.value.trim();
+                            sendUpdate(deviceId, column, newValue, cell, currentText);
+                        });
+
+                        input.addEventListener("keydown", e => {
+                            if (e.key === "Enter") input.blur();
+                            if (e.key === "Escape") this.textContent = currentText;
+                        });
+
+                        this.textContent = "";
+                        this.appendChild(input);
+                        input.focus();
+                    }
+                });
+            });
+        });
+    }
 
     document.querySelectorAll(".clickable-row").forEach(row => {
         row.addEventListener("click", function (e) {
+        // Do nothing on single click to avoid accidental navigation
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        row.addEventListener("dblclick", function (e) {
             const isEditing = document.body.classList.contains("editing-mode");
-            const target = e.target;
-    
-            // 👇 Only block row navigation if not clicking on an input/select/checkbox
-            const isInteractive = target.closest("input, select, textarea, button, .inline-edit-input, .inline-edit-select");
-    
-            if (isEditing && !isInteractive) {
+            const href = this.getAttribute("data-href");
+
+            if (!isEditing && href) {
+                window.location.href = href;
+            } else {
                 e.preventDefault();
                 e.stopPropagation();
-                return;
-            }
-    
-            const href = this.getAttribute("data-href");
-            if (href && !isEditing) {
-                window.location.href = href;
             }
         });
     });
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+    // Handle Create Device modal open, close, and form submission
     const openBtn = document.getElementById("open-create-modal");
     const modal = document.getElementById("create-device-modal");
     const closeBtn = document.getElementById("close-create-modal");
@@ -415,10 +529,18 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .then(res => res.text())
         .then(response => {
-            alert(response);
-            modal.style.display = "none";
-            form.reset();
-            location.reload();
+            const result = document.getElementById("create-result-message");
+            if (response.toLowerCase().includes("success")) {
+                result.textContent = response;
+                result.style.color = "green";
+                modal.style.display = "none";
+                form.reset();
+                location.reload();
+            } else {
+                result.textContent = response;
+                result.style.color = "red";
+                result.style.display = "block";
+            }
         })
         .catch(err => alert("Error: " + err));
     });
@@ -431,8 +553,9 @@ document.addEventListener("DOMContentLoaded", function () {
         assigned_to: window.employeeOptions || []  // will be injected from PHP
     };
 
+    // Enable inline editing for supported fields (dropdown or text input)
     document.querySelectorAll(".device-table td").forEach(cell => {
-        cell.addEventListener("click", function (e) {
+        cell.addEventListener("dblclick", function (e) {
             if (!document.body.classList.contains("editing-mode")) return;
             if (this.querySelector("input, select")) return;
             e.stopPropagation();
@@ -501,6 +624,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function sendUpdate(deviceId, column, value, cell, fallbackText) {
+        // Send updated cell data to server and handle UI feedback
         fetch("update_cell.php", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -521,3 +645,111 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+// Import Modal Script
+document.addEventListener("DOMContentLoaded", function () {
+    const importModal = document.getElementById("importLaptopModal");
+    const openImportBtn = document.getElementById("openImportLaptopModal");
+    const closeImportBtn = document.getElementById("closeImportLaptopModal");
+
+    if (openImportBtn && closeImportBtn && importModal) {
+        openImportBtn.addEventListener("click", () => {
+            importModal.style.display = "block";
+        });
+
+        closeImportBtn.addEventListener("click", () => {
+            importModal.style.display = "none";
+        });
+        window.addEventListener("click", (e) => {
+            if (e.target === importModal) {
+                importModal.style.display = "none";
+            }
+        });
+    }
+});
+
+// Helper function to bind row events
+function bindRowEvents() {
+    document.querySelectorAll(".clickable-row").forEach(row => {
+        row.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        row.addEventListener("dblclick", function (e) {
+            const isEditing = document.body.classList.contains("editing-mode");
+            const href = this.getAttribute("data-href");
+            if (!isEditing && href) {
+                window.location.href = href;
+            } else {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+    });
+
+    document.querySelectorAll(".device-table td").forEach(cell => {
+        cell.addEventListener("dblclick", function (e) {
+            if (!document.body.classList.contains("editing-mode")) return;
+            if (this.querySelector("input, select")) return;
+            e.stopPropagation();
+
+            const column = this.getAttribute("data-column");
+            const deviceId = this.getAttribute("data-id");
+            const currentText = this.textContent.trim();
+
+            if (!column || !deviceId) return;
+
+            if (selectOptions[column?.toLowerCase()]) {
+                const select = document.createElement("select");
+                select.className = "inline-edit-select";
+
+                if (column === "assigned_to") {
+                    selectOptions[column.toLowerCase()].forEach(opt => {
+                        const option = document.createElement("option");
+                        option.value = opt.id;
+                        option.textContent = opt.name;
+                        const currentId = cell.getAttribute('data-emp-id');
+                        if (opt.name === currentText) option.selected = true;
+                        select.appendChild(option);
+                    });
+                } else {
+                    selectOptions[column.toLowerCase()].forEach(opt => {
+                        const option = document.createElement("option");
+                        option.value = opt;
+                        option.textContent = opt;
+                        if (opt.toLowerCase() === currentText.toLowerCase()) option.selected = true;
+                        select.appendChild(option);
+                    });
+                }
+
+                select.addEventListener("blur", () => {
+                    const newValue = select.value;
+                    sendUpdate(deviceId, column, newValue, cell, currentText);
+                });
+
+                this.textContent = "";
+                this.appendChild(select);
+                select.focus();
+            } else {
+                const input = document.createElement("input");
+                input.type = "text";
+                input.value = currentText;
+                input.className = "inline-edit-input";
+
+                input.addEventListener("blur", () => {
+                    const newValue = input.value.trim();
+                    sendUpdate(deviceId, column, newValue, cell, currentText);
+                });
+
+                input.addEventListener("keydown", e => {
+                    if (e.key === "Enter") input.blur();
+                    if (e.key === "Escape") this.textContent = currentText;
+                });
+
+                this.textContent = "";
+                this.appendChild(input);
+                input.focus();
+            }
+        });
+    });
+}

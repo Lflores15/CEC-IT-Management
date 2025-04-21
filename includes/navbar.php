@@ -79,6 +79,7 @@ if (array_key_exists($currentPage, $pageTitles)) {
         </div>
         <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'admin'): ?>
             <a href="../Users/user_Dashboard.php" class="<?php echo ($currentPage == 'users') ? 'active' : ''; ?>">Users</a>
+            <a href="/Forms/Employees/employee_Dashboard.php" class="<?php echo ($currentPage == 'employees') ? 'active' : ''; ?>">Employees</a>
             <a href="../Admin/log_dashboard.php" class="<?php echo ($currentPage == 'logs') ? 'active' : ''; ?>">Logs</a>
         <?php endif; ?>
         <a href="../Settings/settings.php" class="<?php echo ($currentPage == 'settings') ? 'active' : ''; ?>">Settings</a>

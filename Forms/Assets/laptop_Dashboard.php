@@ -67,6 +67,7 @@ $conn->close();
 </head>
 <body>
 <div class="main-layout">
+    <h1>Laptops Dashboard</h1>
     <div class="filters-container">
         <button id="edit-mode-btn" class="edit-mode-btn">Edit Table</button>
         <button id="cancel-edit-btn" class="cancel-edit-btn" style="display: none;">Cancel</button>
@@ -75,20 +76,24 @@ $conn->close();
         <button id="edit-columns-btn" class="edit-columns-btn">Edit Columns</button>
         <button id="delete-selected-btn" class="delete-btn" style="display: none;">Delete Selected</button>
 
-        <div id="column-selector" class="modal" style="display: none;">
-<div class="laptop-modal-content">
-                <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
-                <form id="column-form">
-                    <h3>Select Visible Columns</h3>
-                     <?php foreach ($default_columns as $key => $label): ?>
-                        <label style="display: block; margin-bottom: 5px;">
-                            <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
-                            <?= htmlspecialchars($label) ?>
-                        </label>
-                    <?php endforeach; ?>
-    <button type="submit">Apply</button>
-</form>
+        <div id="column-selector" class="modal">
+          <div class="laptop-modal-content">
+              <div class="laptop-modal-header">
+              <h2 style="margin: 0;">Edit Visible Columns</h2>
+              <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
             </div>
+            <form id="column-form">
+              <div>
+                <?php foreach ($default_columns as $key => $label): ?>
+                  <label style="display: block; margin-bottom: 8px; font-size: 15px;">
+                    <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
+                    <?= htmlspecialchars($label) ?>
+                  </label>
+                <?php endforeach; ?>
+              </div>
+              <button type="submit">Apply</button>
+            </form>
+          </div>
         </div>
 
         <div class="filters">
@@ -198,7 +203,7 @@ $conn->close();
     });
 </script>
   <!-- Create Device Modal -->
-  <div id="create-device-modal" class="laptop-modal-content-wrapper">
+  <div id="create-device-modal" class="modal create-device-modal" style="display: none;">
     <div class="laptop-modal-content">
       <div class="laptop-modal-header">
         <h2>Create New Laptop</h2>

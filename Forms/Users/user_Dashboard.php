@@ -22,6 +22,7 @@ $result = $conn->query($query);
     <title>Manage Users</title>
     <link rel="stylesheet" href="/Assets/styles.css">
 </head>
+<h1>Manage Users</h1>
 <?php if (isset($_GET['created']) && $_GET['created'] == 1): ?>
     <script>
         alert("✅ User created successfully!");
