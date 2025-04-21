@@ -56,17 +56,18 @@ if (array_key_exists($currentPage, $pageTitles)) {
         <h2><?php echo $pageTitle; ?></h2>
         <a href="../Dashboard/dashboard.php" class="<?php echo ($currentPage == 'dashboard') ? 'active' : ''; ?>">Dashboard</a>
 
-        <!-- Working Dropdown -->
         <div class="dropdown">
-            <button class="dropdown-btn">Assets</button>
-            <div class="dropdown-content">
-                <a href="/../Forms/Dashboard/laptop_Dashboard.php" class="<?php echo ($currentPage == 'laptop_Dashboard') ? 'active' : ''; ?>">Laptops</a>
-            </div>
+        <button class="dropdown-btn">Assets</button>
+        <div class="dropdown-content">
+            <a href="../Dashboard/laptop_Dashboard.php">Laptops</a>
+        </div>
         </div>
 
-        <a href="../Users/user_Dashboard.php" class="<?php echo ($currentPage == 'user_Dashboard') ? 'active' : ''; ?>">Users</a>
-        <a href="../../Forms/Admin/log_dashboard.php" class="<?php echo ($currentPage == 'logs') ? 'active' : ''; ?>">Logs</a>
-        <a href="../Settings/settings.php" class="<?php echo ($currentPage == 'settings') ? 'active' : ''; ?>">Settings</a>
+        <a href="../Dashboard/employee_Dashboard.php">Employees</a>
+        <a href="../Users/user_Dashboard.php">Users</a>
+        <a href="../Admin/log_dashboard.php">Logs</a>
+        <a href="../Settings/settings.php">Settings</a>
+
     </div>
 
     <!-- Main Content Wrapper -->
