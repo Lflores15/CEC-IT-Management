@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once "../../PHP/config.php";
 
 // Get inputs
@@ -69,6 +70,20 @@ if (!$stmt) {
 $stmt->bind_param("si", $value, $recordId);
 
 if ($stmt->execute()) {
+    $username = $_SESSION['username'] ?? 'unknown';
+    // Fetch asset tag for logging if device_id is known
+    $logAssetTag = 'unknown';
+    if (!empty($deviceId)) {
+        $tagQuery = $conn->prepare("SELECT asset_tag FROM Devices WHERE device_id = ?");
+        $tagQuery->bind_param("i", $deviceId);
+        $tagQuery->execute();
+        $tagQuery->bind_result($logAssetTag);
+        $tagQuery->fetch();
+        $tagQuery->close();
+    }
+
+    $logMessage = "[" . date("Y-m-d H:i:s") . "] [UPDATE] [$username] Updated $table - $column set to '$value' for asset tag: $logAssetTag\n";
+    file_put_contents("../../Logs/device_event_log.txt", $logMessage, FILE_APPEND);
     echo "success";
 
     // Handle decommission logic
