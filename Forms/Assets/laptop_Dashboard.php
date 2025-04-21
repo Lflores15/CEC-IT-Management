@@ -69,31 +69,36 @@ $conn->close();
 </head>
 <body>
 <div class="main-layout">
+    <h1>Laptops Dashboard</h1>
     <div class="filters-container">
+        <button id="edit-mode-btn" class="edit-mode-btn">Edit Table</button>
+        <button id="cancel-edit-btn" class="cancel-edit-btn" style="display: none;">Cancel</button>
         <button id="openImportLaptopModal" class="import-btn">Import CSV</button>
         <button id="open-create-modal" class="create-device-btn">+ Create Device</button>
-        <button id="edit-mode-btn" class="edit-mode-btn">Edit Table</button>
         <button id="edit-columns-btn" class="edit-columns-btn">Edit Columns</button>
         <button id="delete-selected-btn" class="delete-btn" style="display: none;">Delete Selected</button>
 
-        <div id="column-selector" class="modal" style="display: none;">
-<div class="laptop-modal-content">
-                <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
-                <form id="column-form">
-                    <h3>Select Visible Columns</h3>
-                     <?php foreach ($default_columns as $key => $label): ?>
-                        <label style="display: block; margin-bottom: 5px;">
-                            <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
-                            <?= htmlspecialchars($label) ?>
-                        </label>
-                    <?php endforeach; ?>
-    <button type="submit">Apply</button>
-</form>
+        <div id="column-selector" class="modal">
+          <div class="laptop-modal-content">
+              <div class="laptop-modal-header">
+              <h2 style="margin: 0;">Edit Visible Columns</h2>
+              <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
             </div>
+            <form id="column-form">
+              <div>
+                <?php foreach ($default_columns as $key => $label): ?>
+                  <label style="display: block; margin-bottom: 8px; font-size: 15px;">
+                    <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
+                    <?= htmlspecialchars($label) ?>
+                  </label>
+                <?php endforeach; ?>
+              </div>
+              <button type="submit">Apply</button>
+            </form>
+          </div>
         </div>
 
         <div class="filters">
-            <input type="text" id="filter-name" placeholder="Filter by Name">
             <input type="text" id="filter-tag" placeholder="Filter by Asset Tag">
         </div>
         <div class="filters">
@@ -178,7 +183,7 @@ $conn->close();
                 })
                 .then(response => response.json())
                 .then(data => {
-                    resultMessage.textContent = data.message;
+                    resultMessage.innerHTML = data.message.replace(/\|/g, "<br>");
                     resultMessage.style.display = "block";
                     resultMessage.style.color = data.status === "success" ? "green" : "red";
                 })
@@ -199,4 +204,49 @@ $conn->close();
         }
     });
 </script>
+  <!-- Create Device Modal -->
+  <div id="create-device-modal" class="modal create-device-modal" style="display: none;">
+    <div class="laptop-modal-content">
+      <div class="laptop-modal-header">
+        <h2>Create New Laptop</h2>
+        <span id="close-create-modal" class="close">&times;</span>
+      </div>
+      <form id="create-device-form" method="post" action="create_laptop.php">
+        <fieldset>
+          <legend>Device Info</legend>
+ 
+          <label>Status:
+            <select name="status">
+              <option value="Active">Active</option>
+              <option value="Pending Return">Pending Return</option>
+              <option value="Shelf">Shelf</option>
+              <option value="Lost">Lost</option>
+              <option value="Decommissioned">Decommissioned</option>
+            </select>
+          </label>
+ 
+          <label>Internet Policy:
+            <select name="internet_policy">
+              <option value="admin">Admin</option>
+              <option value="default">Default</option>
+              <option value="office">Office</option>
+            </select>
+          </label>
+ 
+          <label>Asset Tag: <input type="text" name="asset_tag" required></label>
+          <label>Login ID: <input type="text" name="login_id"></label>
+          <label>First Name: <input type="text" name="first_name"></label>
+          <label>Last Name: <input type="text" name="last_name"></label>
+          <label>Employee ID: <input type="text" name="employee_id"></label>
+          <label>Phone Number: <input type="text" name="phone_number"></label>
+          <label>CPU: <input type="text" name="cpu"></label>
+          <label>RAM (GB): <input type="number" name="ram"></label>
+          <label>OS: <input type="text" name="os"></label>
+ 
+        </fieldset>
+        <button type="submit">Submit</button>
+      </form>
+      <p id="create-result-message" style="margin-top: 10px; display: none;"></p>
+    </div>
+  </div>
 </html>

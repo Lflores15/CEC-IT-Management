@@ -5,6 +5,13 @@ body {
     background-color: #f4f4f4;
 }
 
+h1 {
+    font-size: 2rem;
+    text-align: center;
+    color: #333;
+    margin: 20px 0;
+}
+
 h2 {
     text-align: center;
 }
@@ -664,8 +671,8 @@ th.sortable.desc::after {
 }
 
 .create-device-modal {
-    width: 1000px;
-    max-width: 90%;
+    width: 1100px;
+    max-width: 95%;
     background: #fff;
     border-radius: 12px;
     padding: 20px 30px;
@@ -1262,4 +1269,80 @@ th.sortable.desc::after {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+}
+/* Modal styling for create-device-modal */
+#create-device-modal.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 500px;
+}
+
+#create-device-modal .laptop-modal-content {
+    position: relative;
+    max-width: 600px;
+    padding: 30px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+/* Column Selector Modal Styles */
+#column-selector {
+    display: none;
+    padding: 10px;
+    width: 600px;
+    max-width: 95%;
+}
+
+#column-selector .laptop-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+#column-form {
+    text-align: left;
+    padding: 10px 0;
+}
+
+#column-form > div {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+#column-form button {
+    width: 100%;
+    padding: 10px;
+    font-weight: bold;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+}
+#column-selector .laptop-modal-content {
+    max-width: 100%;
+    width: 100%;
+}
+
+#cancel-edit-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+#cancel-edit-btn:hover {
+    background-color: #c82333;
 }
