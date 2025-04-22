@@ -351,14 +351,15 @@ h2 {
 .device-table th {
     background: #007bff;
     color: white;
-    padding: 10px;
+    padding-top: 10px;
     position: relative;
+    text-align: left;
 }
 
 .device-table td {
     padding: 10px;
     border-bottom: 1px solid #ddd;
-    text-align: center;
+    text-align: left;
 }
 
 .device-table tr:hover {
@@ -372,7 +373,6 @@ h2 {
 
 th.sortable {
     cursor: pointer;
-    padding-right: 20px;
 }
 
 th.sortable::after {
@@ -406,6 +406,21 @@ th.sortable.desc::after {
 .device-table tbody tr:hover {
     background-color: #eaf4ff;
     transition: background-color 0.2s;
+}
+
+#employee-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    padding: 10px;
+    border: 2px solid #007bff;
+}
+
+#employee-table th {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    text-align: left;
 }
 
 .create-device-btn{
@@ -1471,4 +1486,12 @@ th.sortable.desc::after {
 
 #auditLaptopModal button#runAuditBtn:hover {
     background-color: #0056b3;
+}
+
+.filter-header th {
+    margin: 0 !important;
+    border-top: none;
+    background: #007bff;
+    color: white;
+    padding-bottom: 10px;
 }
