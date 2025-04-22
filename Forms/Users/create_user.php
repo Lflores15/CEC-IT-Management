@@ -46,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("ssss", $username, $email, $password, $role);
 
     if ($stmt->execute()) {
-        logUserEvent("CREATE_USER", "User '$username' was created by " . $_SESSION['username'], $_SESSION['username']); 
+        logUserEvent("CREATE_USER", "User '$username' was created by"); 
         $stmt->close();
         header("Location: user_Dashboard.php?created=1");
         exit();

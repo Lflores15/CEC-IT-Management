@@ -14,7 +14,7 @@ if (isset($_GET['id'])) {
 
     // Optional: Prevent deleting your own account
     if ($_SESSION["user_id"] == $user_id) {
-        logUserEvent("DELETE_USER_FAIL", "Admin attempted to delete their own account", $_SESSION["username"]);
+        logUserEvent("DELETE_USER_FAIL", "Admin attempted to delete their own account");
         header("Location: user_Dashboard.php?error=cannot_delete_self");
         exit();
     }
@@ -28,7 +28,7 @@ if (isset($_GET['id'])) {
     $userQuery->close();
 
     if (empty($deleted_username)) {
-        logUserEvent("DELETE_USER_FAIL", "Attempted to delete non-existent user ID $user_id", $_SESSION["username"]);
+        logUserEvent("DELETE_USER_FAIL", "Attempted to delete non-existent user ID $user_id");
         header("Location: user_Dashboard.php?error=user_not_found");
         exit();
     }
@@ -41,13 +41,13 @@ if (isset($_GET['id'])) {
 
     $stmt->bind_param("i", $user_id);
     if ($stmt->execute()) {
-        logUserEvent("DELETE_USER", "User $deleted_username was deleted by admin", $_SESSION["username"]);
+        logUserEvent("DELETE_USER", "User '$deleted_username' was deleted by admin");
         $stmt->close();
         $conn->close();
         header("Location: user_Dashboard.php?deleted=1");
         exit();
     } else {
-        logUserEvent("DELETE_USER_FAIL", "Failed to delete user $deleted_username", $_SESSION["username"]);
+        logUserEvent("DELETE_USER_FAIL", "Failed to delete user $deleted_username");
         $stmt->close();
         $conn->close();
         header("Location: user_Dashboard.php?error=delete_failed");
