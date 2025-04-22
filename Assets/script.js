@@ -1,3 +1,123 @@
+document.addEventListener("DOMContentLoaded", function () {
+  const runAuditBtn = document.getElementById("runAuditBtn");
+  const auditFileInput = document.getElementById("auditCsvFile");
+
+  if (runAuditBtn && auditFileInput) {
+    runAuditBtn.addEventListener("click", () => {
+      const file = auditFileInput.files[0];
+      if (!file) return alert("Please select a CSV file to audit.");
+
+      const formData = new FormData();
+      formData.append("csv_file", file);
+
+      fetch("/Forms/Assets/audit_table.php", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.text()) // read as raw text first
+      .then(text => {
+        try {
+          const data = JSON.parse(text); // parse JSON safely
+          if (data.success) {
+            alert("Audit complete. Refreshing...");
+            location.reload();
+          } else {
+            alert("Audit failed: " + data.message);
+          }
+        } catch (err) {
+          console.error("Invalid JSON response:", text);
+          alert("Audit failed: Invalid response format.");
+        }
+      })
+      .catch(err => {
+        alert("An error occurred: " + err);
+      });
+    });
+  }
+});
+// Audit Laptop Modal logic
+document.addEventListener("DOMContentLoaded", function () {
+  const auditModal = document.getElementById("auditLaptopModal");
+  const openAuditBtn = document.getElementById("audit-laptop-btn");
+  const closeAuditBtn = document.getElementById("closeAuditLaptopModal");
+
+  if (auditModal && openAuditBtn && closeAuditBtn) {
+    openAuditBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      auditModal.style.display = "block";
+    });
+
+    closeAuditBtn.addEventListener("click", function () {
+      auditModal.style.display = "none";
+    });
+
+    window.addEventListener("click", function (event) {
+      if (event.target === auditModal) {
+        auditModal.style.display = "none";
+      }
+    });
+  }
+});
+// ========== Delete Selected Devices and Undo Delete ==========
+document.addEventListener("DOMContentLoaded", function () {
+    const deleteBtn = document.getElementById("delete-selected-btn");
+    // Add deleteInProgress variable to prevent double prompts
+    let deleteInProgress = false;
+    if (deleteBtn) {
+        deleteBtn.addEventListener("click", function () {
+            if (deleteBtn.disabled || deleteInProgress) return;
+            deleteInProgress = true;
+            const checkboxes = document.querySelectorAll(".row-checkbox:checked");
+            if (!checkboxes.length) {
+                alert("Please select devices to delete.");
+                deleteInProgress = false;
+                return;
+            }
+            if (!confirm("Are you sure you want to delete the selected devices?")) {
+                deleteInProgress = false;
+                return;
+            }
+            const ids = Array.from(checkboxes).map(cb => cb.value);
+            deleteBtn.disabled = true;
+            fetch("delete_laptop.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ device_ids: ids })
+            })
+            .then(res => res.text())
+            .then(msg => {
+                alert(msg);
+                location.reload();
+            })
+            .catch(err => {
+                alert("Delete failed: " + err);
+                deleteBtn.disabled = false;
+            })
+            .finally(() => {
+                deleteInProgress = false;
+            });
+        });
+    }
+    // Undo Last Delete button
+    const undoBtn = document.getElementById("undo-delete-btn");
+    if (undoBtn) {
+        let undoInProgress = false;
+        undoBtn.addEventListener("click", () => {
+            if (undoInProgress) return;
+            undoInProgress = true;
+            fetch("undo_delete.php")
+                .then(res => res.text())
+                .then(msg => {
+                    alert(msg);
+                    location.reload();
+                })
+                .catch(err => alert("Undo failed: " + err))
+                .finally(() => {
+                    undoInProgress = false;
+                });
+        });
+    }
+});
 // ========== Script Initialization & UI Interaction Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
     console.log("JavaScript Loaded ✅");
@@ -83,28 +203,28 @@ tables.forEach((table) => {
     const filterCategory = document.getElementById("filter-category");
     const filterStatus = document.getElementById("filter-status");
 
+    // Updated: Filter table dynamically for Asset Tag and Status columns
     function filterTable() {
-        // Apply filters based on input values
-        tables.forEach(table => {
-            const rows = table.querySelectorAll("tbody tr");
+        const headers = document.querySelectorAll("#device-table thead th");
+        // Find column indexes by header label
+        const tagIndex = Array.from(headers).findIndex(th => th.textContent.trim() === "Asset Tag");
+        const statusIndex = Array.from(headers).findIndex(th => th.textContent.trim() === "Status");
 
-            rows.forEach(row => {
-                const cells = row.cells;
+        const tagValue = filterTag?.value?.toLowerCase() || "";
+        const statusValue = filterStatus?.value?.toLowerCase() || "";
 
-                if (!cells.length) return;
+        document.querySelectorAll("#device-table tbody tr").forEach(row => {
+            const cells = row.cells;
+            if (!cells.length) return;
 
-                const name = cells[0].textContent.toLowerCase();
-                const tag = cells[1].textContent.toLowerCase();
-                const category = cells[2].textContent.toLowerCase();
-                const status = cells[11].textContent.toLowerCase(); 
+            const tag = cells[tagIndex]?.textContent.toLowerCase() || "";
+            const status = cells[statusIndex]?.textContent.toLowerCase() || "";
 
-                const nameMatch = filterName.value === "" || name.includes(filterName.value.toLowerCase());
-                const tagMatch = filterTag.value === "" || tag.includes(filterTag.value.toLowerCase());
-                const categoryMatch = filterCategory.value === "" || category.includes(filterCategory.value.toLowerCase());
-                const statusMatch = filterStatus.value === "" || status.includes(filterStatus.value.toLowerCase());
+            const tagMatch = tagValue === "" || tag.includes(tagValue);
+            // "status" option (default) acts as "All"
+            const statusMatch = statusValue === "status" || status.includes(statusValue);
 
-                row.style.display = nameMatch && tagMatch && categoryMatch && statusMatch ? "" : "none";
-            });
+            row.style.display = tagMatch && statusMatch ? "" : "none";
         });
     }
 
@@ -367,26 +487,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.addEventListener("DOMContentLoaded", function () {
     // Toggle inline edit mode for table rows and handle click-to-edit behavior
-const editBtn = document.getElementById("edit-mode-btn");
-const cancelEditBtn = document.getElementById("cancel-edit-btn");
-let originalTableHTML = null;
+    const editBtn = document.getElementById("edit-mode-btn");
+    const cancelEditBtn = document.getElementById("cancel-edit-btn");
+    let originalTableHTML = null;
     const deleteBtn = document.getElementById("delete-selected-btn");
+    const undoBtn = document.getElementById("undo-delete-btn");
     let editing = false;
 
     // Toggle editing mode
     editBtn.addEventListener("click", () => {
         editing = !editing;
         document.body.classList.toggle("editing-mode", editing);
- 
+
+        // Always add .editable-cell class and enable/disable checkboxes
+        document.querySelectorAll(".device-table td").forEach(cell => {
+            cell.classList.add("editable-cell");
+        });
+        document.querySelectorAll(".row-checkbox").forEach(cb => cb.disabled = !editing);
+
         if (editing) {
             originalTableHTML = document.querySelector(".device-table tbody").innerHTML;
             editBtn.textContent = "Save Table";
             cancelEditBtn.style.display = "inline-block";
             if (deleteBtn) deleteBtn.style.display = "inline-block";
+            if (undoBtn) undoBtn.style.display = "inline-block";
         } else {
+            // Remove editable-cell class and disable checkboxes when exiting edit mode
+            document.querySelectorAll(".device-table td").forEach(cell => {
+                cell.classList.remove("editable-cell");
+            });
+            document.querySelectorAll(".row-checkbox").forEach(cb => cb.disabled = true);
             editBtn.textContent = "Edit Table";
             cancelEditBtn.style.display = "none";
             if (deleteBtn) deleteBtn.style.display = "none";
+            if (undoBtn) undoBtn.style.display = "none";
             bindRowEvents();
         }
     });
@@ -401,6 +535,7 @@ let originalTableHTML = null;
             editBtn.textContent = "Edit Table";
             cancelEditBtn.style.display = "none";
             if (deleteBtn) deleteBtn.style.display = "none";
+            if (undoBtn) undoBtn.style.display = "none";
 
             // Re-enable double click handlers on reverted rows
             document.querySelectorAll(".clickable-row").forEach(row => {
@@ -509,41 +644,51 @@ let originalTableHTML = null;
 document.addEventListener("DOMContentLoaded", function () {
     // Handle Create Device modal open, close, and form submission
     const openBtn = document.getElementById("open-create-modal");
-    const modal = document.getElementById("create-device-modal");
+    const modal = document.querySelector(".create-device-modal");
     const closeBtn = document.getElementById("close-create-modal");
     const form = document.getElementById("create-device-form");
 
-    openBtn.onclick = () => modal.style.display = "block";
-    closeBtn.onclick = () => modal.style.display = "none";
-    window.onclick = e => {
-        if (e.target === modal) modal.style.display = "none";
-    };
-
-    form.addEventListener("submit", function (e) {
-        e.preventDefault();
-        const formData = new FormData(form);
-
-        fetch("create_laptop.php", {
-            method: "POST",
-            body: formData
-        })
-        .then(res => res.text())
-        .then(response => {
-            const result = document.getElementById("create-result-message");
-            if (response.toLowerCase().includes("success")) {
-                result.textContent = response;
-                result.style.color = "green";
-                modal.style.display = "none";
-                form.reset();
-                location.reload();
-            } else {
-                result.textContent = response;
-                result.style.color = "red";
-                result.style.display = "block";
+    if (openBtn && closeBtn && modal && form) {
+        openBtn.onclick = () => {
+            if (modal.style.display !== "block") {
+                modal.style.display = "block";
             }
-        })
-        .catch(err => alert("Error: " + err));
-    });
+        };
+        closeBtn.onclick = () => {
+            if (modal.style.display !== "none") {
+                modal.style.display = "none";
+            }
+        };
+        window.addEventListener("click", function (e) {
+            if (e.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+            fetch("create_laptop.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.text())
+            .then(response => {
+                const result = document.getElementById("create-result-message");
+                if (response.toLowerCase().includes("success")) {
+                    result.textContent = response;
+                    result.style.color = "green";
+                    modal.style.display = "none";
+                    form.reset();
+                    location.reload();
+                } else {
+                    result.textContent = response;
+                    result.style.color = "red";
+                    result.style.display = "block";
+                }
+            })
+            .catch(err => alert("Error: " + err));
+        });
+    }
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -552,6 +697,9 @@ document.addEventListener("DOMContentLoaded", function () {
         internet_policy: ['Admin', 'Default', 'Office'],
         assigned_to: window.employeeOptions || []  // will be injected from PHP
     };
+
+    // 1. Add a new object to store pending edits
+    let pendingEdits = {};
 
     // Enable inline editing for supported fields (dropdown or text input)
     document.querySelectorAll(".device-table td").forEach(cell => {
@@ -591,7 +739,10 @@ document.addEventListener("DOMContentLoaded", function () {
             
                 select.addEventListener("blur", () => {
                     const newValue = select.value;
-                    sendUpdate(deviceId, column, newValue, cell, currentText);
+                    // 2. Store pending edit instead of sending update
+                    if (!pendingEdits[deviceId]) pendingEdits[deviceId] = {};
+                    pendingEdits[deviceId][column] = newValue;
+                    cell.textContent = newValue;
                 });
             
                 this.textContent = "";
@@ -606,7 +757,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 input.addEventListener("blur", () => {
                     const newValue = input.value.trim();
-                    sendUpdate(deviceId, column, newValue, cell, currentText);
+                    // 2. Store pending edit instead of sending update
+                    if (!pendingEdits[deviceId]) pendingEdits[deviceId] = {};
+                    pendingEdits[deviceId][column] = newValue;
+                    cell.textContent = newValue;
                 });
 
                 input.addEventListener("keydown", e => {
@@ -619,29 +773,142 @@ document.addEventListener("DOMContentLoaded", function () {
                 input.focus();
             }
         });
-
-        
     });
 
-    function sendUpdate(deviceId, column, value, cell, fallbackText) {
-        // Send updated cell data to server and handle UI feedback
-        fetch("update_cell.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `device_id=${encodeURIComponent(deviceId)}&column=${encodeURIComponent(column)}&value=${encodeURIComponent(value)}`
-        })
-        .then(res => res.text())
-        .then(response => {
-            if (response === "success") {
-                cell.textContent = value;
-            } else {
-                cell.textContent = fallbackText;
-                alert("Update failed.");
+    // 3. Modify the "Save Table" button logic
+    const editBtn = document.getElementById("edit-mode-btn");
+    const cancelEditBtn = document.getElementById("cancel-edit-btn");
+    const deleteBtn = document.getElementById("delete-selected-btn");
+    let originalTableHTML = null;
+    let editing = false;
+
+    editBtn.addEventListener("click", () => {
+        editing = !editing;
+        document.body.classList.toggle("editing-mode", editing);
+
+        if (editing) {
+            originalTableHTML = document.querySelector(".device-table tbody").innerHTML;
+            editBtn.textContent = "Save Table";
+            cancelEditBtn.style.display = "inline-block";
+            if (deleteBtn) deleteBtn.style.display = "inline-block";
+        } else {
+            editBtn.textContent = "Edit Table";
+            cancelEditBtn.style.display = "none";
+            if (deleteBtn) deleteBtn.style.display = "none";
+            // Submit all pending edits
+            const promises = [];
+            for (const deviceId in pendingEdits) {
+                for (const column in pendingEdits[deviceId]) {
+                    const value = pendingEdits[deviceId][column];
+                    promises.push(fetch("update_cell.php", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: `device_id=${encodeURIComponent(deviceId)}&column=${encodeURIComponent(column)}&value=${encodeURIComponent(value)}`
+                    }));
+                }
             }
-        })
-        .catch(() => {
-            cell.textContent = fallbackText;
-            alert("Error contacting server.");
+            Promise.all(promises).then(() => location.reload());
+        }
+    });
+
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener("click", () => {
+            if (originalTableHTML) {
+                document.querySelector(".device-table tbody").innerHTML = originalTableHTML;
+            }
+            editing = false;
+            document.body.classList.remove("editing-mode");
+            editBtn.textContent = "Edit Table";
+            cancelEditBtn.style.display = "none";
+            if (deleteBtn) deleteBtn.style.display = "none";
+
+            // Re-enable double click handlers on reverted rows
+            document.querySelectorAll(".clickable-row").forEach(row => {
+                row.addEventListener("dblclick", function (e) {
+                    const isEditing = document.body.classList.contains("editing-mode");
+                    const href = this.getAttribute("data-href");
+                    if (!isEditing && href) {
+                        window.location.href = href;
+                    } else {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
+            });
+
+            // Rebind inline editing after cancel
+            document.querySelectorAll(".device-table td").forEach(cell => {
+                cell.addEventListener("dblclick", function (e) {
+                    if (!document.body.classList.contains("editing-mode")) return;
+                    if (this.querySelector("input, select")) return;
+                    e.stopPropagation();
+
+                    const column = this.getAttribute("data-column");
+                    const deviceId = this.getAttribute("data-id");
+                    const currentText = this.textContent.trim();
+
+                    if (!column || !deviceId) return;
+
+                    if (selectOptions[column?.toLowerCase()]) {
+                        const select = document.createElement("select");
+                        select.className = "inline-edit-select";
+
+                        if (column === "assigned_to") {
+                            selectOptions[column.toLowerCase()].forEach(opt => {
+                                const option = document.createElement("option");
+                                option.value = opt.id;
+                                option.textContent = opt.name;
+                                const currentId = cell.getAttribute('data-emp-id');
+                                if (opt.name === currentText) option.selected = true;
+                                select.appendChild(option);
+                            });
+                        } else {
+                            selectOptions[column.toLowerCase()].forEach(opt => {
+                                const option = document.createElement("option");
+                                option.value = opt;
+                                option.textContent = opt;
+                                if (opt.toLowerCase() === currentText.toLowerCase()) option.selected = true;
+                                select.appendChild(option);
+                            });
+                        }
+
+                        select.addEventListener("blur", () => {
+                            const newValue = select.value;
+                            if (!pendingEdits[deviceId]) pendingEdits[deviceId] = {};
+                            pendingEdits[deviceId][column] = newValue;
+                            cell.textContent = newValue;
+                        });
+
+                        this.textContent = "";
+                        this.appendChild(select);
+                        select.focus();
+                    } else {
+                        const input = document.createElement("input");
+                        input.type = "text";
+                        input.value = currentText;
+                        input.className = "inline-edit-input";
+
+                        input.addEventListener("blur", () => {
+                            const newValue = input.value.trim();
+                            if (!pendingEdits[deviceId]) pendingEdits[deviceId] = {};
+                            pendingEdits[deviceId][column] = newValue;
+                            cell.textContent = newValue;
+                        });
+
+                        input.addEventListener("keydown", e => {
+                            if (e.key === "Enter") input.blur();
+                            if (e.key === "Escape") this.textContent = currentText;
+                        });
+
+                        this.textContent = "";
+                        this.appendChild(input);
+                        input.focus();
+                    }
+                });
+            });
+
+            // 4. Clear unsaved changes
+            pendingEdits = {};
         });
     }
 });

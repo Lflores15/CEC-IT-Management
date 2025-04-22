@@ -54,58 +54,69 @@ foreach ($logFiles as $file => $label) {
 <body>
 <div class="asset-content-user">
     <h2>System Event Logs</h2>
+    <div class="log-scroll-container">
+        <div class="log-tables-scrollable">
+            <?php if (!empty($userLogEntries)): ?>
+                <div class="log-table-wrapper">
+                    <h3>User Event Logs</h3>
+                    <div class="log-table-scrollable">
+                        <table class="user-table" id="userLogTable">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortTable(0, 'userLogTable')">Username</th>
+                                    <th onclick="sortTable(1, 'userLogTable')">Event Type</th>
+                                    <th onclick="sortTable(2, 'userLogTable')">Timestamp</th>
+                                    <th onclick="sortTable(3, 'userLogTable')">Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($userLogEntries as $entry): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($entry['user']); ?></td>
+                                        <td><?php echo htmlspecialchars($entry['type']); ?></td>
+                                        <td><?php echo htmlspecialchars($entry['timestamp']); ?></td>
+                                        <td><?php echo htmlspecialchars($entry['message']); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <?php endif; ?>
 
-    <?php if (!empty($userLogEntries)): ?>
-        <h3>User Event Logs</h3>
-        <table class="user-table" id="userLogTable">
-            <thead>
-                <tr>
-                    <th onclick="sortTable(0, 'userLogTable')">Username</th>
-                    <th onclick="sortTable(1, 'userLogTable')">Event Type</th>
-                    <th onclick="sortTable(2, 'userLogTable')">Timestamp</th>
-                    <th onclick="sortTable(3, 'userLogTable')">Message</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($userLogEntries as $entry): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($entry['user']); ?></td>
-                        <td><?php echo htmlspecialchars($entry['type']); ?></td>
-                        <td><?php echo htmlspecialchars($entry['timestamp']); ?></td>
-                        <td><?php echo htmlspecialchars($entry['message']); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php endif; ?>
+            <?php if (!empty($deviceLogEntries)): ?>
+                <div class="log-table-wrapper">
+                    <h3>Device Event Logs</h3>
+                    <div class="log-table-scrollable">
+                        <table class="user-table" id="deviceLogTable">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortTable(0, 'deviceLogTable')">Username</th>
+                                    <th onclick="sortTable(1, 'deviceLogTable')">Event Type</th>
+                                    <th onclick="sortTable(2, 'deviceLogTable')">Timestamp</th>
+                                    <th onclick="sortTable(3, 'deviceLogTable')">Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($deviceLogEntries as $entry): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($entry['user']); ?></td>
+                                        <td><?php echo htmlspecialchars($entry['type']); ?></td>
+                                        <td><?php echo htmlspecialchars($entry['timestamp']); ?></td>
+                                        <td><?php echo htmlspecialchars($entry['message']); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <?php endif; ?>
 
-    <?php if (!empty($deviceLogEntries)): ?>
-        <h3>Device Event Logs</h3>
-        <table class="user-table" id="deviceLogTable">
-            <thead>
-                <tr>
-                    <th onclick="sortTable(0, 'deviceLogTable')">Username</th>
-                    <th onclick="sortTable(1, 'deviceLogTable')">Event Type</th>
-                    <th onclick="sortTable(2, 'deviceLogTable')">Timestamp</th>
-                    <th onclick="sortTable(3, 'deviceLogTable')">Message</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($deviceLogEntries as $entry): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($entry['user']); ?></td>
-                        <td><?php echo htmlspecialchars($entry['type']); ?></td>
-                        <td><?php echo htmlspecialchars($entry['timestamp']); ?></td>
-                        <td><?php echo htmlspecialchars($entry['message']); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php endif; ?>
-
-    <?php if (empty($userLogEntries) && empty($deviceLogEntries)): ?>
-        <p>No log entries found.</p>
-    <?php endif; ?>
+            <?php if (empty($userLogEntries) && empty($deviceLogEntries)): ?>
+                <p>No log entries found.</p>
+            <?php endif; ?>
+        </div>
+    </div>
 </div>
 
 <script>
