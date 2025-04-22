@@ -1,4 +1,34 @@
-/* General Styles */
+.log-table-scrollable {
+    max-height: 800px;
+    overflow-y: auto;
+}
+
+.log-table-wrapper table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #28a745;
+    z-index: 2;
+}
+
+#deviceLogTable thead th {
+    background-color: #28a745; /* match device log table header */
+}
+.log-scroll-container {
+    max-width: 100%;
+    padding-bottom: 20px;
+}
+
+.log-tables-scrollable {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    min-width: 1200px;
+}
+
+.log-table-wrapper {
+    flex: 1 1 50%;
+    min-width: 550px;
+}
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -6,11 +36,21 @@ body {
     background-color: #f4f4f4;
 }
 
+h1 {
+    font-size: 2rem;
+    text-align: center;
+    color: #333;
+    margin: 20px 0;
+}
+
 h2 {
     text-align: center;
 }
 
-/* Top Navbar */
+
+/* =========================================
+   Top Navbar
+========================================= */
 .top-navbar {
     position: fixed;
     top: 0;
@@ -25,7 +65,6 @@ h2 {
     z-index: 1000;
 }
 
-/* Navbar Content */
 .top-navbar .logo {
     height: 40px;
     margin-right: auto;
@@ -44,7 +83,9 @@ h2 {
     border-radius: 5px;
 }
 
-/* Profile Dropdown */
+/* =========================================
+   Profile Dropdown
+========================================= */
 .profile-dropdown {
     position: relative;
     margin-right: 30px;
@@ -56,32 +97,57 @@ h2 {
     border: none;
     cursor: pointer;
     font-size: 16px;
-    padding: 10px;
+    padding: 10px 15px;
     display: flex;
     align-items: center;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.profile-btn:hover,
+.profile-btn:focus {
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
 }
 
 .profile-dropdown-content {
     display: none;
     position: absolute;
-    top: 100%;
+    top: calc(100% + 10px);
     right: 0;
-    background: white;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    background: #ffffff;
+    min-width: 180px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
     z-index: 1000;
-    border-radius: 5px;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-/* Show Dropdown */
+.profile-dropdown-content a {
+    display: block;
+    padding: 12px 16px;
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.profile-dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Toggle visibility */
 .profile-dropdown.active .profile-dropdown-content {
     display: block;
 }
-
-/* Sidebar */
+/* =========================================
+   Sidebar
+========================================= */
 .sidebar {
     position: fixed;
     top: 60px;
+    left: 0;
     width: 200px;
     height: calc(100% - 60px);
     background: #2d3e50;
@@ -89,9 +155,9 @@ h2 {
     padding: 20px;
     display: flex;
     flex-direction: column;
+    z-index: 999;
 }
 
-/* Sidebar Links */
 .sidebar a {
     color: white;
     text-decoration: none;
@@ -104,7 +170,6 @@ h2 {
     background: #0056b3;
 }
 
-/* Sidebar Dropdown */
 .dropdown {
     position: relative;
     display: block;
@@ -121,41 +186,114 @@ h2 {
     align-items: center;
 }
 
-/* Sidebar Dropdown Hover */
 .dropdown-btn:hover {
     background: #0056b3;
     width: 100%;
     border-radius: 5px;
 }
 
-/* Sidebar Dropdown Content */
 .dropdown-content {
     display: none;
     flex-direction: column;
     background: #3a4b5c;
-    padding-left: 15px;
+    margin-left: 15px;
 }
 
 .dropdown.open .dropdown-content {
     display: flex !important;
-    content: " ▲";
 }
 
-/* Content Layout */
+/* =========================================
+   Main Content
+========================================= */
 .main-content {
-    margin-top: 80px;
-    margin-left: 220px;
+    margin-left: 220px;/* Hide checkboxes by default */
+.delete-checkbox {
+    display: none;
+}
+
+/* Show checkboxes when body has .editing-mode */
+.editing-mode .delete-checkbox {
+    display: inline-block;
+    margin-right: 6px;
+    transform: scale(1.2);
+    cursor: pointer;
+}
     padding: 20px;
 }
 
 .asset-content {
-    margin-top: 20px;
-    margin-left: 110px;
+    margin-left: 230px;
     padding: 20px;
     overflow-x: auto;
 }
 
-/* Dashboard Cards */
+/* =========================================
+   User Content
+========================================= */
+.asset-content-user {
+    padding: 20px;
+    padding-top: 40px;
+    overflow-x: auto;
+}
+.create-user-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.create-user-btn:hover {
+    background-color: #0056b3;
+}
+
+.edit-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.edit-btn:hover {
+    background-color: #218838;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+.import-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.import-btn:hover {
+    background-color: #0056b3;
+}
+
+/* =========================================
+   Dashboard Cards - Enhanced Layout
+========================================= */
+
 .dashboard-cards {
     display: flex;
     justify-content: space-between;
@@ -176,40 +314,37 @@ h2 {
     margin-left: 10px;
 }
 
-/* Status Card Colors */
-.card.total {
-    background: #343a40;
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
 }
 
-.card.active {
-    background: #28a745;
+/* Status Colors */
+.card.total           { background-color: #343a40; }
+.card.active          { background-color: #28a745; }
+.card.decommissioned  { background-color: #6c757d; }
+.card.lost            { background-color: #dc3545; }
+.card.pending         { background-color: #ffbb00; }
+.card.shelf           { background-color: #17a2b8; }
+
+/* Card Text */
+.card h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #ffffff;
 }
 
-.card.pending {
-    background: #ff9800;
-}
-
-.card.lost {
-    background: #dc3545;
-}
-
-.card.shelf {
-    background: #17a2b8;
-}
-
-.card.decommissioned {
-    background: #606162;
-}
-
-/* Table */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+.card p {
+    font-size: 1.8rem;
+    margin: 0;
+    color: #ffffff;
 }
 
 .device-table {
+    width: 100%;
+    border-collapse: collapse;
     background: #ffffff;
+    margin-top: 20px;
     border: 2px solid #007bff;
 }
 
@@ -217,33 +352,27 @@ table {
     background: #007bff;
     color: white;
     padding: 10px;
+    position: relative;
 }
 
 .device-table td {
     padding: 10px;
     border-bottom: 1px solid #ddd;
-    text-align: left;
+    text-align: center;
 }
 
 .device-table tr:hover {
     background: #f1f1f1;
 }
 
-/* Alternating Row Colors */
-.even-row {
-    background-color: #f9f9f9;
+/* Highlight rows for missing employees in audit table */
+.missing-employee {
+    background-color: #ffcccc !important;
 }
 
-.odd-row {
-    background-color: #e6e6e6;
-}
-
-/* Sortable Columns */
 th.sortable {
     cursor: pointer;
-    position: relative;
     padding-right: 20px;
-    text-align: left;
 }
 
 th.sortable::after {
@@ -264,7 +393,108 @@ th.sortable.desc::after {
     opacity: 1;
 }
 
-/* User Table Styling */
+/* Alternating row background colors */
+.device-table tbody tr:nth-child(odd) {
+    background-color: #eaf4ff;
+}
+
+.device-table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+/* Override hover to match your theme */
+.device-table tbody tr:hover {
+    background-color: #eaf4ff;
+    transition: background-color 0.2s;
+}
+
+.create-device-btn{
+    background-color: #007bff;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.create-device-btn:hover {
+    background-color: #0056b3;
+}
+
+.edit-mode-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.edit-mode-btn:hover {
+    background-color: #218838;
+}
+
+.delete-checkbox {
+    display: none;
+}
+
+.editing-mode .delete-checkbox {
+    display: inline-block;
+    margin-right: 6px;
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+
+/* =========================================
+   Clickable Row Behavior in Edit Mode
+========================================= */
+/* Block row clicks in edit mode but allow inputs inside */
+.editing-mode .clickable-row {
+    pointer-events: auto;      /* Let child elements get pointer events */
+    opacity: 0.8;
+}
+
+.editing-mode .clickable-row {
+    pointer-events: auto;
+}
+
+.editing-mode .clickable-row td {
+    pointer-events: auto;
+}
+
+.editing-mode .clickable-row input,
+.editing-mode .clickable-row select,
+.editing-mode .clickable-row textarea {
+    pointer-events: auto;
+}
+
+.editing-mode .clickable-row td input,
+.editing-mode .clickable-row td select,
+.editing-mode .clickable-row td .inline-edit-input,
+.editing-mode .clickable-row td .inline-edit-select {
+    pointer-events: auto;      /* Re-enable interactions for form controls */
+    cursor: pointer;
+}
+
+.edit-only {
+    display: none;
+}
+
+.editing-mode .edit-only {
+    display: table-cell;
+}
+/* =========================================
+   Column Selector Modal Styles
+========================================= */
+
+
+
+
+
+
+
 .user-table {
     width: 100%;
     border-collapse: collapse;
@@ -287,7 +517,8 @@ th.sortable.desc::after {
     padding: 12px;
     border-bottom: 1px solid #ddd;
     text-align: left;
-    white-space: nowrap;
+    white-space: normal;
+    word-wrap: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -305,12 +536,10 @@ th.sortable.desc::after {
     transition: 0.2s ease-in-out;
 }
 
-/* Sorting Icons */
 .user-table th.sortable::after {
-    content: " ⇅"; 
+    content: " ⇅";
     font-size: 0.8em;
     opacity: 0.6;
-    position: relative;
     margin-left: 8px;
 }
 
@@ -324,87 +553,922 @@ th.sortable.desc::after {
     opacity: 1;
 }
 
-/* Responsive Table */
-@media (max-width: 768px) {
-    .user-table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
+/* =========================================
+   Device Details Page Styles
+========================================= */
+.device-details-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Modal */
+.device-details-container h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #222;
+}
+
+.section-title {
+    margin-top: 10px;
+    font-size: 20px;
+    color: #444;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+
+.device-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr ;
+    gap: 20px 30px;
+    margin-top: 20px;
+}
+
+.device-details-grid label {
+    font-weight: 600;
+    color: #333;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.device-details-grid div {
+    margin-bottom: 15px;
+}
+
+.back-link {
+    margin-top: 30px;
+    display: inline-block;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.action-buttons a {
+    text-align: center;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.action-buttons .edit-btn {
+    background-color: #28a745;
+}
+
+.action-buttons .edit-btn:hover {
+    background-color: #218838;
+}
+
+.action-buttons .delete-btn {
+    background-color: #dc3545;
+}
+
+.action-buttons .delete-btn:hover {
+    background-color: #c82333;
+}
+
+.edit-columns-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-columns-btn:hover {
+    background-color: #0056b3;
+}
+
+/* =========================================
+   Modal Styles
+========================================= */
 .modal {
     display: none;
     position: fixed;
-    z-index: 10;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 300px;
 }
 
 .modal-content {
-    background-color: white;
-    margin: 10% auto;
-    padding: 20px;
-    border-radius: 10px;
-    width: 30%;
     position: relative;
 }
 
-.close {
+.modal .close {
     position: absolute;
-    right: 15px;
+    right: 10px;
+    top: 5px;
     font-size: 20px;
     cursor: pointer;
 }
 
-.modal input, .modal select, .modal button {
+.modal input,
+.modal select,
+.modal button {
     width: 100%;
     margin-top: 10px;
     padding: 8px;
-    border: 1px solid #ccc;
     border-radius: 5px;
+    border: 1px solid #ccc;
 }
 
 .modal button {
     background-color: #007bff;
     color: white;
+    font-weight: bold;
     border: none;
-    cursor: pointer;
 }
 
 .modal button:hover {
     background-color: #0056b3;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
+.create-device-modal {
+    width: 1100px;
+    max-width: 95%;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    position: center;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+
+}
+
+.create-device-modal h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.create-device-modal form input,
+.create-device-modal form select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.create-device-modal form button {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    margin-top: 10px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.create-device-modal form button:hover {
+    background-color: #0056b3;
+}
+
+/* =========================================
+   Device Details Page - Side by Side
+========================================= */
+.side-by-side-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    margin-top: 20px;
+    align-items: flex-start;
+}
+
+.device-details-grid {
+    flex: 1 1 calc(50% - 20px);
+    min-width: 300px;
+    padding: 20px;
+    background: #fff;
+}
+
+.device-details-grid h3.section-title {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+
+.device-details-grid div {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 6px 0;
+}
+
+.device-details-grid label {
+    font-weight: 600;
+    color: #333;
+    margin-right: 10px;
+    min-width: 140px;
+}
+
+/* =========================================
+   Login Form Styles
+========================================= */
+.login-modal {
+    display: flex !important; 
+    position: fixed;
+    z-index: 2000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 300px;
+}
+
+.login-form {
+    background: white;
+    padding: 25px 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-sizing: border-box;
+}
+
+.login-form h2 {
+    margin-bottom: 10px;
+    text-align: center;
+    color: #333;
+}
+
+.login-form label {
+    font-weight: bold;
+    color: #444;
+}
+
+.login-form input {
+    border: 1px solid gray;
+    border-radius: 6px;
+    outline: none;
+    width: 90%;
+    transition: border-color 0.3s;
+}
+
+.login-form input:focus {
+    border-color: #007bff;
+}
+
+.login-form button {
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-form button:hover {
+    background-color: #0056b3;
+}
+
+.login-error {
+    color: red;
+    margin-top: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; 
+    margin-bottom: 20px; 
+}
+
+/* =========================================
+   Filters Container Styles
+========================================= */
+.filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin: 20px 0;
+    border-radius: 10px;
+    align-items: center;
+    padding-top: 40px;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.filters input[type="text"],
+.filters select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    min-width: 180px;
+    box-sizing: border-box;
+}
+
+.filters input[type="text"]:focus,
+.filters select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.filters select {
+    appearance: none; /* Hide default arrow in some browsers */
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #333;
+    min-width: 180px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg fill='%23666' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px 16px;
+    transition: border-color 0.2s;
+}
+
+.filters select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+
+/* =========================================
+   Responsive Fixes
+========================================= */
+@media screen and (max-width: 768px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 10px;
+    }
+
+    .asset-content,
+    .device-details-container {
+        margin-left: 0;
+        padding: 15px;
+    }
+
     .dashboard-cards {
         flex-direction: column;
         align-items: center;
     }
 
     .card {
-        width: 80%;
-        margin-bottom: 10px;
+        width: 90%;
+    }
+
+    .device-details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+@media screen and (max-width: 480px) {
+    .top-navbar input {
+        width: 100%;
+    }
+
+    .sidebar a {
+        padding: 5px;
     }
 
     .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        top: 60px;
+        flex-direction: column;
+        align-items: center;
     }
 
-    .main-content {
-        margin-left: 0;
+    .dashboard-cards {
+        flex-direction: column;
+        align-items: center;
     }
 
-    .top-navbar {
-        width: 100%;
-        left: 0;
+    .card {
+        width: 90%;
     }
+}
+@media screen and (max-width: 320px) {
+    .top-navbar input {
+        width: 100%;
+    }
+
+    .sidebar a {
+        padding: 5px;
+    }
+
+    .sidebar {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .dashboard-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        width: 90%;
+    }
+    .login-form {
+        padding: 20px 15px; /* optional tweak */
+        max-width: 95%;
+    }
+}
+/* Modal Header Style */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Import Modal Styles */
+#importLaptopModal .modal-header h2 {
+    margin: 0;
+}
+
+#closeImportLaptopModal {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#importLaptopModal .modal-content form > div {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* =========================================
+   Log Tables Side-by-Side Layout
+========================================== */
+.log-tables-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 20px;
+}
+
+.log-table {
+    flex: 1 1 48%;
+    min-width: 300px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+}
+
+.log-table h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.1rem;
+}
+/* Log Page Wrapper Styles */
+.log-page-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Import CSV Modal Improvements */
+#importLaptopModal .modal-content {
+    max-width: 650px;
+    width: 90%;
+    padding: 25px 30px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+#importLaptopModal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#importLaptopModal .modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #333;
+}
+
+#closeImportLaptopModal {
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+}
+
+#importLaptopModal input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+}
+
+#importLaptopModal button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#importLaptopModal button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+/* Refined Import Modal Styling */
+#importLaptopModal .modal-content {
+    max-width: 600px;
+    width: 100%;
+    padding: 30px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+#importLaptopModal .modal-content h2 {
+    font-size: 1.4rem;
+    color: #333;
+}
+
+#importLaptopModal .modal-content input[type="file"] {
+    margin: 10px 0 20px;
+}
+
+#importLaptopModal .modal-content button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+#importLaptopModal .modal-content button:hover {
+    background-color: #0056b3;
+}
+/* Import CSV Modal Styling */
+#importLaptopModal .modal-content {
+    max-width: 600px;
+    width: 100%;
+    padding: 30px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+#importLaptopModal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#importLaptopModal .modal-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: #333;
+}
+
+#closeImportLaptopModal {
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+}
+
+#importLaptopModal input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+}
+
+#importLaptopModal button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#importLaptopModal button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+.laptop-modal-content-wrapper {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 650px;
+}
+
+.laptop-modal-content {
+    position: relative;
+    max-width: 600px;
+    padding: 30px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.laptop-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.laptop-modal .modal-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: #333;
+}
+
+#closeImportLaptopModal {
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+}
+
+.laptop-modal input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+}
+
+.laptop-modal button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.laptop-modal button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+.laptop-column {
+    flex: 1;
+    min-width: 300px;
+}
+
+/* Modal Header Style for Import Laptop Modal */
+.laptop-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+/* Modal styling for create-device-modal */
+#create-device-modal.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 500px;
+}
+
+#create-device-modal .laptop-modal-content {
+    position: relative;
+    max-width: 600px;
+    padding: 30px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+/* Column Selector Modal Styles */
+#column-selector {
+    display: none;
+    padding: 10px;
+    width: 600px;
+    max-width: 95%;
+}
+
+#column-selector .laptop-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+#column-form {
+    text-align: left;
+    padding: 10px 0;
+}
+
+#column-form > div {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+#column-form button {
+    width: 100%;
+    padding: 10px;
+    font-weight: bold;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+}
+#column-selector .laptop-modal-content {
+    max-width: 100%;
+    width: 100%;
+}
+
+#cancel-edit-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+#cancel-edit-btn:hover {
+    background-color: #c82333;
+}
+
+#undo-delete-btn {
+    background-color: #ffc107;
+    color: #212529;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#undo-delete-btn:hover {
+    background-color: #e0a800;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+
+.log-tables-scrollable {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+}
+
+.log-table-wrapper {
+    flex: 0 0 790px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.log-table-wrapper h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.log-scroll-container {
+    overflow-x: auto;
+    max-width: 100%;
+    padding-bottom: 20px;
+}
+
+
+
+.missing-employee {
+    background-color: #ffcccc !important;
+}
+
+/* =========================================
+   Audit Laptop Modal File Input Styling
+========================================= */
+#auditLaptopModal input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#auditLaptopModal input[type="file"]:hover {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+#auditLaptopModal button#runAuditBtn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#auditLaptopModal button#runAuditBtn:hover {
+    background-color: #0056b3;
 }

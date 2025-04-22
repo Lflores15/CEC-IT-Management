@@ -1,5 +1,4 @@
 <?php
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -22,12 +21,11 @@ $isAssetPage = in_array($currentPage, $assetPages);
 $pageTitles = [
     "dashboard" => "Dashboard",
     "assets" => "Assets",
-    "asset_Dashboard" => "All Assets",
     "laptop_Dashboard" => "Laptops",
     "pc_Dashboard" => "PCs",
-    "phone_Dashboard" => "Phones",
     "tablet_Dashboard" => "Tablets",
     "user_Dashboard" => "Users",
+    "log_dashboard" => "Logs",
     "settings" => "Settings",
 ];
 
@@ -42,13 +40,13 @@ if (array_key_exists($currentPage, $pageTitles)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle; ?> | CEC-IT</title>
-    <link rel="stylesheet" href="../../Assets/styles.css">
+    <link rel="stylesheet" href="/Assets/styles.css">
 </head>
 <body>
 
     <!-- Top Navbar -->
     <div class="top-navbar">
-        <img src="../../Assets/CEC-Logo.png" alt="CEC-IT Logo" class="logo">
+        <img src="/Assets/CEC-Logo.png" alt="CEC-IT Logo" class="logo">
 
         <div class="navbar-right">
             <input type="text" placeholder="Search assets...">
@@ -68,21 +66,21 @@ if (array_key_exists($currentPage, $pageTitles)) {
     <!-- Sidebar -->
     <div class="sidebar">
         <h2><?php echo $pageTitle; ?></h2>
-        <a href="../Dashboard/dashboard.php" class="<?php echo ($currentPage == 'dashboard') ? 'active' : ''; ?>">Dashboard</a>
+        <a href="../Assets/dashboard.php" class="<?php echo ($currentPage == 'dashboard') ? 'active' : ''; ?>">Dashboard</a>
 
         <!-- Assets Dropdown -->
         <div class="dropdown">
             <button class="dropdown-btn">Assets</button>
             <div class="dropdown-content">
-                <a href="../Dashboard/asset_Dashboard.php">All Assets</a>
-                <a href="../Dashboard/laptop_Dashboard.php">Laptops</a>
-                <a href="../Dashboard/pc_Dashboard.php">PCs</a>
-                <a href="../Dashboard/phone_Dashboard.php">Phones</a>
-                <a href="../Dashboard/tablet_Dashboard.php">Tablets</a>
+                <a href="../Assets/laptop_Dashboard.php">Laptops</a>
             </div>
         </div>
+        <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'admin'): ?>
+            <a href="../Users/user_Dashboard.php" class="<?php echo ($currentPage == 'users') ? 'active' : ''; ?>">Users</a>
 
-        <a href="../Users/user_Dashboard.php" class="<?php echo ($currentPage == 'users') ? 'active' : ''; ?>">Users</a>
+            <a href="/Forms/Employees/employee_Dashboard.php" class="<?php echo ($currentPage == 'employees') ? 'active' : ''; ?>">Employees</a>
+            <a href="../Admin/log_dashboard.php" class="<?php echo ($currentPage == 'logs') ? 'active' : ''; ?>">Logs</a>
+        <?php endif; ?>
         <a href="../Settings/settings.php" class="<?php echo ($currentPage == 'settings') ? 'active' : ''; ?>">Settings</a>
     </div>
 
@@ -90,7 +88,8 @@ if (array_key_exists($currentPage, $pageTitles)) {
     <div class="<?php echo $isAssetPage ? 'asset-content' : 'main-content'; ?>">
 
     <!-- Script Link -->
-    <script src="../../Assets/script.js?v=<?php echo time(); ?>"></script>
+    <script src="/Assets/script.js?v=<?php echo time(); ?>"></script>
+
 
 </body>
 </html>
