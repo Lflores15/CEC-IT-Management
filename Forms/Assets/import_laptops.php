@@ -3,7 +3,7 @@ require_once "../../PHP/config.php";
 session_start();
 
 function logDeviceImport($message) {
-    $user = $_SESSION["user_id"] ?? "unknown";
+    $user = $_SESSION["username"] ?? ($_SESSION["user_id"] ?? "unknown");
     $timestamp = date("Y-m-d H:i:s");
     file_put_contents("../../Logs/device_event_log.txt", "[$timestamp] [IMPORT] [$user] $message\n", FILE_APPEND);
 }
@@ -87,10 +87,10 @@ while (($row = fgetcsv($file)) !== false) {
 
     // Insert into Devices
     if ($assignedTo !== null) {
-        $deviceInsert = $conn->prepare("INSERT INTO Devices (asset_tag, status, os, assigned_to, category) VALUES (?, ?, ?, ?, 'laptop')");
+        $deviceInsert = $conn->prepare("INSERT INTO Devices (asset_tag, status, os, assigned_to) VALUES (?, ?, ?, ?)");
         $deviceInsert->bind_param("sssi", $assetTag, $data["status"], $os, $assignedTo);
     } else {
-        $deviceInsert = $conn->prepare("INSERT INTO Devices (asset_tag, status, os, category) VALUES (?, ?, ?, 'laptop')");
+        $deviceInsert = $conn->prepare("INSERT INTO Devices (asset_tag, status, os) VALUES (?, ?, ?)");
         $deviceInsert->bind_param("sss", $assetTag, $data["status"], $os);
     }
     if (!$deviceInsert) {
@@ -128,9 +128,13 @@ while (($row = fgetcsv($file)) !== false) {
 
 fclose($file);
 
-if ($imported > 0) {
-    echo json_encode(["status" => "success", "message" => "Import attempted. $imported of " . ($imported + count($errors)) . " laptop(s) successfully imported. Reason(s): " . implode(" | ", $errors)]);
-} else {
-    echo json_encode(["status" => "error", "message" => "Import attempted. 0 laptops imported. " . implode(" | ", $errors)]);
-}
+header('Content-Type: application/json');
+echo json_encode([
+    "status" => $imported > 0 ? "success" : "error",
+    "message" => $imported > 0
+        ? "✅ Import attempted. $imported of " . ($imported + count($errors)) . " laptop(s) successfully imported."
+            . (count($errors) > 0 ? " Issues: " . implode(" | ", $errors) : "")
+        : "❌ Import failed. " . implode(" | ", $errors)
+]);
+exit;
 ?>

@@ -622,14 +622,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelectorAll(".clickable-row").forEach(row => {
         row.addEventListener("dblclick", function (e) {
-            const isEditing = document.body.classList.contains("editing-mode");
-            const href = this.getAttribute("data-href");
-
-            if (!isEditing && href) {
-                window.location.href = href;
-            } else {
+            const deviceId = this.getAttribute("data-device-id");
+            if (deviceId) {
                 e.preventDefault();
                 e.stopPropagation();
+                const modal = document.getElementById("logEventModal");
+                const formDeviceId = document.getElementById("log-device-id");
+                if (modal && formDeviceId) {
+                    formDeviceId.value = deviceId;
+                    modal.style.display = "block";
+                }
             }
         });
     });
@@ -711,14 +713,14 @@ document.addEventListener("DOMContentLoaded", function () {
             if (selectOptions[column?.toLowerCase()]) {
                 const select = document.createElement("select");
                 select.className = "inline-edit-select";
-            
+
                 if (column === "assigned_to") {
                     selectOptions[column.toLowerCase()].forEach(opt => {
                         const option = document.createElement("option");
                         option.value = opt.id;
                         option.textContent = opt.name;
                         const currentId = cell.getAttribute('data-emp-id');
-                        if (opt.name === currentText) option.selected = true;
+                        if ((opt.id === "" && !currentId) || opt.id == currentId) option.selected = true;
                         select.appendChild(option);
                     });
                 } else {
@@ -730,7 +732,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         select.appendChild(option);
                     });
                 }
-            
+
                 select.addEventListener("blur", () => {
                     const newValue = select.value;
                     // 2. Store pending edit instead of sending update
@@ -738,11 +740,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     pendingEdits[deviceId][column] = newValue;
                     cell.textContent = newValue;
                 });
-            
+
                 this.textContent = "";
                 this.appendChild(select);
                 select.focus();
-            
+
             } else {
                 const input = document.createElement("input");
                 input.type = "text";
@@ -853,7 +855,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 option.value = opt.id;
                                 option.textContent = opt.name;
                                 const currentId = cell.getAttribute('data-emp-id');
-                                if (opt.name === currentText) option.selected = true;
+                                if ((opt.id === "" && !currentId) || opt.id == currentId) option.selected = true;
                                 select.appendChild(option);
                             });
                         } else {
@@ -936,15 +938,17 @@ function bindRowEvents() {
             e.preventDefault();
             e.stopPropagation();
         });
-
         row.addEventListener("dblclick", function (e) {
-            const isEditing = document.body.classList.contains("editing-mode");
-            const href = this.getAttribute("data-href");
-            if (!isEditing && href) {
-                window.location.href = href;
-            } else {
+            const deviceId = this.getAttribute("data-device-id");
+            if (deviceId) {
                 e.preventDefault();
                 e.stopPropagation();
+                const modal = document.getElementById("logEventModal");
+                const formDeviceId = document.getElementById("log-device-id");
+                if (modal && formDeviceId) {
+                    formDeviceId.value = deviceId;
+                    modal.style.display = "block";
+                }
             }
         });
     });
@@ -971,7 +975,7 @@ function bindRowEvents() {
                         option.value = opt.id;
                         option.textContent = opt.name;
                         const currentId = cell.getAttribute('data-emp-id');
-                        if (opt.name === currentText) option.selected = true;
+                        if ((opt.id === "" && !currentId) || opt.id == currentId) option.selected = true;
                         select.appendChild(option);
                     });
                 } else {
@@ -1015,3 +1019,33 @@ function bindRowEvents() {
         });
     });
 }
+
+
+// Import Laptop CSV Form Submission (AJAX)
+document.addEventListener("DOMContentLoaded", () => {
+  const importForm = document.getElementById("importLaptopForm");
+  const importResult = document.getElementById("import-result-message");
+
+  if (importForm) {
+    importForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(importForm);
+
+      fetch("import_laptops.php", {
+        method: "POST",
+        body: formData
+      })
+        .then(res => res.json())
+        .then(data => {
+          importResult.style.display = "block";
+          importResult.innerHTML = data.message;
+          importResult.style.color = data.status === "success" ? "green" : "red";
+        })
+        .catch(err => {
+          importResult.style.display = "block";
+          importResult.textContent = "An error occurred while importing.";
+          importResult.style.color = "red";
+        });
+    });
+  }
+});

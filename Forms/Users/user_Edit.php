@@ -10,7 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $role = $_POST["role"];
 
     if (empty($username) || empty($email) || empty($role)) {
-        logUserEvent("UPDATE_USER_FAIL", "Update failed: missing fields for user ID $user_id", $_SESSION["username"]);
+        logUserEvent("UPDATE_USER_FAIL", "Update failed: missing fields for user ID $user_id");
         echo json_encode(["success" => false, "message" => "All fields are required."]);
         exit();
     }
@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $query = "UPDATE Users SET username = ?, email = ?, role = ? WHERE user_id = ?";
     $stmt = $conn->prepare($query);
     if (!$stmt) {
-        logUserEvent("UPDATE_USER_FAIL", "Prepare failed for user ID $user_id: " . $conn->error, $_SESSION["username"]);
+        logUserEvent("UPDATE_USER_FAIL", "Prepare failed for user ID $user_id: " . $conn->error);
         echo json_encode(["success" => false, "message" => "Database error."]);
         exit();
     }
@@ -26,10 +26,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->bind_param("sssi", $username, $email, $role, $user_id);
 
     if ($stmt->execute()) {
-        logUserEvent("UPDATE_USER", "User ID $user_id updated to username '$username', email '$email', role '$role'", $_SESSION["username"]);
+        logUserEvent("UPDATE_USER", "User '$username' updated to username '$username', email '$email', role '$role'");
         echo json_encode(["success" => true, "message" => "User updated successfully."]);
     } else {
-        logUserEvent("UPDATE_USER_FAIL", "Failed to update User ID $user_id: " . $stmt->error, $_SESSION["username"]);
+        logUserEvent("UPDATE_USER_FAIL", "Failed to update User '$username': " . $stmt->error, $_SESSION["username"]);
         echo json_encode(["success" => false, "message" => "Failed to update user."]);
     }
 

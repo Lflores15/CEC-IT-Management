@@ -25,17 +25,13 @@ $default_columns = [
 
 $visible_columns = $_SESSION['visible_columns'] ?? array_keys($default_columns);
 
-$query = " SELECT d.device_id, d.asset_tag, d.serial_number, d.brand, d.model, d.os,
-           l.cpu, l.ram, l.storage, d.status, d.assigned_to, d.location, d.purchase_date, d.warranty_expiry, d.notes,
-           l.backup_type, l.internet_policy, l.backup_removed, l.sinton_backup, l.midland_backup, l.c2_backup, l.actions_needed,
-           dl.broken, dl.duplicate, dl.decommission_status, dl.additional_notes AS decommission_notes,
+$query = " SELECT d.device_id, d.asset_tag, d.serial_number, d.brand, d.model, d.os, l.cpu, l.ram, l.storage, d.status, d.assigned_to, l.internet_policy, d.category,
            e.first_name AS emp_first_name, e.last_name AS emp_last_name, e.login_id AS login_id, e.employee_id AS employee_id, e.phone_number AS phone_number
     FROM Devices d
     LEFT JOIN Laptops l ON d.device_id = l.device_id
 LEFT JOIN Decommissioned_Laptops dl
   ON l.id = dl.laptop_id
     LEFT JOIN Employees e ON d.assigned_to = e.emp_id
-    WHERE d.category = 'laptop'
     ORDER BY d.asset_tag
 ";
 
@@ -48,7 +44,7 @@ $result = $stmt->get_result();
 $devices = $result->fetch_all(MYSQLI_ASSOC);
 // Fetch employee dropdown values before closing the connection
 // Fetch employee dropdown values before closing the connection
-$employeeOptions = [];
+$employeeOptions = [['id' => '', 'name' => 'Not Assigned']];
 $empQuery = $conn->query("SELECT emp_id, CONCAT(first_name, ' ', last_name) AS name FROM Employees ORDER BY name ASC");
 while ($row = $empQuery->fetch_assoc()) {
     $employeeOptions[] = [
@@ -147,7 +143,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
                         $empId = isset($device['employee_id']) ? trim($device['employee_id']) : null;
                         $isMissingEmployee = $empId && !in_array($empId, $activeEmployeeIDs);
                         ?>
-                        <tr class="clickable-row<?= $isMissingEmployee ? ' missing-employee' : '' ?>" data-href="device_details.php?id=<?= $device['device_id'] ?>">
+                        <tr class="clickable-row<?= $isMissingEmployee ? ' missing-employee' : '' ?>" data-device-id="<?= $device['device_id'] ?>">
                             <td><input type="checkbox" class="row-checkbox delete-checkbox" value="<?= $device['device_id'] ?>"></td>
                             <?php foreach ($visible_columns as $col): ?>
                                 <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ?  'class="edit-only"data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>
@@ -176,7 +172,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
       <h2 style="margin: 0;">Import Laptops from CSV</h2>
       <span id="closeImportLaptopModal" class="close" style="font-size: 24px; cursor: pointer;">&times;</span>
     </div>
-    <form id="importLaptopForm" method="post" action="import_laptops.php" enctype="multipart/form-data">
+    <form id="importLaptopForm" enctype="multipart/form-data">
       <input type="file" name="csv_file" accept=".csv" required>
       <button type="submit">Import</button>
     </form>
@@ -244,4 +240,33 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
     </div>
   </div>
 </html>
+  <!-- Log Event Modal -->
+  <div id="logEventModal" class="modal create-device-modal" style="display: none;">
+    <div class="laptop-modal-content">
+      <div class="laptop-modal-header">
+        <h2>Log Laptop Event</h2>
+        <span class="close" onclick="document.getElementById('logEventModal').style.display='none'">&times;</span>
+      </div>
+      <form id="log-event-form" method="post" action="log_event.php">
+        <input type="hidden" id="log-device-id" name="device_id">
+
+        <label for="event_type">Event Type:</label>
+        <select name="event_type" required>
+          <option value="">Select Event Type</option>
+          <option value="New User Setup">New User Setup</option>
+          <option value="Updated">Updated</option>
+          <option value="User Archived">User Archived</option>
+          <option value="Maintenance">Maintenance</option>
+          <option value="Damaged">Damaged</option>
+          <option value="Decommissioned">Decommissioned</option>
+          <option value="Location Change">Location Change</option>
+        </select>
+
+        <label for="memo">Memo:</label>
+        <textarea name="memo" rows="4" placeholder="Add a note about this event..." required></textarea>
+
+        <button type="submit">Log Event</button>
+      </form>
+    </div>
+  </div>
 </html>

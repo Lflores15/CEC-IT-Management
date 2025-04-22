@@ -67,7 +67,12 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param("si", $value, $recordId);
+if ($column === "assigned_to" && $value === "") {
+    // Bind NULL for assigned_to when value is empty (Not Assigned)
+    $stmt->bind_param("ii", $null = null, $recordId);
+} else {
+    $stmt->bind_param("si", $value, $recordId);
+}
 
 if ($stmt->execute()) {
     $username = $_SESSION['username'] ?? 'unknown';
