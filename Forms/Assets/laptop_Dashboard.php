@@ -47,6 +47,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 $devices = $result->fetch_all(MYSQLI_ASSOC);
 // Fetch employee dropdown values before closing the connection
+// Fetch employee dropdown values before closing the connection
 $employeeOptions = [];
 $empQuery = $conn->query("SELECT emp_id, CONCAT(first_name, ' ', last_name) AS name FROM Employees ORDER BY name ASC");
 while ($row = $empQuery->fetch_assoc()) {
@@ -57,6 +58,8 @@ while ($row = $empQuery->fetch_assoc()) {
 }
 $stmt->close();
 $conn->close();
+
+$activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
 ?>
 
 <!DOCTYPE html>
@@ -71,47 +74,55 @@ $conn->close();
 <body>
 <div class="main-layout">
     <h1>Laptops Dashboard</h1>
-    <div class="filters-container">
-        <button id="edit-mode-btn" class="edit-mode-btn">Edit Table</button>
-        <button id="cancel-edit-btn" class="cancel-edit-btn" style="display: none;">Cancel</button>
-        <button id="openImportLaptopModal" class="import-btn">Import CSV</button>
-        <button id="open-create-modal" class="create-device-btn">+ Create Device</button>
-        <button id="edit-columns-btn" class="edit-columns-btn">Edit Columns</button>
-        <button id="delete-selected-btn" class="delete-btn" style="display: none;">Delete Selected</button>
-
-        <div id="column-selector" class="modal">
-          <div class="laptop-modal-content">
-              <div class="laptop-modal-header">
-              <h2 style="margin: 0;">Edit Visible Columns</h2>
-              <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
+    <div class="filters-container" style="padding-top: 0;">
+      <div style="display: flex; justify-content: space-between; width: 100%;">
+        <div style="display: flex; gap: 10px;">
+            <button id="edit-mode-btn" class="edit-mode-btn">Edit Table</button>
+            <button id="cancel-edit-btn" class="cancel-edit-btn" style="display: none;">Cancel</button>
+            <button id="delete-selected-btn" class="delete-btn" style="display: none;">Delete Selected</button>
+            <button id="undo-delete-btn" class="undo-btn" style="display: none;">Undo Last Delete</button>
+            <button id="open-create-modal" class="create-device-btn">+ Create Device</button>
+            <button id="edit-columns-btn" class="edit-columns-btn">Edit Columns</button>
+            <!-- Filters moved here -->
+            <div class="filters" style="margin-left: 10px;">
+              <input type="text" id="filter-tag" placeholder="Filter by Asset Tag">
             </div>
-            <form id="column-form">
-              <div>
-                <?php foreach ($default_columns as $key => $label): ?>
-                  <label style="display: block; margin-bottom: 8px; font-size: 15px;">
-                    <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
-                    <?= htmlspecialchars($label) ?>
-                  </label>
-                <?php endforeach; ?>
-              </div>
-              <button type="submit">Apply</button>
-            </form>
-          </div>
-        </div>
-
-        <div class="filters">
-            <input type="text" id="filter-tag" placeholder="Filter by Asset Tag">
-        </div>
-        <div class="filters">
-            <select id="filter-status">
+            <div class="filters">
+              <select id="filter-status">
                 <option value="Status">Filter by Status</option>
                 <option value="Active">Active</option>
                 <option value="Decommissioned">Decommissioned</option>
                 <option value="Lost">Lost</option>
                 <option value="Pending Return">Pending Return</option>
                 <option value="Shelf">Shelf</option>
-            </select>
+              </select>
+            </div>
         </div>
+        <div style="display: flex; gap: 10px;">
+            <button id="openImportLaptopModal" class="import-btn">Populate Table</button>
+            <button id="audit-laptop-btn" class="create-device-btn">Audit Laptops</button>
+        </div>
+      </div>
+      <!-- JS logic for undo, delete, modals, import, etc. is handled by script.js -->
+      <div id="column-selector" class="modal">
+        <div class="laptop-modal-content">
+          <div class="laptop-modal-header">
+            <h2 style="margin: 0;">Edit Visible Columns</h2>
+            <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
+          </div>
+          <form id="column-form">
+            <div>
+              <?php foreach ($default_columns as $key => $label): ?>
+                <label style="display: block; margin-bottom: 8px; font-size: 15px;">
+                  <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
+                  <?= htmlspecialchars($label) ?>
+                </label>
+              <?php endforeach; ?>
+            </div>
+            <button type="submit">Apply</button>
+          </form>
+        </div>
+      </div>
     </div>
 
     <div class="table-container">
@@ -131,12 +142,18 @@ $conn->close();
                     <tr><td colspan="<?= count($visible_columns) + 1 ?>">No devices found.</td></tr>
                 <?php else : ?>
                     <?php foreach ($devices as $device): ?>
-                        <tr class="clickable-row" data-href="device_details.php?id=<?= $device['device_id'] ?>">
+                        <?php
+                        // Determine if this device's employee_id is NOT in the active employee list
+                        $empId = isset($device['employee_id']) ? trim($device['employee_id']) : null;
+                        $isMissingEmployee = $empId && !in_array($empId, $activeEmployeeIDs);
+                        ?>
+                        <tr class="clickable-row<?= $isMissingEmployee ? ' missing-employee' : '' ?>" data-href="device_details.php?id=<?= $device['device_id'] ?>">
                             <td><input type="checkbox" class="row-checkbox delete-checkbox" value="<?= $device['device_id'] ?>"></td>
                             <?php foreach ($visible_columns as $col): ?>
-                                <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ?  'class="edit-only"data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>                                <?php if ($col === 'assigned_to'): ?>
-                                    <?= htmlspecialchars(trim(($device['emp_first_name'] ?? '') . ' ' . ($device['emp_last_name'] ?? ''))) . ' (' . ($device['employee_id'] ?? 'N/A') . ')' ?>
-                                <?php else: ?>
+                                <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ?  'class="edit-only"data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>
+                                    <?php if ($col === 'assigned_to'): ?>
+                                        <?= htmlspecialchars(trim(($device['emp_first_name'] ?? '') . ' ' . ($device['emp_last_name'] ?? ''))) . ' (' . ($device['employee_id'] ?? 'N/A') . ')' ?>
+                                    <?php else: ?>
                                         <?= htmlspecialchars($device[$col] ?? 'N/A') ?>
                                     <?php endif; ?>
                                 </td>
@@ -166,45 +183,21 @@ $conn->close();
     <div id="import-result-message" style="margin-top: 10px; display: none;"></div>
   </div>
 </div>
-</body>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const importForm = document.querySelector("#importLaptopForm");
-        const resultMessage = document.getElementById("import-result-message");
-        const modal = document.getElementById("importLaptopModal");
-        const closeBtn = document.getElementById("closeImportLaptopModal");
-
-        if (importForm) {
-            importForm.addEventListener("submit", function (e) {
-                e.preventDefault();
-                const formData = new FormData(importForm);
-                fetch("import_laptops.php", {
-                    method: "POST",
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    resultMessage.innerHTML = data.message.replace(/\|/g, "<br>");
-                    resultMessage.style.display = "block";
-                    resultMessage.style.color = data.status === "success" ? "green" : "red";
-                })
-                .catch(error => {
-                    resultMessage.textContent = "Import failed: " + error.message;
-                    resultMessage.style.color = "red";
-                    resultMessage.style.display = "block";
-                });
-            });
-        }
-
-        if (closeBtn && modal) {
-            closeBtn.addEventListener("click", () => {
-                modal.style.display = "none";
-                resultMessage.style.display = "none";
-                importForm.reset();
-            });
-        }
-    });
-</script>
+<!-- Audit Laptop Modal -->
+<div id="auditLaptopModal" class="laptop-modal-content-wrapper" style="display: none;">
+  <div class="laptop-modal-content">
+    <div class="laptop-modal-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <h2 style="margin: 0;">Audit Laptops</h2>
+      <span id="closeAuditLaptopModal" class="close" style="font-size: 24px; cursor: pointer;">&times;</span>
+    </div>
+    <div id="auditLaptopForm">
+      <p>Select an Active Employee CSV file to audit assigned laptops.</p>
+      <input type="file" id="auditCsvFile" accept=".csv" required>
+      <button type="button" id="runAuditBtn">Run Audit</button>
+    </div>
+  </div>
+</div>
+<!-- All modal, import, and row navigation JS logic is handled by script.js -->
   <!-- Create Device Modal -->
   <div id="create-device-modal" class="modal create-device-modal" style="display: none;">
     <div class="laptop-modal-content">
@@ -250,4 +243,5 @@ $conn->close();
       <p id="create-result-message" style="margin-top: 10px; display: none;"></p>
     </div>
   </div>
+</html>
 </html>
