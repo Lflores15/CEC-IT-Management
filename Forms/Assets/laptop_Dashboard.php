@@ -266,7 +266,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
         <form id="log-event-form" method="post" action="manual_log.php" style="display: flex; flex-direction: column; gap: 10px;">
           <input type="hidden" id="log-device-id" name="device_id">
           <label for="log-event-time">Event Time:</label>
-          <p id="log-event-time" style="font-style: italic; font-size: 0.9em; color: #555;"></p>
+          <p id="log-event-time" style="font-style: italic; font-size: 1em; color: #555;"></p>
           <label for="event_type">Event Type:</label>
           <select name="event_type" required>
             <option value="">Select Event Type</option>
