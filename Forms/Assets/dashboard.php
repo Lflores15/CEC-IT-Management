@@ -1,92 +1,134 @@
 <?php
 session_start();
 require_once "../../PHP/config.php";
-require_once "../../includes/navbar.php"; 
 
+// 1) ensure logged in
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../Login/login.php");
     exit();
 }
 
-$user_id = $_SESSION["user_id"];
 $username = $_SESSION["username"];
-$emp_id = $_SESSION["emp_id"] ?? null;
+$role     = $_SESSION["role"];
 
-$stmt = $conn->prepare("SELECT email, role FROM Users WHERE user_id = ?");
-$stmt->bind_param("i", $user_id);
+// helper for single‑value stats queries
+function getCount($conn, $sql) {
+    $res = $conn->query($sql);
+    if (!$res) {
+        die("Stats query failed: (" . $conn->errno . ") " . $conn->error);
+    }
+    return (int)$res->fetch_assoc()['c'];
+}
+
+// 2) laptop stats via Devices ⇄ Laptops join
+$totalLaptops   = getCount(
+    $conn,
+    "SELECT COUNT(*) AS c 
+       FROM Laptops"
+);
+$activeLaptops  = getCount(
+    $conn,
+    "SELECT COUNT(*) AS c
+       FROM Devices d
+       JOIN Laptops l ON d.device_id = l.device_id
+      WHERE d.status = 'Active'"
+);
+$pendingReturns = getCount(
+    $conn,
+    "SELECT COUNT(*) AS c
+       FROM Devices d
+       JOIN Laptops l ON d.device_id = l.device_id
+      WHERE d.status = 'Pending Return'"
+);
+
+// 3) fetch every laptop’s details
+$stmt = $conn->prepare("
+    SELECT
+      d.asset_tag,
+      d.cpu,
+      d.ram,
+      d.os,
+      d.status,
+      e.employee_id,
+      e.first_name,
+      e.last_name
+    FROM Devices d
+    JOIN Laptops l
+      ON d.device_id = l.device_id
+    LEFT JOIN Employees e
+      ON d.assigned_to = e.emp_id
+    ORDER BY e.employee_id, d.asset_tag
+") or die("Prepare failed: (" . $conn->errno . ") " . $conn->error);
+
 $stmt->execute();
-$stmt->bind_result($email, $role);
-$stmt->fetch();
+$devices = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
-
-$query = "
-    SELECT 
-        (SELECT COUNT(*) FROM Devices) AS total, 
-        (SELECT COUNT(*) FROM Devices WHERE status = 'Active') AS active, 
-        (SELECT COUNT(*) FROM Decommissioned_Laptops) AS decommissioned, 
-        (SELECT COUNT(*) FROM Devices WHERE status = 'Lost') AS lost, 
-        (SELECT COUNT(*) FROM Devices WHERE status = 'Pending Return') AS pending, 
-        (SELECT COUNT(*) FROM Devices WHERE status = 'Shelf') AS shelf
-";
-
-$result = $conn->query($query);
-$counts = $result->fetch_assoc();
-
-$conn->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
-    <link rel="stylesheet" href="/Assets/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="../../Assets/styles.css">
 </head>
 <body>
-    <h2>Device Status Overview</h2>
-    <section class="dashboard-cards">
-        <div class="card total">
-            <h3>Total Devices</h3>
-            <p><?php echo $counts["total"]; ?></p>
-        </div>
-        <div class="card active">
-            <h3>Active Devices</h3>
-            <p><?php echo $counts["active"]; ?></p>
-        </div>
-        <div class="card decommissioned">
-            <h3>Decommissioned</h3>
-            <p><?php echo $counts["decommissioned"]; ?></p>
-        </div>
-        <div class="card lost">
-            <h3>Lost Devices</h3>
-            <p><?php echo $counts["lost"]; ?></p>
-        </div>
-        <div class="card pending">
-            <h3>Pending Return</h3>
-            <p><?php echo $counts["pending"]; ?></p>
-        </div>
-        <div class="card shelf">
-            <h3>On Shelf</h3>
-            <p><?php echo $counts["shelf"]; ?></p>
-        </div>
+  <?php require_once '../../includes/navbar.php'; ?>
+
+  <main class="container">
+    <h1>Laptops Dashboard</h1>
+    <p>Welcome, <?= htmlspecialchars($username) ?> (<?= htmlspecialchars($role) ?>)</p>
+
+    <section class="stats">
+      <div class="stat-card">
+        <h2>Total Laptops</h2>
+        <p><?= $totalLaptops ?></p>
+      </div>
+      <div class="stat-card">
+        <h2>Active Laptops</h2>
+        <p><?= $activeLaptops ?></p>
+      </div>
+      <div class="stat-card">
+        <h2>Pending Returns</h2>
+        <p><?= $pendingReturns ?></p>
+      </div>
     </section>
 
-    <canvas id="deviceChart" style="max-width: 600px; max-height: 400px;"></canvas>        
+    <section class="all-laptops">
+      <h2>All Laptops by Employee</h2>
 
-    <script>
-        var ctx = document.getElementById('deviceChart').getContext('2d');
-        var deviceChart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: ['Active', 'Decommissioned', 'Lost', 'Pending Return', 'Shelf'],
-                datasets: [{
-                    data: [<?php echo $counts["active"]; ?>, <?php echo $counts["decommissioned"]; ?>, <?php echo $counts["lost"]; ?>, <?php echo $counts["pending"]; ?>, <?php echo $counts["shelf"]; ?>],
-                    backgroundColor: ['#28a745', '#606162', '#dc3545', '#ffc107', '#17a2b8']
-                }]
-            }
-        });
-    </script>
+      <?php if (empty($devices)): ?>
+        <p>No laptops found.</p>
+      <?php else: ?>
+        <table>
+          <thead>
+            <tr>
+              <th>Asset Tag</th>
+              <th>CPU</th>
+              <th>RAM (GB)</th>
+              <th>OS</th>
+              <th>Status</th>
+              <th>Employee ID</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($devices as $d): ?>
+            <tr>
+              <td><?= htmlspecialchars($d['asset_tag']) ?></td>
+              <td><?= htmlspecialchars($d['cpu'])       ?></td>
+              <td><?= htmlspecialchars($d['ram'])       ?></td>
+              <td><?= htmlspecialchars($d['os'])        ?></td>
+              <td><?= htmlspecialchars($d['status'])    ?></td>
+              <td><?= htmlspecialchars($d['employee_id'] ?? '-') ?></td>
+              <td><?= htmlspecialchars($d['first_name']  ?? '-') ?></td>
+              <td><?= htmlspecialchars($d['last_name']   ?? '-') ?></td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      <?php endif; ?>
+    </section>
+  </main>
 </body>
 </html>

@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit();
     }
 
-    $query = "UPDATE Users SET username = ?, email = ?, role = ? WHERE user_id = ?";
+    $query = "UPDATE Users SET username = ?, role = ? WHERE user_id = ?";
     $stmt = $conn->prepare($query);
     if (!$stmt) {
         logUserEvent("UPDATE_USER_FAIL", "Prepare failed for user ID $user_id: " . $conn->error, $_SESSION["username"]);

@@ -2,38 +2,33 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-session_start();
+// enforce login
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../Login/login.php");
     exit();
 }
 
-// Get the current page name dynamically
-$pageTitle = "CEC-IT"; // Default title
-$currentPage = basename($_SERVER['PHP_SELF'], ".php"); 
+// Determine page for titles and active classes
+$pageTitle = "CEC-IT";
+$currentPage = basename($_SERVER['PHP_SELF'], ".php");
 
-// Determine if we are on an asset-related page
-$assetPages = ["asset_Dashboard", "laptop_Dashboard", "pc_Dashboard", "phone_Dashboard", "tablet_Dashboard"];
-$isAssetPage = in_array($currentPage, $assetPages);
-
-// Set custom titles for each page
 $pageTitles = [
-    "dashboard" => "Dashboard",
-    "assets" => "Assets",
-    "laptop_Dashboard" => "Laptops",
-    "pc_Dashboard" => "PCs",
-    "tablet_Dashboard" => "Tablets",
-    "user_Dashboard" => "Users",
-    "log_dashboard" => "Logs",
-    "settings" => "Settings",
+    "dashboard"           => "Dashboard",
+    "laptop_Dashboard"    => "Laptops",
+    "asset_Dashboard"     => "Assets Dashboard",
+    "user_Dashboard"      => "Users",
+    "employee_Dashboard"  => "Employees",
+    "log_dashboard"       => "Logs",
+    "settings"            => "Settings",
 ];
-
-if (array_key_exists($currentPage, $pageTitles)) {
+if (isset($pageTitles[$currentPage])) {
     $pageTitle = $pageTitles[$currentPage];
 }
-?>
 
+// Determine if on an Assets-related page
+$assetPages = ["asset_Dashboard", "laptop_Dashboard"];
+$isAssetPage = in_array($currentPage, $assetPages);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,12 +41,10 @@ if (array_key_exists($currentPage, $pageTitles)) {
 
     <!-- Top Navbar -->
     <div class="top-navbar">
-        <img src="/Assets/CEC-Logo.png" alt="CEC-IT Logo" class="logo">
+        <img src="/Assets/CEC-logo.png" alt="CEC-IT Logo" class="logo">
 
         <div class="navbar-right">
             <input type="text" placeholder="Search assets...">
-
-            <!-- Profile Dropdown -->
             <div class="profile-dropdown">
                 <button class="profile-btn">Profile ▼</button>
                 <div class="profile-dropdown-content">
@@ -66,21 +59,21 @@ if (array_key_exists($currentPage, $pageTitles)) {
     <!-- Sidebar -->
     <div class="sidebar">
         <h2><?php echo $pageTitle; ?></h2>
+
         <a href="../Assets/dashboard.php" class="<?php echo ($currentPage == 'dashboard') ? 'active' : ''; ?>">Dashboard</a>
 
         <!-- Assets Dropdown -->
         <div class="dropdown">
-            <button class="dropdown-btn">Assets</button>
+            <button class="dropdown-btn <?php echo in_array($currentPage, ['asset_Dashboard', 'laptop_Dashboard']) ? 'active' : ''; ?>">Assets</button>
             <div class="dropdown-content">
-                <a href="../Assets/laptop_Dashboard.php">Laptops</a>
+                <a href="../Assets/dashboard.php" class="<?php echo ($currentPage == 'asset_Dashboard') ? 'active' : ''; ?>">Dashboard</a>
+                <a href="../Assets/laptop_Dashboard.php" class="<?php echo ($currentPage == 'laptop_Dashboard') ? 'active' : ''; ?>">Laptops</a>
             </div>
         </div>
-        <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'admin'): ?>
-            <a href="../Users/user_Dashboard.php" class="<?php echo ($currentPage == 'users') ? 'active' : ''; ?>">Users</a>
 
-            <a href="/Forms/Employees/employee_Dashboard.php" class="<?php echo ($currentPage == 'employees') ? 'active' : ''; ?>">Employees</a>
-            <a href="../Admin/log_dashboard.php" class="<?php echo ($currentPage == 'logs') ? 'active' : ''; ?>">Logs</a>
-        <?php endif; ?>
+        <a href="../Users/user_Dashboard.php" class="<?php echo ($currentPage == 'user_Dashboard') ? 'active' : ''; ?>">Users</a>
+        <a href="../Employees/employee_Dashboard.php" class="<?php echo ($currentPage == 'employee_Dashboard') ? 'active' : ''; ?>">Employees</a>
+        <a href="../Admin/log_dashboard.php" class="<?php echo ($currentPage == 'log_dashboard') ? 'active' : ''; ?>">Logs</a>
         <a href="../Settings/settings.php" class="<?php echo ($currentPage == 'settings') ? 'active' : ''; ?>">Settings</a>
     </div>
 
@@ -89,7 +82,3 @@ if (array_key_exists($currentPage, $pageTitles)) {
 
     <!-- Script Link -->
     <script src="/Assets/script.js?v=<?php echo time(); ?>"></script>
-
-
-</body>
-</html>

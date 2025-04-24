@@ -10,7 +10,7 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'admin') {
 }
 
 // Fetch all users
-$query = "SELECT user_id, username, email, role FROM Users";
+$query = "SELECT user_id, username, role FROM Users";
 $result = $conn->query($query);
 ?>
 
@@ -30,7 +30,7 @@ $result = $conn->query($query);
     </script>
 <?php elseif (isset($_GET['error']) && $_GET['error'] === 'duplicate'): ?>
     <script>
-        alert("❌ Username or email already exists.");
+        alert("❌ Username already exists.");
         window.location.href = window.location.pathname; // removes ?error=duplicate
     </script>
 <?php elseif (isset($_GET['deleted']) && $_GET['deleted'] == 1): ?>
@@ -51,7 +51,6 @@ $result = $conn->query($query);
             <thead>
                 <tr>
                     <th>Username</th>
-                    <th>Email</th>
                     <th>Role</th>
                     <th>Actions</th>
                 </tr>
@@ -60,17 +59,14 @@ $result = $conn->query($query);
                 <?php while ($user = $result->fetch_assoc()) : ?>
                     <tr>
                         <td><?php echo htmlspecialchars($user["username"]); ?></td>
-                        <td><?php echo htmlspecialchars($user["email"]); ?></td>
                         <td><?php echo htmlspecialchars($user["role"]); ?></td>
                         <td>
                             <button class="edit-btn" data-id="<?php echo $user['user_id']; ?>"
                                 data-username="<?php echo $user['username']; ?>"
-                                data-email="<?php echo $user['email']; ?>"
                                 data-role="<?php echo $user['role']; ?>">Edit</button>
 
                             <button class="delete-btn" data-id="<?php echo $user['user_id']; ?>"
                                 data-username="<?php echo $user['username']; ?>"
-                                data-email="<?php echo $user['email']; ?>"
                                 data-role="<?php echo $user['role']; ?>">Delete</button>
                         </td>
                     </tr>
@@ -87,9 +83,6 @@ $result = $conn->query($query);
             <form action="create_user.php" method="POST">
                 <label for="new-username">Username:</label>
                 <input type="text" id="new-username" name="username" required>
-
-                <label for="new-email">Email:</label>
-                <input type="email" id="new-email" name="email" required>
 
                 <label for="new-password">Password:</label>
                 <input type="password" id="new-password" name="password" required>
@@ -114,9 +107,6 @@ $result = $conn->query($query);
                 <input type="hidden" id="edit-user-id" name="user_id">
                 <label for="edit-username">Username:</label>
                 <input type="text" id="edit-username" name="username" required>
-
-                <label for="edit-email">Email:</label>
-                <input type="email" id="edit-email" name="email" required>
 
                 <label for="edit-role">Role:</label>
                 <select id="edit-role" name="role">

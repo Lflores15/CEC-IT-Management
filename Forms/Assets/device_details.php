@@ -20,7 +20,6 @@ $query = "
            CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
            e.login_id AS employee_login,
            e.employee_id AS employee_external_id,
-           e.email AS employee_email,
            e.phone_number AS employee_phone,
            a.assigned_at,
            l.backup_type, l.internet_policy, l.backup_removed, l.sinton_backup, l.midland_backup, l.c2_backup, l.actions_needed,
@@ -168,7 +167,6 @@ if (!$device) {
             <div><label>Employee ID:</label><div><?= htmlspecialchars($device['employee_external_id']) ?></div></div>
             <div><label>Full Name:</label><div><?= htmlspecialchars($device['employee_name']) ?></div></div>
             <div><label>Login Username:</label><div><?= htmlspecialchars($device['employee_login']) ?></div></div>
-            <div><label>Email:</label><div><?= htmlspecialchars($device['employee_email']) ?></div></div>
             <div><label>Phone Number:</label><div><?= htmlspecialchars($device['employee_phone']) ?></div></div>
             <div><label>Assigned At:</label><div><?= htmlspecialchars($device['assigned_at']) ?></div></div>
         </div>

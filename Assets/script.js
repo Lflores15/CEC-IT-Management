@@ -123,7 +123,6 @@ tables.forEach((table) => {
         button.addEventListener("click", function () {
             document.getElementById("edit-user-id").value = this.dataset.id;
             document.getElementById("edit-username").value = this.dataset.username;
-            document.getElementById("edit-email").value = this.dataset.email;
             document.getElementById("edit-role").value = this.dataset.role;
             modal.style.display = "block";
         });
@@ -189,13 +188,11 @@ if (editModal && closeEditModal) {
         button.addEventListener("click", function () {
             const userId = this.dataset.id;
             const username = this.dataset.username;
-            const email = this.dataset.email;
             const role = this.dataset.role;
 
             // Populate form fields
             document.getElementById("edit-user-id").value = userId;
             document.getElementById("edit-username").value = username;
-            document.getElementById("edit-email").value = email;
             document.getElementById("edit-role").value = role;
 
             // Show modal
