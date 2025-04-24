@@ -1,3 +1,163 @@
+// ========== Dynamic Log Event Time Display for Modal ==========
+document.addEventListener("DOMContentLoaded", function () {
+  function updateLogEventTime() {
+    const now = new Date();
+    const options = { month: '2-digit', day: '2-digit', year: 'numeric' };
+    const dateStr = now.toLocaleDateString('en-US', options);
+    const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+    const timeDisplay = document.getElementById("log-event-time");
+    if (timeDisplay) {
+      timeDisplay.textContent = `${dateStr} | ${timeStr}`;
+    }
+  }
+  updateLogEventTime();
+  setInterval(updateLogEventTime, 1000);
+});
+
+// ========== Laptop Log Event Modal and Log Fetching ==========
+// ========== Laptop Log Event Modal and Log Fetching ==========
+// Helper function to fetch device log for a given asset tag and update the log table
+function fetchDeviceLog(assetTag) {
+  if (!assetTag || typeof assetTag !== 'string' || assetTag.trim() === '') {
+    console.error("fetchDeviceLog called with invalid asset tag:", assetTag);
+    return;
+  }
+
+  fetch(`/Forms/Assets/fetch_event_log.php?asset_tag=${encodeURIComponent(assetTag.trim())}`)
+    .then(res => res.json())
+    .then(data => {
+      console.log("Fetched log entries:", data);
+      const logHistoryTable = document.getElementById("device-log-history");
+      logHistoryTable.innerHTML = "";
+
+      if (!Array.isArray(data) || data.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 4;
+        cell.textContent = "No logs found for this device.";
+        row.appendChild(cell);
+        logHistoryTable.appendChild(row);
+        return;
+      }
+
+      data.forEach(entry => {
+        const row = document.createElement("tr");
+
+        const dateCell = document.createElement("td");
+        dateCell.textContent = entry.date;
+        row.appendChild(dateCell);
+
+        const timeCell = document.createElement("td");
+        timeCell.textContent = entry.time;
+        row.appendChild(timeCell);
+
+        const typeCell = document.createElement("td");
+        typeCell.textContent = entry.event_type;
+        row.appendChild(typeCell);
+
+        const memoCell = document.createElement("td");
+        memoCell.textContent = entry.memo;
+        row.appendChild(memoCell);
+
+        logHistoryTable.appendChild(row);
+      });
+    })
+    .catch(err => {
+      console.error("Error fetching logs:", err);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const logButtons = document.querySelectorAll("tr.log-event-btn");
+  const modal = document.getElementById("logEventModal");
+  const logDeviceInput = document.getElementById("log-device-id");
+
+  // Modal should open only on double-click, not single-click
+  logButtons.forEach(btn => {
+    btn.addEventListener("dblclick", function (e) {
+      if (document.body.classList.contains("editing-mode")) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      // Use Asset Tag for log filtering
+      const assetTagCell = this.querySelector('td[data-column="asset_tag"]');
+      const assetTag = assetTagCell ? assetTagCell.textContent.trim() : null;
+      logDeviceInput.value = assetTag;
+
+      if (!assetTag) {
+        console.error("Asset tag is missing for selected device.");
+        return;
+      }
+      modal.style.display = "block";
+      fetchDeviceLog(assetTag);
+    });
+  });
+
+  // Optionally handle a manual log modal open (if such a button exists)
+  const manualLogBtn = document.getElementById("open-log-manual-modal");
+  if (manualLogBtn) {
+    manualLogBtn.addEventListener("click", function () {
+      document.getElementById("log-device-id").value = "";
+      document.getElementById("logEventModal").style.display = "block";
+      // No asset tag, so fetch all logs
+      fetch('/Forms/Assets/fetch_event_log.php')
+        .then(res => res.json())
+        .then(data => {
+          const table = document.getElementById("device-log-history");
+          table.innerHTML = "";
+          if (!Array.isArray(data) || data.length === 0) {
+            table.innerHTML = "<tr><td colspan='4'>No logs available.</td></tr>";
+            return;
+          }
+          data.forEach(log => {
+            const row = `<tr>
+              <td>${log.date}</td>
+              <td>${log.time}</td>
+              <td>${log.event_type}</td>
+              <td>${log.memo}</td>
+            </tr>`;
+            table.innerHTML += row;
+          });
+        });
+    });
+  }
+
+  // ADD: Log Event Form Submission Handler (AJAX)
+  const logEventForm = document.getElementById("log-event-form");
+  if (logEventForm) {
+    logEventForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const formData = new FormData(form);
+      // Use value from hidden input for asset tag
+      const assetTag = document.getElementById("log-device-id").value;
+      console.log("Submitting log for asset tag:", assetTag);
+
+      // Ensure assetTag is not null before fetch
+      if (!assetTag) {
+        console.error("No asset tag found, cannot fetch logs.");
+        return;
+      }
+
+      fetch("manual_log.php", {
+        method: "POST",
+        body: formData
+      })
+        .then(() => {
+          // Optionally, reset form fields
+          form.reset();
+          // Fetch updated logs for this asset tag using the hidden input value
+          const refreshedAssetTag = document.getElementById("log-device-id").value;
+          if (refreshedAssetTag) {
+            fetchDeviceLog(refreshedAssetTag);
+          }
+        });
+    });
+  }
+});
 // Per-column filtering for device-table (laptop dashboard)
 document.addEventListener("DOMContentLoaded", function () {
     // Only run if device-table exists
@@ -551,28 +711,47 @@ document.addEventListener("DOMContentLoaded", function () {
     if (cancelEditBtn) {
         cancelEditBtn.addEventListener("click", () => {
             if (originalTableHTML) {
-                document.querySelector(".device-table tbody").innerHTML = originalTableHTML;
+                const tbody = document.querySelector(".device-table tbody");
+                tbody.innerHTML = originalTableHTML;
+
+                // Clear old double-click handlers by replacing each row with its clone
+                const refreshedRows = document.querySelectorAll(".device-table .clickable-row");
+                refreshedRows.forEach(row => {
+                  const clone = row.cloneNode(true);
+                  row.parentNode.replaceChild(clone, row);
+                });
+                // Rebind double-click modal logic for clickable-row
+                document.querySelectorAll(".device-table .clickable-row").forEach(row => {
+                  row.addEventListener("dblclick", function (e) {
+                    if (document.body.classList.contains("editing-mode")) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      return;
+                    }
+
+                    const assetTagCell = this.querySelector('td[data-column="asset_tag"]');
+                    const assetTag = assetTagCell ? assetTagCell.textContent.trim() : null;
+                    const modal = document.getElementById("logEventModal");
+                    const logDeviceInput = document.getElementById("log-device-id");
+
+                    if (!assetTag) {
+                      console.error("Asset tag is missing for selected device.");
+                      return;
+                    }
+
+                    logDeviceInput.value = assetTag;
+                    modal.style.display = "block";
+                    fetchDeviceLog(assetTag);
+                  });
+                });
             }
+
             editing = false;
             document.body.classList.remove("editing-mode");
             editBtn.textContent = "Edit Table";
             cancelEditBtn.style.display = "none";
             if (deleteBtn) deleteBtn.style.display = "none";
             if (undoBtn) undoBtn.style.display = "none";
-
-            // Re-enable double click handlers on reverted rows
-            document.querySelectorAll(".clickable-row").forEach(row => {
-                row.addEventListener("dblclick", function (e) {
-                    const isEditing = document.body.classList.contains("editing-mode");
-                    const href = this.getAttribute("data-href");
-                    if (!isEditing && href) {
-                        window.location.href = href;
-                    } else {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-                });
-            });
 
             // Rebind inline editing after cancel
             document.querySelectorAll(".device-table td").forEach(cell => {
@@ -643,20 +822,29 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Initial .clickable-row logic: open modal only on double-click
     document.querySelectorAll(".clickable-row").forEach(row => {
-        row.addEventListener("dblclick", function (e) {
-            const deviceId = this.getAttribute("data-device-id");
-            if (deviceId) {
-                e.preventDefault();
-                e.stopPropagation();
-                const modal = document.getElementById("logEventModal");
-                const formDeviceId = document.getElementById("log-device-id");
-                if (modal && formDeviceId) {
-                    formDeviceId.value = deviceId;
-                    modal.style.display = "block";
-                }
-            }
-        });
+      row.addEventListener("dblclick", function (e) {
+        if (document.body.classList.contains("editing-mode")) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+
+        const assetTagCell = this.querySelector('td[data-column="asset_tag"]');
+        const assetTag = assetTagCell ? assetTagCell.textContent.trim() : null;
+        const modal = document.getElementById("logEventModal");
+        const logDeviceInput = document.getElementById("log-device-id");
+
+        if (!assetTag) {
+          console.error("Asset tag is missing for selected device.");
+          return;
+        }
+
+        logDeviceInput.value = assetTag;
+        modal.style.display = "block";
+        fetchDeviceLog(assetTag);
+      });
     });
 });
 
@@ -962,15 +1150,18 @@ function bindRowEvents() {
             e.stopPropagation();
         });
         row.addEventListener("dblclick", function (e) {
-            const deviceId = this.getAttribute("data-device-id");
-            if (deviceId) {
+            // Retrieve asset tag from the row's asset_tag cell
+            const assetTagCell = this.querySelector('td[data-column="asset_tag"]');
+            const assetTag = assetTagCell ? assetTagCell.textContent.trim() : null;
+            if (assetTag) {
                 e.preventDefault();
                 e.stopPropagation();
                 const modal = document.getElementById("logEventModal");
                 const formDeviceId = document.getElementById("log-device-id");
                 if (modal && formDeviceId) {
-                    formDeviceId.value = deviceId;
+                    formDeviceId.value = assetTag;
                     modal.style.display = "block";
+                    fetchDeviceLog(assetTag);
                 }
             }
         });
