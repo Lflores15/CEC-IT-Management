@@ -344,7 +344,6 @@ h2 {
     width: 100%;
     border-collapse: collapse;
     background: #ffffff;
-    margin-top: 20px;
     border: 2px solid #007bff;
 }
 
@@ -368,7 +367,12 @@ h2 {
 
 #log-header-row th {
     padding: 10px;
-  }
+}
+
+#log-header-row {
+    margin-top: 0;
+    padding-top: 0;
+}
 
 /* Highlight rows for missing employees in audit table */
 .missing-employee {
@@ -1501,7 +1505,7 @@ th.sortable.desc::after {
 
 #logEventModal .laptop-modal-content {
     width: 1000px;
-    height: 800px;
+    height: 775px;
     max-width: none;
     max-height: none;
     padding: 40px;
@@ -1522,9 +1526,14 @@ th.sortable.desc::after {
 }
 
 #logEventModal .laptop-modal-content .log-table-scrollable {
-    max-height: 650px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-top: 20px;
+    max-height: none;
+    height: 640px;
     overflow-y: auto;
-    padding-right: 5px;
 }
 
 
@@ -1604,7 +1613,7 @@ th.sortable.desc::after {
 }
 #logEventModal .laptop-modal-content h2,
 #logEventModal .laptop-modal-content h3 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: bold;
     color: #333;
     margin: 0 0 15px 0;

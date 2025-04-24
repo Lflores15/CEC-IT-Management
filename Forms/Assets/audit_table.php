@@ -118,6 +118,9 @@ while (($row = fgetcsv($csvFile)) !== false) {
                 error_log("Insert failed for employee_id '$empId': " . $insert->error);
             } else {
                 error_log("Insert succeeded for '$empId'");
+                // LOG: Each employee inserted into Employees table
+                $logMessage = date("Y-m-d | h:i:s A") . " | Event: New Employee Added | Name: $firstName $lastName | Employee ID: $empId" . PHP_EOL;
+                file_put_contents(__DIR__ . '/../../logs/user_event_log.txt', $logMessage, FILE_APPEND);
             }
             $insert->close();
         } else {
@@ -146,6 +149,9 @@ foreach ($namePairs as $pair) {
     $stmt = $conn->prepare("UPDATE Employees SET active = 1 WHERE LOWER(first_name) = ? AND LOWER(last_name) = ?");
     $stmt->bind_param("ss", $pair['first_name'], $pair['last_name']);
     $stmt->execute();
+    // LOG: Each employee flagged as active during audit (name-based)
+    $logMessage = date("Y-m-d | h:i:s A") . " | Event: Employee Reactivated (Audit) | Name: {$pair['first_name']} {$pair['last_name']}" . PHP_EOL;
+    file_put_contents(__DIR__ . '/../../logs/device_event_log.txt', $logMessage, FILE_APPEND);
     $stmt->close();
 }
 
