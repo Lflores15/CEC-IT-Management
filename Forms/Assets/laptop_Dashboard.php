@@ -80,6 +80,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
             <button id="open-create-modal" class="create-device-btn">+ Create Device</button>
             <button id="edit-columns-btn" class="edit-columns-btn">Edit Columns</button>
             <!-- Filters moved here -->
+            <!-- Deprecated filters
             <div class="filters" style="margin-left: 10px;">
               <input type="text" id="filter-tag" placeholder="Filter by Asset Tag">
             </div>
@@ -92,8 +93,8 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
                 <option value="Pending Return">Pending Return</option>
                 <option value="Shelf">Shelf</option>
               </select>
-            </div>
-        </div>
+            </div> --> 
+        </div> 
         <div style="display: flex; gap: 10px;">
             <button id="openImportLaptopModal" class="import-btn">Populate Table</button>
             <button id="audit-laptop-btn" class="create-device-btn">Audit Laptops</button>
@@ -125,10 +126,24 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
         <table class="device-table" id="device-table">
             <thead>
                 <tr>
-                    <th><input type="checkbox" id="select-all"></th>
+                    <th>
+                        <input class="edit-only" type="checkbox" id="select-all">
+                    </th>
                     <?php foreach ($visible_columns as $col): ?>
                         <th class="sortable <?= $col === 'assigned_to' ? 'edit-only' : '' ?>">
                             <?= htmlspecialchars($default_columns[$col]) ?>
+                        </th>
+                    <?php endforeach; ?>
+                </tr>
+            </thead>
+            <thead class="filter-header">
+                <tr>
+                    <th></th>
+                    <?php foreach ($visible_columns as $col): ?>
+                        <th <?= $col === 'assigned_to' ? 'class="edit-only"' : '' ?>>
+                            <?php if ($col !== 'assigned_to'): ?>
+                                <input type="text" class="filter-input" data-column="<?= $col ?>" placeholder="Filter <?= htmlspecialchars($default_columns[$col]) ?>" style="width: 95%;">
+                            <?php endif; ?>
                         </th>
                     <?php endforeach; ?>
                 </tr>

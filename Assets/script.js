@@ -1,3 +1,26 @@
+// Per-column filtering for device-table (laptop dashboard)
+document.addEventListener("DOMContentLoaded", function () {
+    // Only run if device-table exists
+    const table = document.getElementById("device-table");
+    if (!table) return;
+    // Listen for input on all filter-inputs
+    document.querySelectorAll(".filter-input").forEach(input => {
+        input.addEventListener("input", () => {
+            const rows = document.querySelectorAll("#device-table tbody tr");
+            rows.forEach(row => {
+                let match = true;
+                document.querySelectorAll(".filter-input").forEach(filter => {
+                    const col = filter.dataset.column;
+                    const val = filter.value.toLowerCase();
+                    const cell = row.querySelector(`td[data-column="${col}"]`);
+                    const text = cell?.textContent.toLowerCase() || '';
+                    if (!text.includes(val)) match = false;
+                });
+                row.style.display = match ? "" : "none";
+            });
+        });
+    });
+});
 document.addEventListener("DOMContentLoaded", function () {
   const runAuditBtn = document.getElementById("runAuditBtn");
   const auditFileInput = document.getElementById("auditCsvFile");
