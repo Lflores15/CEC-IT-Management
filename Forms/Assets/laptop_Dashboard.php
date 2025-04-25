@@ -1,299 +1,106 @@
 <?php
-session_start();
-require_once "../../PHP/config.php";
-require_once "../../includes/navbar.php";
+// Forms/Assets/laptop_Dashboard.php
+declare(strict_types=1);
 
-if (!isset($_SESSION["user_id"])) {
-    header("Location: ../Login/login.php");
-    exit();
+// 1) Bootstrapping & session check
+require __DIR__ . '/../../PHP/config.php';
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../Login/login.php');
+    exit;
 }
 
-$default_columns = [
-    'status' => 'Status',
-    'internet_policy' => 'Internet Policy',
-    'asset_tag' => 'Asset Tag',    
-    'login_id' => 'Login ID',
-    'emp_first_name' => 'First Name',
-    'emp_last_name' => 'Last Name',
-    'employee_id' => 'Employee ID',
-    'phone_number' => 'Phone Number',
-    'cpu' => 'CPU',
-    'ram' => 'RAM (GB)',
-    'os' => 'OS',
-    'assigned_to' => 'Assigned To' 
-];
+// 2) Pull in your sidebar/navbar
+include __DIR__ . '/../../includes/navbar.php';
 
-$visible_columns = $_SESSION['visible_columns'] ?? array_keys($default_columns);
-
-
+// 3) Build the query string
 $sql = "
   SELECT
     d.status,
     l.internet_policy,
     d.asset_tag,
-    e.login_id,
-    e.first_name,
-    e.last_name,
-    e.emp_code   AS employee_id,
-    e.phone_number,
+    COALESCE(e.login_id,'N/A')      AS login_id,
+    COALESCE(e.first_name,'N/A')    AS first_name,
+    COALESCE(e.last_name,'N/A')     AS last_name,
+    COALESCE(d.assigned_to,'N/A')   AS employee_id,
+    COALESCE(e.phone_number,'N/A')  AS phone_number,
     l.cpu,
     l.ram,
     l.os
-  FROM Devices AS d
-  JOIN Laptops AS l 
-    ON d.device_id = l.device_id
-  LEFT JOIN Employees AS e 
-    ON d.assigned_to = e.emp_code
-  ORDER BY d.asset_tag
+  FROM Devices d
+  JOIN Laptops  l  ON l.device_id      = d.device_id
+  LEFT JOIN Employees e ON d.assigned_to = e.emp_code
+  ORDER BY d.asset_tag;
 ";
 
-$stmt = $conn->prepare($query);
-if (!$stmt) {
-    die("Prepare failed: " . $conn->error);
+// … right before your prepare call …
+error_log("LAPTOP SQL: " . $sql);
+echo "<pre style='color:red'>SQL=>\n" . htmlspecialchars($sql) . "</pre>";
+$stmt = $conn->prepare($sql);
+if ( ! $stmt ) {
+    echo "<div style='color:red'>Prepare failed: " . htmlspecialchars($conn->error) . "</div>";
+    exit;
 }
+
 $stmt->execute();
-$result = $stmt->get_result();
+$result  = $stmt->get_result();
 $devices = $result->fetch_all(MYSQLI_ASSOC);
-// Fetch employee dropdown values before closing the connection
-// Fetch employee dropdown values before closing the connection
-$employeeOptions = [['id' => '', 'name' => 'Not Assigned']];
-$empQuery = $conn->query("SELECT emp_id, CONCAT(first_name, ' ', last_name) AS name FROM Employees ORDER BY name ASC");
-while ($row = $empQuery->fetch_assoc()) {
-    $employeeOptions[] = [
-        'id' => $row['emp_id'],
-        'name' => $row['name']
-    ];
-}
 $stmt->close();
 $conn->close();
 
-$activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
+// 5) Helper to safely escape any value as string
+function h($val): string {
+    return htmlspecialchars((string)$val, ENT_QUOTES, 'UTF-8');
+}
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Laptops Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/Assets/styles.css">
-    <script src="/Assets/script.js?v=<?php echo time(); ?>" defer></script> 
+  <meta charset="UTF-8">
+  <title>Laptops Dashboard | CEC-IT</title>
+  <link rel="stylesheet" href="/Assets/styles.css">
 </head>
 <body>
-<div class="main-layout">
+  <div class="main-content">
     <h1>Laptops Dashboard</h1>
-    <div class="filters-container" style="padding-top: 0;">
-      <div style="display: flex; justify-content: space-between; width: 100%;">
-        <div style="display: flex; gap: 10px;">
-            <button id="edit-mode-btn" class="edit-mode-btn">Edit Table</button>
-            <button id="cancel-edit-btn" class="cancel-edit-btn" style="display: none;">Cancel</button>
-            <button id="delete-selected-btn" class="delete-btn" style="display: none;">Delete Selected</button>
-            <button id="undo-delete-btn" class="undo-btn" style="display: none;">Undo Last Delete</button>
-            <button id="open-create-modal" class="create-device-btn">+ Create Device</button>
-            <button id="edit-columns-btn" class="edit-columns-btn">Edit Columns</button>
-            <!-- Filters moved here -->
-            <!-- Deprecated filters
-            <div class="filters" style="margin-left: 10px;">
-              <input type="text" id="filter-tag" placeholder="Filter by Asset Tag">
-            </div>
-            <div class="filters">
-              <select id="filter-status">
-                <option value="Status">Filter by Status</option>
-                <option value="Active">Active</option>
-                <option value="Decommissioned">Decommissioned</option>
-                <option value="Lost">Lost</option>
-                <option value="Pending Return">Pending Return</option>
-                <option value="Shelf">Shelf</option>
-              </select>
-            </div> --> 
-        </div> 
-        <div style="display: flex; gap: 10px;">
-            <button id="openImportLaptopModal" class="import-btn">Populate Table</button>
-            <button id="audit-laptop-btn" class="create-device-btn">Audit Laptops</button>
-        </div>
-      </div>
-      <!-- JS logic for undo, delete, modals, import, etc. is handled by script.js -->
-      <div id="column-selector" class="modal">
-        <div class="laptop-modal-content">
-          <div class="laptop-modal-header">
-            <h2 style="margin: 0;">Edit Visible Columns</h2>
-            <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
-          </div>
-          <form id="column-form">
-            <div>
-              <?php foreach ($default_columns as $key => $label): ?>
-                <label style="display: block; margin-bottom: 8px; font-size: 15px;">
-                  <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
-                  <?= htmlspecialchars($label) ?>
-                </label>
-              <?php endforeach; ?>
-            </div>
-            <button type="submit">Apply</button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <div class="table-container">
-        <table class="device-table" id="device-table">
-            <thead>
-                <tr>
-                    <th>
-                        <input class="edit-only" type="checkbox" id="select-all">
-                    </th>
-                    <?php foreach ($visible_columns as $col): ?>
-                        <th class="sortable <?= $col === 'assigned_to' ? 'edit-only' : '' ?>">
-                            <?= htmlspecialchars($default_columns[$col]) ?>
-                        </th>
-                    <?php endforeach; ?>
-                </tr>
-            </thead>
-            <thead class="filter-header">
-                <tr>
-                    <th></th>
-                    <?php foreach ($visible_columns as $col): ?>
-                        <th <?= $col === 'assigned_to' ? 'class="edit-only"' : '' ?>>
-                            <?php if ($col !== 'assigned_to'): ?>
-                                <input type="text" class="filter-input" data-column="<?= $col ?>" placeholder="Filter <?= htmlspecialchars($default_columns[$col]) ?>" style="width: 95%;">
-                            <?php endif; ?>
-                        </th>
-                    <?php endforeach; ?>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (empty($devices)) : ?>
-                    <tr><td colspan="<?= count($visible_columns) + 1 ?>">No devices found.</td></tr>
-                <?php else : ?>
-                    <?php foreach ($devices as $device): ?>
-                        <?php
-                        // Determine if this device's employee_id is NOT in the active employee list
-                        $empId = isset($device['employee_id']) ? trim($device['employee_id']) : null;
-                        $isMissingEmployee = $empId && !in_array($empId, $activeEmployeeIDs);
-                        ?>
-                        <tr class="clickable-row<?= $isMissingEmployee ? ' missing-employee' : '' ?>" data-device-id="<?= $device['device_id'] ?>">
-                            <td><input type="checkbox" class="row-checkbox delete-checkbox" value="<?= $device['device_id'] ?>"></td>
-                            <?php foreach ($visible_columns as $col): ?>
-                                <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ?  'class="edit-only"data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>
-                                    <?php if ($col === 'assigned_to'): ?>
-                                        <?= htmlspecialchars(trim(($device['emp_first_name'] ?? '') . ' ' . ($device['emp_last_name'] ?? ''))) . ' (' . ($device['employee_id'] ?? 'N/A') . ')' ?>
-                                    <?php else: ?>
-                                        <?= htmlspecialchars($device[$col] ?? 'N/A') ?>
-                                    <?php endif; ?>
-                                </td>
-                            <?php endforeach; ?>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
-<script>
-    window.employeeOptions = <?= json_encode($employeeOptions) ?>;
-</script>
-
-<!-- Import Laptop CSV Modal -->
-<div id="importLaptopModal" class="laptop-modal-content-wrapper">
-  <div class="laptop-modal-content">
-    <div class="laptop-modal-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-      <h2 style="margin: 0;">Import Laptops from CSV</h2>
-      <span id="closeImportLaptopModal" class="close" style="font-size: 24px; cursor: pointer;">&times;</span>
-    </div>
-    <form id="importLaptopForm" enctype="multipart/form-data">
-      <input type="file" name="csv_file" accept=".csv" required>
-      <button type="submit">Import</button>
-    </form>
-    <div id="import-result-message" style="margin-top: 10px; display: none;"></div>
+    <table class="device-table">
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Internet Policy</th>
+          <th>Asset Tag</th>
+          <th>Login ID</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Employee ID</th>
+          <th>Phone Number</th>
+          <th>CPU</th>
+          <th>RAM (GB)</th>
+          <th>OS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php if (empty($devices)): ?>
+          <tr><td colspan="11">No laptops found.</td></tr>
+        <?php else: ?>
+          <?php foreach ($devices as $row): ?>
+            <tr>
+              <td><?= h($row['status']) ?></td>
+              <td><?= h($row['internet_policy']) ?></td>
+              <td><?= h($row['asset_tag']) ?></td>
+              <td><?= h($row['login_id']) ?></td>
+              <td><?= h($row['first_name']) ?></td>
+              <td><?= h($row['last_name']) ?></td>
+              <td><?= h($row['employee_id']) ?></td>
+              <td><?= h($row['phone_number']) ?></td>
+              <td><?= h($row['cpu']) ?></td>
+              <td><?= h($row['ram']) ?></td>
+              <td><?= h($row['os']) ?></td>
+            </tr>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </tbody>
+    </table>
   </div>
-</div>
-<!-- Audit Laptop Modal -->
-<div id="auditLaptopModal" class="laptop-modal-content-wrapper" style="display: none;">
-  <div class="laptop-modal-content">
-    <div class="laptop-modal-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-      <h2 style="margin: 0;">Audit Laptops</h2>
-      <span id="closeAuditLaptopModal" class="close" style="font-size: 24px; cursor: pointer;">&times;</span>
-    </div>
-    <div id="auditLaptopForm">
-      <p>Select an Active Employee CSV file to audit assigned laptops.</p>
-      <input type="file" id="auditCsvFile" accept=".csv" required>
-      <button type="button" id="runAuditBtn">Run Audit</button>
-    </div>
-  </div>
-</div>
-<!-- All modal, import, and row navigation JS logic is handled by script.js -->
-  <!-- Create Device Modal -->
-  <div id="create-device-modal" class="modal create-device-modal" style="display: none;">
-    <div class="laptop-modal-content">
-      <div class="laptop-modal-header">
-        <h2>Create New Laptop</h2>
-        <span id="close-create-modal" class="close">&times;</span>
-      </div>
-      <form id="create-device-form" method="post" action="create_laptop.php">
-        <fieldset>
-          <legend>Device Info</legend>
- 
-          <label>Status:
-            <select name="status">
-              <option value="Active">Active</option>
-              <option value="Pending Return">Pending Return</option>
-              <option value="Shelf">Shelf</option>
-              <option value="Lost">Lost</option>
-              <option value="Decommissioned">Decommissioned</option>
-            </select>
-          </label>
- 
-          <label>Internet Policy:
-            <select name="internet_policy">
-              <option value="admin">Admin</option>
-              <option value="default">Default</option>
-              <option value="office">Office</option>
-            </select>
-          </label>
- 
-          <label>Asset Tag: <input type="text" name="asset_tag" required></label>
-          <label>Login ID: <input type="text" name="login_id"></label>
-          <label>First Name: <input type="text" name="first_name"></label>
-          <label>Last Name: <input type="text" name="last_name"></label>
-          <label>Employee ID: <input type="text" name="employee_id"></label>
-          <label>Phone Number: <input type="text" name="phone_number"></label>
-          <label>CPU: <input type="text" name="cpu"></label>
-          <label>RAM (GB): <input type="number" name="ram"></label>
-          <label>OS: <input type="text" name="os"></label>
- 
-        </fieldset>
-        <button type="submit">Submit</button>
-      </form>
-      <p id="create-result-message" style="margin-top: 10px; display: none;"></p>
-    </div>
-  </div>
-</html>
-  <!-- Log Event Modal -->
-  <div id="logEventModal" class="modal create-device-modal" style="display: none;">
-    <div class="laptop-modal-content">
-      <div class="laptop-modal-header">
-        <h2>Log Laptop Event</h2>
-        <span class="close" onclick="document.getElementById('logEventModal').style.display='none'">&times;</span>
-      </div>
-      <form id="log-event-form" method="post" action="log_event.php">
-        <input type="hidden" id="log-device-id" name="device_id">
-
-        <label for="event_type">Event Type:</label>
-        <select name="event_type" required>
-          <option value="">Select Event Type</option>
-          <option value="New User Setup">New User Setup</option>
-          <option value="Updated">Updated</option>
-          <option value="User Archived">User Archived</option>
-          <option value="Maintenance">Maintenance</option>
-          <option value="Damaged">Damaged</option>
-          <option value="Decommissioned">Decommissioned</option>
-          <option value="Location Change">Location Change</option>
-        </select>
-
-        <label for="memo">Memo:</label>
-        <textarea name="memo" rows="4" placeholder="Add a note about this event..." required></textarea>
-
-        <button type="submit">Log Event</button>
-      </form>
-    </div>
-  </div>
+</body>
 </html>
