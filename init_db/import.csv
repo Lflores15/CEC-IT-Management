@@ -1,4 +1,4 @@
-status,internet_policy,asset_tag,login_id,first_name,last_name,user_id,phone_number,cpu,ram,os
+status,internet_policy,asset_tag,login_id,first_name,last_name,emp_code,phone_number,cpu,ram,os,*,*
 active,Admin,CEC-LT001,dmoorhead,Darrin,Moorhead,1202,(361) 443-0990,i5-12500H,16,11
 active,Admin,CEC-LT002,hwatkins,Hanah,Watkins,,,Ultra 9 185H,32,11
 shelf,Default,CEC-LT003,,Corpus,Office,,,i7-1065G7,16,11

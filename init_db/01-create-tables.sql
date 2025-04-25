@@ -12,7 +12,7 @@ CREATE TABLE Users (
 
 CREATE TABLE Employees (
   emp_id        INT AUTO_INCREMENT PRIMARY KEY,
-  emp_code      VARCHAR(50)    NOT NULL UNIQUE,  -- 4-digit HR code
+  emp_code      VARCHAR(50),           -- 4-digit HR code
   login_id      VARCHAR(100)   NOT NULL,         -- to join on assets
   first_name    VARCHAR(100)   NOT NULL,
   last_name     VARCHAR(100)   NOT NULL,
@@ -30,8 +30,8 @@ CREATE TABLE Devices (
                   'Decommissioned',
                   'Open'
                 ) NOT NULL,
-  assigned_to  VARCHAR(50),                                   -- emp_code
-  FOREIGN KEY (assigned_to) REFERENCES Employees(emp_code)
+  assigned_to  INT,                                   -- FK to emp_id
+  FOREIGN KEY (assigned_to) REFERENCES Employees(emp_id)
 );
 
 CREATE TABLE Laptops (
