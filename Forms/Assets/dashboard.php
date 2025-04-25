@@ -1,36 +1,38 @@
 <?php
 session_start();
 require_once "../../PHP/config.php";
-require_once "../../includes/navbar.php"; 
+require_once "../../includes/navbar.php";
 
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../Login/login.php");
     exit();
 }
 
-$user_id = $_SESSION["user_id"];
+$user_id  = $_SESSION["user_id"];
 $username = $_SESSION["username"];
-$emp_id = $_SESSION["emp_id"] ?? null;
 
-$stmt = $conn->prepare("SELECT email, role FROM Users WHERE user_id = ?");
+// pull back username & role, not email
+$stmt = $conn->prepare("SELECT username, role FROM Users WHERE user_id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
-$stmt->bind_result($email, $role);
+$stmt->bind_result($username, $role);
 $stmt->fetch();
 $stmt->close();
 
+// now grab our status counts directly off Devices
 $query = "
-    SELECT 
-        (SELECT COUNT(*) FROM Devices) AS total, 
-        (SELECT COUNT(*) FROM Devices WHERE status = 'Active') AS active, 
-        (SELECT COUNT(*) FROM Decommissioned_Laptops) AS decommissioned, 
-        (SELECT COUNT(*) FROM Devices WHERE status = 'Lost') AS lost, 
-        (SELECT COUNT(*) FROM Devices WHERE status = 'Pending Return') AS pending, 
-        (SELECT COUNT(*) FROM Devices WHERE status = 'Shelf') AS shelf
+    SELECT
+       (SELECT COUNT(*) FROM Devices)                                  AS total,
+       (SELECT COUNT(*) FROM Devices WHERE status = 'Active')          AS active,
+       (SELECT COUNT(*) FROM Devices WHERE status = 'Decommissioned')   AS decommissioned,
+       (SELECT COUNT(*) FROM Devices WHERE status = 'Lost')            AS lost,
+       (SELECT COUNT(*) FROM Devices WHERE status = 'Pending Return')  AS pending,
+       (SELECT COUNT(*) FROM Devices WHERE status = 'Shelf')           AS shelf
 ";
 
 $result = $conn->query($query);
 $counts = $result->fetch_assoc();
+
 
 $conn->close();
 ?>
