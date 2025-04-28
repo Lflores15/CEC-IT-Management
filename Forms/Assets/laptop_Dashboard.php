@@ -171,6 +171,9 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
                         // Determine if this device's employee_id is NOT in the active employee list
                         $empId = isset($device['employee_id']) ? trim($device['employee_id']) : null;
                         $isMissingEmployee = $empId && !in_array($empId, $activeEmployeeIDs);
+                        $isDummy = ($device['emp_code'] === '0000');
+
+
                         ?>
                         <tr class="clickable-row<?= $isMissingEmployee ? ' missing-employee' : '' ?>" data-device-id="<?= $device['device_id'] ?>">
                             <td><input type="checkbox" class="row-checkbox delete-checkbox" value="<?= $device['device_id'] ?>"></td>
@@ -178,9 +181,25 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
                                 <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ?  'class="edit-only"data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>
                                     <?php if ($col === 'assigned_to'): ?>
                                         <?= htmlspecialchars(trim(($device['first_name'] ?? '') . ' ' . ($device['last_name'] ?? ''))) . ' (' . ($device['emp_code'] ?? 'N/A') . ')' ?>
-                                    <?php else: ?>
-                                        <?= htmlspecialchars($device[$col] ?? 'N/A') ?>
-                                    <?php endif; ?>
+                                        <?php else: ?>
+                                          <?php
+                                            // 1) If this is our dummy “0000” row, any employee field should show N/A
+                                            if ($isDummy && in_array($col, ['username','first_name','last_name','emp_code','phone_number'])) {
+                                                echo 'N/A';
+
+                                            // 2) Otherwise, normalize blank or zero → N/A
+                                            } else {
+                                                $raw = isset($device[$col]) ? trim((string)$device[$col]) : '';
+                                                if ($raw === '' || $raw === '0') {
+                                                    echo 'N/A';
+                                                } else {
+                                                    echo htmlspecialchars($raw);
+                                                }
+                                            }
+                                          ?>
+                                      <?php endif; ?>
+
+
                                 </td>
                             <?php endforeach; ?>
                         </tr>
