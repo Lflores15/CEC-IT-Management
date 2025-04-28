@@ -712,7 +712,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.addEventListener("DOMContentLoaded", function () {
     const selectOptions = {
-        status: ['Active', 'Pending Return', 'Shelf', 'Lost', 'Decommissioned'],
+        status: ['active', 'shelf-cc', 'shelf-md', 'shelf-hx', 'pending return', 'lost', 'decommissioned'],
         internet_policy: ['Admin', 'Default', 'Office'],
         assigned_to: window.employeeOptions || []  // will be injected from PHP
     };

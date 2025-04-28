@@ -255,11 +255,13 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
  
           <label>Status:
             <select name="status">
-              <option value="Active">Active</option>
-              <option value="Pending Return">Pending Return</option>
-              <option value="Shelf">Shelf</option>
-              <option value="Lost">Lost</option>
-              <option value="Decommissioned">Decommissioned</option>
+              <option value="active">Active</option>
+              <option value="shelf-cc">Shelf-CC</option>
+              <option value="shelf-md">Shelf-MD</option>
+              <option value="shelf-hx">Shelf-HX</option>
+              <option value="pending return">Pending Return</option>
+              <option value="lost">Lost</option>
+              <option value="decommissioned">Decommissioned</option>
             </select>
           </label>
  
