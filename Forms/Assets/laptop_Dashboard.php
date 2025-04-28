@@ -59,13 +59,24 @@ $devices = $result->fetch_all(MYSQLI_ASSOC);
 // Fetch employee dropdown values before closing the connection
 // Fetch employee dropdown values before closing the connection
 $employeeOptions = [['id' => '', 'name' => 'Not Assigned']];
-$empQuery = $conn->query("SELECT emp_id, CONCAT(first_name, ' ', last_name) AS name FROM Employees ORDER BY name ASC");
+$empQuery = $conn->query("
+  SELECT emp_id, emp_code, first_name, last_name
+    FROM Employees
+ORDER BY first_name ASC, last_name ASC
+");
 while ($row = $empQuery->fetch_assoc()) {
+    // If the dummy row, only use one “Unassigned”
+    if ($row['emp_code'] === '0000') {
+        $displayName = 'Unassigned';
+    } else {
+        $displayName = trim($row['first_name'] . ' ' . $row['last_name']);
+    }
     $employeeOptions[] = [
-        'id' => $row['emp_id'],
-        'name' => $row['name']
+        'id'   => $row['emp_id'],
+        'name' => $displayName,
     ];
 }
+
 $stmt->close();
 $conn->close();
 
@@ -163,49 +174,62 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($devices)) : ?>
-                    <tr><td colspan="<?= count($visible_columns) + 1 ?>">No devices found.</td></tr>
-                <?php else : ?>
-                    <?php foreach ($devices as $device): ?>
-                        <?php
-                        // Determine if this device's employee_id is NOT in the active employee list
-                        $empId = isset($device['employee_id']) ? trim($device['employee_id']) : null;
-                        $isMissingEmployee = $empId && !in_array($empId, $activeEmployeeIDs);
-                        $isDummy = ($device['emp_code'] === '0000');
+  <?php if (empty($devices)): ?>
+    <tr><td colspan="<?= count($visible_columns) + 1 ?>">No devices found.</td></tr>
+  <?php else: ?>
+    <?php foreach ($devices as $device):
+      // Has a real emp_code?
+      $hasCode = !empty($device['emp_code']);
+      // Is the dummy row?
+      $isDummy = ($device['emp_code'] === '0000');
+      // Missing‐employee if there's a code, it's not the dummy, and we didn't load a first_name
+      $isMissingEmployee = $hasCode && !$isDummy && empty($device['first_name']);
+    ?>
+      <tr
+        class="clickable-row<?= $isMissingEmployee ? ' missing-employee' : '' ?>"
+        data-device-id="<?= $device['device_id'] ?>"
+      >
+        <td><input type="checkbox" class="row-checkbox delete-checkbox" value="<?= $device['device_id'] ?>"></td>
+
+        <?php foreach ($visible_columns as $col): ?>
+          <td
+            data-column="<?= $col ?>"
+            data-id="<?= $device['device_id'] ?>"
+            <?= $col === 'assigned_to'
+                ? 'class="edit-only" data-emp-id="' . htmlspecialchars($device['assigned_to']) . '"'
+                : '' ?>
+          >
+            <?php if ($col === 'assigned_to'): ?>
+              <?php if ($isDummy): ?>
+                Unassigned (0000)
+              <?php else: ?>
+                <?= htmlspecialchars(trim($device['first_name'] . ' ' . $device['last_name'])) ?>
+                (<?= htmlspecialchars($device['emp_code']) ?>)
+              <?php endif; ?>
+
+            <?php else: ?>
+              <?php
+                // Dummy row hides all employee fields
+                if ($isDummy && in_array($col, ['username','first_name','last_name','emp_code','phone_number'], true)) {
+                  echo 'N/A';
+                } else {
+                  // Normalize blank or zero → N/A
+                  $raw = isset($device[$col]) ? trim((string)$device[$col]) : '';
+                  echo ($raw === '' || $raw === '0')
+                       ? 'N/A'
+                       : htmlspecialchars($raw);
+                }
+              ?>
+            <?php endif; ?>
+          </td>
+        <?php endforeach; ?>
+
+      </tr>
+    <?php endforeach; ?>
+  <?php endif; ?>
+</tbody>
 
 
-                        ?>
-                        <tr class="clickable-row<?= $isMissingEmployee ? ' missing-employee' : '' ?>" data-device-id="<?= $device['device_id'] ?>">
-                            <td><input type="checkbox" class="row-checkbox delete-checkbox" value="<?= $device['device_id'] ?>"></td>
-                            <?php foreach ($visible_columns as $col): ?>
-                                <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ?  'class="edit-only"data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>
-                                    <?php if ($col === 'assigned_to'): ?>
-                                        <?= htmlspecialchars(trim(($device['first_name'] ?? '') . ' ' . ($device['last_name'] ?? ''))) . ' (' . ($device['emp_code'] ?? 'N/A') . ')' ?>
-                                        <?php else: ?>
-                                          <?php
-                                            // 1) If this is our dummy “0000” row, any employee field should show N/A
-                                            if ($isDummy && in_array($col, ['username','first_name','last_name','emp_code','phone_number'])) {
-                                                echo 'N/A';
-
-                                            // 2) Otherwise, normalize blank or zero → N/A
-                                            } else {
-                                                $raw = isset($device[$col]) ? trim((string)$device[$col]) : '';
-                                                if ($raw === '' || $raw === '0') {
-                                                    echo 'N/A';
-                                                } else {
-                                                    echo htmlspecialchars($raw);
-                                                }
-                                            }
-                                          ?>
-                                      <?php endif; ?>
-
-
-                                </td>
-                            <?php endforeach; ?>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
         </table>
     </div>
 </div>
