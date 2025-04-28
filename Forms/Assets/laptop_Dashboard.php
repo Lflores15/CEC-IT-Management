@@ -265,13 +265,17 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
             </select>
           </label>
  
-          <label>Internet Policy:
-            <select name="internet_policy">
-              <option value="admin">Admin</option>
-              <option value="default">Default</option>
-              <option value="office">Office</option>
-            </select>
-          </label>
+         <label>Internet Policy:
+          <select name="internet_policy">
+            <option value="admin">Admin</option>
+            <option value="default">Default</option>
+            <option value="office">Office</option>
+            <option value="accounting">Accounting</option>
+            <option value="estimating">Estimating</option>
+            <option value="executive hr">Executive HR</option>
+          </select>
+        </label>
+
  
           <label>Asset Tag: <input type="text" name="asset_tag" required></label>
           <label>Login ID: <input type="text" name="login_id"></label>

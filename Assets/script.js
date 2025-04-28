@@ -57,7 +57,27 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   }
+
+
 });
+
+   // Format all phone_number cells as (XXX) XXX-XXXX
+   function formatPhoneColumn() {
+    document.querySelectorAll('td[data-column="phone_number"]').forEach(cell => {
+    let digits = (cell.textContent || '').replace(/\D/g, '');
+    if (digits.length === 10) {
+        cell.textContent = `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+    }
+    });
+}
+
+// Wait until everything else runs, then format phones
+document.addEventListener("DOMContentLoaded", function () {
+    formatPhoneColumn();
+});
+
+
+
 // Audit Laptop Modal logic
 document.addEventListener("DOMContentLoaded", function () {
   const auditModal = document.getElementById("auditLaptopModal");
@@ -713,7 +733,15 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
     const selectOptions = {
         status: ['active', 'shelf-cc', 'shelf-md', 'shelf-hx', 'pending return', 'lost', 'decommissioned'],
-        internet_policy: ['Admin', 'Default', 'Office'],
+        internet_policy: [
+            'default',
+            'office',
+            'admin',
+            'accounting',
+            'estimating',
+            'executive',
+            'hr',
+          ],
         assigned_to: window.employeeOptions || []  // will be injected from PHP
     };
 

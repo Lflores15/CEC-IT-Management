@@ -11,6 +11,7 @@ if (!isset($_SESSION["user_id"])) {
 
 // Get the current page name dynamically
 $pageTitle = "CEC-IT"; // Default title
+$role        = $_SESSION['role'] ?? '';
 $currentPage = basename($_SERVER['PHP_SELF'], ".php"); 
 
 // Determine if we are on an asset-related page
@@ -68,21 +69,44 @@ if (array_key_exists($currentPage, $pageTitles)) {
         <h2><?php echo $pageTitle; ?></h2>
         <a href="../Assets/dashboard.php" class="<?php echo ($currentPage == 'dashboard') ? 'active' : ''; ?>">Dashboard</a>
 
-        <!-- Assets Dropdown -->
-        <div class="dropdown">
-            <button class="dropdown-btn">Assets</button>
-            <div class="dropdown-content">
-                <a href="../Assets/laptop_Dashboard.php">Laptops</a>
-            </div>
-        </div>
-        <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'Manager'): ?>
-            <a href="../Users/user_Dashboard.php" class="<?php echo ($currentPage == 'users') ? 'active' : ''; ?>">Users</a>
-
-            <a href="/Forms/Employees/employee_Dashboard.php" class="<?php echo ($currentPage == 'employees') ? 'active' : ''; ?>">Employees</a>
-            <a href="../Admin/log_dashboard.php" class="<?php echo ($currentPage == 'logs') ? 'active' : ''; ?>">Logs</a>
-        <?php endif; ?>
-        <a href="../Settings/settings.php" class="<?php echo ($currentPage == 'settings') ? 'active' : ''; ?>">Settings</a>
+ <!-- Assets dropdown -->
+ <div class="dropdown">
+      <button class="dropdown-btn <?= in_array($currentPage, ['laptop_Dashboard','pc_Dashboard','tablet_Dashboard','phone_Dashboard']) ? 'open' : '' ?>">
+        Assets
+      </button>
+      <div class="dropdown-content">
+        <a href="../Assets/laptop_Dashboard.php"
+           class="<?= $currentPage==='laptop_Dashboard' ? 'active' : '' ?>">
+          Laptops
+        </a>
+      </div>
     </div>
+
+    <!-- Users: only for Managers -->
+    <?php if ($role === 'Manager'): ?>
+      <a href="../Users/user_Dashboard.php"
+         class="<?= $currentPage==='user_Dashboard' ? 'active' : '' ?>">
+        Users
+      </a>
+    <?php endif; ?>
+
+    <!-- Employees & Logs: for Managers & Technicians -->
+    <?php if (in_array($role, ['Manager','Technician'], true)): ?>
+      <a href="/Forms/Employees/employee_Dashboard.php"
+         class="<?= $currentPage==='employee_Dashboard' ? 'active' : '' ?>">
+        Employees
+      </a>
+      <a href="../Admin/log_dashboard.php"
+         class="<?= $currentPage==='log_dashboard' ? 'active' : '' ?>">
+        Logs
+      </a>
+    <?php endif; ?>
+
+    <a href="../Settings/settings.php"
+       class="<?= $currentPage==='settings' ? 'active' : '' ?>">
+      Settings
+    </a>
+  </div>
 
     <!-- Main Content Wrapper -->
     <div class="<?php echo $isAssetPage ? 'asset-content' : 'main-content'; ?>">
