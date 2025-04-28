@@ -1100,3 +1100,45 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    const exportButton = document.getElementById('export-csv-btn');
+    if (exportButton) {
+        exportButton.addEventListener('click', function() {
+            fetch('export_laptops.php')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not OK');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    const seconds = String(now.getSeconds()).padStart(2, '0');
+                    const formattedDateTime = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+                    const filename = `laptops_export_${formattedDateTime}.csv`;
+
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = blobUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(blobUrl);
+                    document.body.removeChild(a);
+                })
+                .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                    alert('Error downloading the file.');
+                });
+        });
+    }
+});
