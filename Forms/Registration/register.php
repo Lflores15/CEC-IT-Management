@@ -8,45 +8,51 @@ require_once '../../PHP/config.php';
 $registrationMessage = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
+    $login = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirmPassword = $_POST['confirm_password'] ?? '';
 
-    if ($password !== $confirm_password) {
+    if (empty($login) || empty($password) || empty($confirmPassword)) {
+        $registrationMessage = "❌ All fields are required.";
+    } elseif ($password !== $confirmPassword) {
         $registrationMessage = "❌ Passwords do not match.";
     } else {
-        $stmt = $conn->prepare("SELECT user_id FROM Users WHERE username = ?");
+        // Check if the username already exists
+        $stmt = $conn->prepare("SELECT user_id FROM Users WHERE login = ?");
         if ($stmt) {
-            $stmt->bind_param("s", $username);
+            $stmt->bind_param("s", $login);
             $stmt->execute();
             $stmt->store_result();
 
             if ($stmt->num_rows > 0) {
                 $registrationMessage = "❌ Username already taken.";
             } else {
+                // Username is available; create user
                 $hashedPassword = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
-                $role = 'user';
+                $role = 'Technician'; // Default role
 
-                $insertStmt = $conn->prepare("INSERT INTO Users (username, password_hash, role) VALUES (?, ?, ?)");
+                $insertStmt = $conn->prepare("INSERT INTO Users (login, password_hash, role) VALUES (?, ?, ?)");
                 if ($insertStmt) {
-                    $insertStmt->bind_param("sss", $username, $hashedPassword, $role);
+                    $insertStmt->bind_param("sss", $login, $hashedPassword, $role);
                     if ($insertStmt->execute()) {
-                        $registrationMessage = "✅ Registration successful! <a href='../Login/login.php'>Login here</a>.";
+                        $registrationMessage = "✅ Registration successful! Click 'Back to Login' to sign in.";
+
                     } else {
                         $registrationMessage = "❌ Registration failed: " . htmlspecialchars($insertStmt->error);
                     }
                     $insertStmt->close();
                 } else {
-                    $registrationMessage = "❌ Database error (Insert): " . htmlspecialchars($conn->error);
+                    $registrationMessage = "❌ Database error during insert: " . htmlspecialchars($conn->error);
                 }
             }
             $stmt->close();
         } else {
-            $registrationMessage = "❌ Database error (Check): " . htmlspecialchars($conn->error);
+            $registrationMessage = "❌ Database error during username check: " . htmlspecialchars($conn->error);
         }
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -61,8 +67,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h2>Register</h2>
 
             <?php if (!empty($registrationMessage)): ?>
-                <div class="message"><?= $registrationMessage ?></div>
+                <div class="registration-success"><?= $registrationMessage ?></div>
             <?php endif; ?>
+
 
             <div class="form-group">
                 <label for="username">Username</label>
