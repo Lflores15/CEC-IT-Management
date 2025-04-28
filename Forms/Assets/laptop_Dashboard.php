@@ -324,31 +324,50 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
 </html>
   <!-- Log Event Modal -->
   <div id="logEventModal" class="modal create-device-modal" style="display: none;">
-    <div class="laptop-modal-content">
-      <div class="laptop-modal-header">
-        <h2>Log Laptop Event</h2>
-        <span class="close" onclick="document.getElementById('logEventModal').style.display='none'">&times;</span>
+    <div class="laptop-modal-content" style="display: flex; gap: 30px; align-items: flex-start;">
+      <div style="flex: 1 1 50%; min-width: 300px;">
+        <div class="laptop-modal-header">
+          <h2>Log Laptop Event</h2>
+          <span class="close" onclick="document.getElementById('logEventModal').style.display='none'">&times;</span>
+        </div>
+        <form id="log-event-form" method="post" action="manual_log.php" style="display: flex; flex-direction: column; gap: 10px;">
+          <input type="hidden" id="log-device-id" name="device_id">
+          <label for="log-event-time">Event Time:</label>
+          <p id="log-event-time" style="font-style: italic; font-size: 0.9em; color: #555;"></p>
+          <label for="event_type">Event Type:</label>
+          <select name="event_type" required>
+            <option value="">Select Event Type</option>
+            <option value="New User Setup">New User Setup</option>
+            <option value="Updated">Updated</option>
+            <option value="User Archived">User Archived</option>
+            <option value="Maintenance">Maintenance</option>
+            <option value="Damaged">Damaged</option>
+            <option value="Decommissioned">Decommissioned</option>
+            <option value="Location Change">Location Change</option>
+          </select>
+          <label for="memo">Memo:</label>
+          <textarea name="memo" rows="4" placeholder="Add a note about this event..." required></textarea>
+          <button type="submit">Log Event</button>
+        </form>
       </div>
-      <form id="log-event-form" method="post" action="log_event.php">
-        <input type="hidden" id="log-device-id" name="device_id">
-
-        <label for="event_type">Event Type:</label>
-        <select name="event_type" required>
-          <option value="">Select Event Type</option>
-          <option value="New User Setup">New User Setup</option>
-          <option value="Updated">Updated</option>
-          <option value="User Archived">User Archived</option>
-          <option value="Maintenance">Maintenance</option>
-          <option value="Damaged">Damaged</option>
-          <option value="Decommissioned">Decommissioned</option>
-          <option value="Location Change">Location Change</option>
-        </select>
-
-        <label for="memo">Memo:</label>
-        <textarea name="memo" rows="4" placeholder="Add a note about this event..." required></textarea>
-
-        <button type="submit">Log Event</button>
-      </form>
+      <div style="flex: 1 1 50%; min-width: 300px;">
+        <h3>Asset History Log</h3>
+        <div id="log-history-container" class="log-table-scrollable" style= "overflow-y: auto;">
+          <table class="device-table" style="font-size: 0.85em;">
+            <thead>
+              <tr id="log-header-row">
+                <th>Date</th>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Memo</th>
+              </tr>
+            </thead>
+            <tbody id="device-log-history" style="font-size: 0.85em;">
+              <!-- JS will populate log entries here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
-</html>
+</body>

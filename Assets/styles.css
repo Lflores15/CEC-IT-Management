@@ -351,20 +351,24 @@ h2 {
 .device-table th {
     background: #007bff;
     color: white;
-    padding-top: 10px;
-    position: relative;
     text-align: left;
+    padding-top: 10px;
 }
 
 .device-table td {
-    padding: 10px;
+    padding: 8px;
     border-bottom: 1px solid #ddd;
     text-align: left;
+    font-size: 0.85em;
 }
 
 .device-table tr:hover {
     background: #f1f1f1;
 }
+
+#log-header-row th {
+    padding: 10px;
+  }
 
 /* Highlight rows for missing employees in audit table */
 .missing-employee {
@@ -686,6 +690,7 @@ th.sortable.desc::after {
     border-radius: 10px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     width: 300px;
+    margin-left: 100px;
 }
 
 .modal-content {
@@ -722,14 +727,13 @@ th.sortable.desc::after {
 }
 
 .create-device-modal {
-    width: 1100px;
     max-width: 95%;
+    width: 1080px;
     background: #fff;
     border-radius: 12px;
-    padding: 20px 30px;
+    padding: 10px 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     position: center;
-    margin: 0 auto;
     display: flex;
     flex-direction: column;
 
@@ -1251,6 +1255,7 @@ th.sortable.desc::after {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     width: 100%;
     max-width: 650px;
+    margin-left: 100px;
 }
 
 .laptop-modal-content {
@@ -1316,10 +1321,8 @@ th.sortable.desc::after {
 
 /* Modal Header Style for Import Laptop Modal */
 .laptop-modal-header {
-    display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
 }
 /* Modal styling for create-device-modal */
 #create-device-modal.modal {
@@ -1494,4 +1497,115 @@ th.sortable.desc::after {
     background: #007bff;
     color: white;
     padding-bottom: 10px;
+}
+
+#logEventModal .laptop-modal-content {
+    width: 1000px;
+    height: 800px;
+    max-width: none;
+    max-height: none;
+    padding: 40px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: left;
+    display: flex;
+    gap: 30px;
+    align-items: stretch;
+}
+
+#logEventModal .laptop-modal-content > div {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 10px;
+}
+
+#logEventModal .laptop-modal-content .log-table-scrollable {
+    max-height: 650px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+
+/* Improved Log Event Modal Form Styling */
+#logEventModal .laptop-modal-content form {
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-top: 20px;
+    height:600px;
+}
+
+#logEventModal .laptop-modal-content form label {
+    font-weight: 600;
+    margin-top: 10px;
+    display: block;
+    color: #333;
+}
+
+#logEventModal .laptop-modal-content form select,
+#logEventModal .laptop-modal-content form textarea {
+    margin-top: 6px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#logEventModal .laptop-modal-content form textarea {
+    resize: vertical;
+    height: 300px;
+}
+
+#logEventModal .laptop-modal-content form button[type="submit"] {
+    margin-top: 20px;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#logEventModal .laptop-modal-content form button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+#logEventModal .laptop-modal-content .device-table {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    font-size: 14px;
+}
+
+#logEventModal .laptop-modal-content .device-table th,
+#logEventModal .laptop-modal-content .device-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+#logEventModal .laptop-modal-content .device-table thead th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+}
+#logEventModal .laptop-modal-content h2,
+#logEventModal .laptop-modal-content h3 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 15px 0;
 }

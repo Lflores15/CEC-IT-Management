@@ -39,13 +39,13 @@ require_once("../../includes/session.php");
             </thead>
             <tbody>
                 <?php
-                $stmt = $conn->prepare("SELECT employee_id, first_name, last_name, login_id, phone_number FROM Employees");
+                $stmt = $conn->prepare("SELECT employee_id, first_name, last_name, login_id, phone_number, active FROM Employees");
                 $stmt->execute();
                 $result = $stmt->get_result();
 
                 while ($row = $result->fetch_assoc()):
                 ?>
-                <tr class="clickable-row" data-id="<?php echo $row['employee_id']; ?>">
+                <tr class="clickable-row<?php echo $row['active'] ? '' : ' missing-employee'; ?>" data-id="<?php echo $row['employee_id']; ?>">
                     <td class="checkbox-col" style="display: none;"><input type="checkbox" class="row-select"></td>
                     <td><?php echo htmlspecialchars($row['employee_id']); ?></td>
                     <td><?php echo htmlspecialchars($row['first_name']); ?></td>
