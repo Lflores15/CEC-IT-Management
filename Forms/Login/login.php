@@ -60,7 +60,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <label for="password">Password</label>
                 <input type="password" name="password" id="password" required>
             </div>
-            <button type="submit">Login</button>
+
+            <!-- Login button -->
+            <button type="submit" class="login-btn">Login</button>
+
+            <!-- Register link styled as button -->
+            <div class="register-link">
+                <a href="../Registration/register.php" class="register-btn">Register New Account</a>
+            </div>
+
         </form>
     </div>
 </body>

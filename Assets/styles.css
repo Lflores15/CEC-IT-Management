@@ -690,7 +690,6 @@ th.sortable.desc::after {
     border-radius: 10px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     width: 300px;
-    margin-left: 100px;
 }
 
 .modal-content {
@@ -808,75 +807,80 @@ th.sortable.desc::after {
     margin-right: 10px;
     min-width: 140px;
 }
-
 /* =========================================
-   Login Form Styles
+   Login/Register Modal Styles
 ========================================= */
-.login-modal {
-    display: flex !important; 
+.login-modal,
+.register-modal {
     position: fixed;
-    z-index: 2000;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     background: white;
-    padding: 10px;
+    padding: 30px;
     border-radius: 10px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    width: 300px;
+    width: 400px;
+    min-width: 400px;
+    display: block; /* 🚨 NOT flex! */
 }
 
-.login-form {
-    background: white;
-    padding: 25px 30px;
-    border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+/* Form inside modals */
+.login-form,
+.register-form {
     width: 100%;
-    max-width: 400px;
     display: flex;
     flex-direction: column;
     gap: 15px;
     box-sizing: border-box;
 }
 
-.login-form h2 {
-    margin-bottom: 10px;
+.login-form h2,
+.register-form h2 {
     text-align: center;
     color: #333;
+    margin-bottom: 10px;
 }
 
-.login-form label {
+.login-form label,
+.register-form label {
     font-weight: bold;
     color: #444;
 }
 
-.login-form input {
-    border: 1px solid gray;
+/* Inputs and Buttons */
+.login-form input,
+.register-form input,
+.login-form button,
+.register-form button {
+    width: 100%;
+    padding: 10px;
     border-radius: 6px;
-    outline: none;
-    width: 90%;
-    transition: border-color 0.3s;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
 }
 
-.login-form input:focus {
+.login-form input:focus,
+.register-form input:focus {
     border-color: #007bff;
 }
 
-.login-form button {
-    padding: 10px;
+.login-form button,
+.register-form button {
     background-color: #007bff;
-    border: none;
     color: white;
-    border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
+    border: none;
     transition: background-color 0.3s;
 }
 
-.login-form button:hover {
+.login-form button:hover,
+.register-form button:hover {
     background-color: #0056b3;
 }
 
+/* Error message */
 .login-error {
     color: red;
     margin-top: 10px;
@@ -884,12 +888,44 @@ th.sortable.desc::after {
     font-weight: bold;
 }
 
-.form-group {
+/* Extra buttons below the form */
+.form-buttons {
     display: flex;
     flex-direction: column;
-    gap: 5px; 
-    margin-bottom: 20px; 
+    gap: 8px;
+    margin-top: 20px;
 }
+
+/* Back to Login / Register Link */
+.register-link {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.login-btn,
+.register-btn {
+    display: inline-block;
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background-color: #007BFF;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.login-btn:hover,
+.register-btn:hover {
+    background-color: #0056b3;
+}
+
 
 /* =========================================
    Filters Container Styles
