@@ -1,4 +1,6 @@
+USE cec_it_management;
 -- 02-seed-from-csv.sql
+
 -- 0) Dummy “Unassigned” employee
 INSERT INTO Employees (emp_code, username, first_name, last_name, phone_number)
 VALUES ('0000','system','Unassigned','Unassigned','')

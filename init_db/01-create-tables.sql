@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS cec_it_management;
+USE cec_it_management;
+
 -- 01-create-tables.sql
 
 -- drop any old versions
