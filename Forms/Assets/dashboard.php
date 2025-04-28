@@ -9,13 +9,19 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 $user_id = $_SESSION["user_id"];
-$username = $_SESSION["username"];
-$emp_id = $_SESSION["emp_id"] ?? null;
+$login   = $_SESSION["login"];
+$emp_id  = $_SESSION["emp_id"] ?? null;
 
-$stmt = $conn->prepare("SELECT email, role FROM Users WHERE user_id = ?");
+$sql = "SELECT login, role
+          FROM Users
+         WHERE user_id = ?";
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    die("Prepare failed: (" . $conn->errno . ") " . $conn->error);
+}
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
-$stmt->bind_result($email, $role);
+$stmt->bind_result($login, $role);
 $stmt->fetch();
 $stmt->close();
 
@@ -23,13 +29,16 @@ $query = "
     SELECT 
         (SELECT COUNT(*) FROM Devices) AS total, 
         (SELECT COUNT(*) FROM Devices WHERE status = 'Active') AS active, 
-        (SELECT COUNT(*) FROM Decommissioned_Laptops) AS decommissioned, 
+        (SELECT COUNT(*) FROM Devices WHERE status = 'Decomissioned') AS decommissioned, 
         (SELECT COUNT(*) FROM Devices WHERE status = 'Lost') AS lost, 
         (SELECT COUNT(*) FROM Devices WHERE status = 'Pending Return') AS pending, 
         (SELECT COUNT(*) FROM Devices WHERE status = 'Shelf') AS shelf
 ";
 
 $result = $conn->query($query);
+if (! $result) {
+    die("Dashboard counts query failed: (" . $conn->errno . ") " . $conn->error);
+}
 $counts = $result->fetch_assoc();
 
 $conn->close();

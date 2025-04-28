@@ -9,31 +9,45 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 $default_columns = [
-    'status' => 'Status',
-    'internet_policy' => 'Internet Policy',
-    'asset_tag' => 'Asset Tag',    
-    'login_id' => 'Login ID',
-    'emp_first_name' => 'First Name',
-    'emp_last_name' => 'Last Name',
-    'employee_id' => 'Employee ID',
-    'phone_number' => 'Phone Number',
-    'cpu' => 'CPU',
-    'ram' => 'RAM (GB)',
-    'os' => 'OS',
-    'assigned_to' => 'Assigned To' 
+  'status'          => 'Status',
+  'internet_policy'=> 'Internet Policy',
+  'asset_tag'      => 'Asset Tag',
+  'username'       => 'Login ID',       // matches e.username
+  'first_name'     => 'First Name',     // matches e.first_name
+  'last_name'      => 'Last Name',      // matches e.last_name
+  'emp_code'       => 'Employee ID',    // matches e.emp_code
+  'phone_number'   => 'Phone Number',
+  'cpu'            => 'CPU',
+  'ram'            => 'RAM (GB)',
+  'os'             => 'OS',
+  'assigned_to'    => 'Assigned To'
 ];
 
 $visible_columns = $_SESSION['visible_columns'] ?? array_keys($default_columns);
 
-$query = " SELECT d.device_id, d.asset_tag, d.serial_number, d.brand, d.model, d.os, l.cpu, l.ram, l.storage, d.status, d.assigned_to, l.internet_policy, d.category,
-           e.first_name AS emp_first_name, e.last_name AS emp_last_name, e.login_id AS login_id, e.employee_id AS employee_id, e.phone_number AS phone_number
-    FROM Devices d
-    LEFT JOIN Laptops l ON d.device_id = l.device_id
-LEFT JOIN Decommissioned_Laptops dl
-  ON l.id = dl.laptop_id
-    LEFT JOIN Employees e ON d.assigned_to = e.emp_id
-    ORDER BY d.asset_tag
+$query = "
+SELECT
+  d.device_id,
+  d.status,
+  l.internet_policy,
+  d.asset_tag,
+  l.cpu,
+  l.ram,
+  l.os,
+  e.username      AS username,
+  e.first_name    AS first_name,
+  e.last_name     AS last_name,
+  e.emp_code      AS emp_code,
+  e.phone_number  AS phone_number,
+  d.assigned_to
+FROM Devices   AS d
+LEFT JOIN Laptops   AS l ON d.device_id    = l.device_id
+LEFT JOIN Employees AS e ON d.assigned_to  = e.emp_code
+ORDER BY d.asset_tag
 ";
+
+
+
 
 $stmt = $conn->prepare($query);
 if (!$stmt) {
@@ -163,7 +177,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
                             <?php foreach ($visible_columns as $col): ?>
                                 <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ?  'class="edit-only"data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>
                                     <?php if ($col === 'assigned_to'): ?>
-                                        <?= htmlspecialchars(trim(($device['emp_first_name'] ?? '') . ' ' . ($device['emp_last_name'] ?? ''))) . ' (' . ($device['employee_id'] ?? 'N/A') . ')' ?>
+                                        <?= htmlspecialchars(trim(($device['first_name'] ?? '') . ' ' . ($device['last_name'] ?? ''))) . ' (' . ($device['emp_code'] ?? 'N/A') . ')' ?>
                                     <?php else: ?>
                                         <?= htmlspecialchars($device[$col] ?? 'N/A') ?>
                                     <?php endif; ?>

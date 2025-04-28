@@ -1,84 +1,51 @@
--- 1) Import Employees (ignore duplicates on emp_code)
-LOAD DATA INFILE '/docker-entrypoint-initdb.d/import.csv'
+-- 02-seed-from-csv.sql
+-- 0) Dummy “Unassigned” employee
+INSERT INTO Employees (emp_code, username, first_name, last_name, phone_number)
+VALUES ('0000','system','Unassigned','Unassigned','')
+ON DUPLICATE KEY UPDATE emp_code = emp_code;
+-- 1) Load Employees
+LOAD DATA INFILE '/docker-entrypoint-initdb.d/SparkList_Inventory.csv'
 IGNORE
 INTO TABLE Employees
 FIELDS TERMINATED BY ',' ENCLOSED BY '"'
 IGNORE 1 LINES
-(
-  @status_dummy,
-  @internet_policy_dummy,
-  @asset_tag_dummy,
-  @login_id,
-  @first_name,
-  @last_name,
-  @emp_code,
-  @phone_number,
-  @cpu_dummy,
-  @ram_dummy,
-  @os_dummy,
-  @d1,
-  @d2
-)
+(@status,@internet_policy,@asset_tag,
+ @username,@first_name,@last_name,@emp_code,@phone_number,
+ @cpu,@ram,@os)
 SET
-  login_id     = @login_id,
+  emp_code     = @emp_code,
+  username     = @username,
   first_name   = @first_name,
   last_name    = @last_name,
-  emp_code     = @emp_code,
   phone_number = @phone_number;
-
--- 2a) populate Devices only
-LOAD DATA INFILE '/docker-entrypoint-initdb.d/import.csv'
+-- 2) Load Devices
+LOAD DATA INFILE '/docker-entrypoint-initdb.d/SparkList_Inventory.csv'
 IGNORE
 INTO TABLE Devices
 FIELDS TERMINATED BY ',' ENCLOSED BY '"'
 IGNORE 1 LINES
-(
-  @status,
-  @internet_policy,  -- just read it here, but…
-  @asset_tag,
-  @login_id,         -- ignore these
-  @first_name,
-  @last_name,
-  @emp_code,
-  @phone_number,
-  @cpu,
-  @ram,
-  @os,
-  @d1,
-  @d2
-)
+(@status,@internet_policy,@asset_tag,
+ @username,@first_name,@last_name,@emp_code,@phone_number,
+ @cpu,@ram,@os)
 SET
   status      = @status,
   asset_tag   = @asset_tag,
-  assigned_to = NULLIF(@emp_code,'');  -- blanks → NULL so FK doesn’t choke
-
-
--- 2b) then populate Laptops with the extra columns
-LOAD DATA INFILE '/docker-entrypoint-initdb.d/import.csv'
+  assigned_to = COALESCE(NULLIF(@emp_code, ''), '0000');
+-- 3) Load Laptops
+LOAD DATA INFILE '/docker-entrypoint-initdb.d/SparkList_Inventory.csv'
 IGNORE
 INTO TABLE Laptops
 FIELDS TERMINATED BY ',' ENCLOSED BY '"'
 IGNORE 1 LINES
-(
-  @status,
-  @internet_policy,
-  @asset_tag,
-  @login_id,
-  @first_name,
-  @last_name,
-  @emp_code,
-  @phone_number,
-  @cpu,
-  @ram,
-  @os,
-  @d1,
-  @d2
-)
+(@status,@internet_policy,@asset_tag,
+ @username,@first_name,@last_name,@emp_code,@phone_number,
+ @cpu,@ram,@os)
 SET
   device_id       = (
-    SELECT device_id
-      FROM Devices
-     WHERE asset_tag = @asset_tag
+    SELECT d.device_id
+      FROM Devices AS d
+     WHERE d.asset_tag = @asset_tag
+     LIMIT 1
   ),
   internet_policy = @internet_policy,
   cpu             = @cpu,
