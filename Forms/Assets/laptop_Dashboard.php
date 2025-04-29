@@ -25,6 +25,7 @@ $default_columns = [
 
 $visible_columns = $_SESSION['visible_columns'] ?? array_keys($default_columns);
 
+
 $query = "
 SELECT
   d.device_id,
