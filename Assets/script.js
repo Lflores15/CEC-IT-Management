@@ -15,8 +15,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ========== Laptop Log Event Modal and Log Fetching ==========
-// ========== Laptop Log Event Modal and Log Fetching ==========
-// Helper function to fetch device log for a given asset tag and update the log table
 function fetchDeviceLog(assetTag) {
   if (!assetTag || typeof assetTag !== 'string' || assetTag.trim() === '') {
     console.error("fetchDeviceLog called with invalid asset tag:", assetTag);

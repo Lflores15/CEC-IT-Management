@@ -15,7 +15,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
-    // cpu and ram normalization for binding (cpu is now VARCHAR, ram is int or null)
     $conn->begin_transaction();
 
     try {
@@ -34,11 +33,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             throw new Exception("laptop_prepare_failed: " . $conn->error);
         }
 
-        // Explicitly cast and safeguard CPU and RAM values
         $cpu_value = ($cpu !== null && $cpu !== '') ? $cpu : null;
         $ram_value = ($ram !== null && $ram !== '' && $ram !== 'N/A') ? (int)$ram : null;
 
-        // Safeguard for N/A values
         if ($ram_value === null || $ram_value === 'N/A') {
             $ram_value = 0;
         }

@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 if (!isset($_SESSION['user'])) {
     if (isset($_SESSION['user_id']) && isset($_SESSION['role'])) {
-        $_SESSION['user'] = $_SESSION['user_id']; // or use 'username' if available
+        $_SESSION['user'] = $_SESSION['user_id'];
     } elseif (isset($_SESSION['login'])) {
         $_SESSION['user'] = $_SESSION['login'];
     } elseif (isset($_SESSION['username'])) {
@@ -28,7 +28,6 @@ try {
     $conn->begin_transaction();
 
     foreach ($lastDeleted as $device) {
-        // Insert back into Devices (only the columns that exist!)
         $stmt1 = $conn->prepare("INSERT INTO Devices (device_id, asset_tag, status, assigned_to) VALUES (?, ?, ?, ?)");
         $stmt1->bind_param(
             "isss",

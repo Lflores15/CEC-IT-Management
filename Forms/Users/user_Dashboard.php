@@ -30,12 +30,12 @@ if (!$result) {
 <?php if (isset($_GET['created']) && $_GET['created'] == 1): ?>
     <script>
         alert("✅ User created successfully!");
-        window.location.href = window.location.pathname; // removes ?created=1
+        window.location.href = window.location.pathname; 
     </script>
 <?php elseif (isset($_GET['error']) && $_GET['error'] === 'duplicate'): ?>
     <script>
         alert("❌ Username or email already exists.");
-        window.location.href = window.location.pathname; // removes ?error=duplicate
+        window.location.href = window.location.pathname; 
     </script>
 <?php elseif (isset($_GET['deleted']) && $_GET['deleted'] == 1): ?>
     <script>

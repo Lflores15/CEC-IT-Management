@@ -11,7 +11,6 @@ if ($conn->connect_error) {
     die('Database connection failed: ' . $conn->connect_error);
 }
 
-// Dynamic filename
 $now = date('Y-m-d_H-i-s');
 header('Content-Type: text/csv');
 header('Content-Disposition: attachment; filename="laptops_export_'.$now.'.csv"');
@@ -20,7 +19,6 @@ header('Expires: 0');
 
 $output = fopen('php://output', 'w');
 
-// Write CSV header matching dashboard columns (dynamic, but hard-coded order for export)
 fwrite($output, "Status,Internet Policy,Asset Tag,CPU,RAM (GB),OS,Username,First Name,Last Name,Employee ID,Phone Number\n");
 
 $query = "

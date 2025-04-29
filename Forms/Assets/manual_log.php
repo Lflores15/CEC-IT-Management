@@ -1,5 +1,4 @@
 <?php
-// ✅ Move this to top of file
 session_start();
 date_default_timezone_set('America/Chicago');
 require_once "../../PHP/config.php";

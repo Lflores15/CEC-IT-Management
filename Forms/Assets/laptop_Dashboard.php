@@ -12,10 +12,10 @@ $default_columns = [
   'status'          => 'Status',
   'internet_policy'=> 'Internet Policy',
   'asset_tag'      => 'Asset Tag',
-  'username'       => 'Login ID',       // matches e.username
-  'first_name'     => 'First Name',     // matches e.first_name
-  'last_name'      => 'Last Name',      // matches e.last_name
-  'emp_code'       => 'Employee ID',    // matches e.emp_code
+  'username'       => 'Login ID',      
+  'first_name'     => 'First Name',     
+  'last_name'      => 'Last Name',      
+  'emp_code'       => 'Employee ID',    
   'phone_number'   => 'Phone Number',
   'cpu'            => 'CPU',
   'ram'            => 'RAM (GB)',
@@ -58,7 +58,6 @@ $stmt->execute();
 $result = $stmt->get_result();
 $devices = $result->fetch_all(MYSQLI_ASSOC);
 // Fetch employee dropdown values before closing the connection
-// Fetch employee dropdown values before closing the connection
 $employeeOptions = [];
 $empQuery = $conn->query("
   SELECT emp_id, emp_code, first_name, last_name
@@ -77,10 +76,17 @@ while ($row = $empQuery->fetch_assoc()) {
     ];
 }
 
+// Fetch active employee IDs from the DB before closing connection
+$activeEmployeeIDs = [];
+$activeQuery = $conn->query("SELECT emp_code FROM Employees WHERE active = 1");
+if ($activeQuery) {
+    while ($row = $activeQuery->fetch_assoc()) {
+        $activeEmployeeIDs[] = $row['emp_code'];
+    }
+}
+
 $stmt->close();
 $conn->close();
-
-$activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
 ?>
 
 <!DOCTYPE html>
@@ -135,12 +141,18 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
           </div>
           <form id="column-form">
             <div>
-              <?php foreach ($default_columns as $key => $label): ?>
-                <label style="display: block; margin-bottom: 8px; font-size: 15px;">
-                  <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
-                  <?= htmlspecialchars($label) ?>
-                </label>
-              <?php endforeach; ?>
+              <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                <?php foreach (array_chunk($default_columns, ceil(count($default_columns) / 2), true) as $columnGroup): ?>
+                  <div style="flex: 1 1 45%; min-width: 200px;">
+                    <?php foreach ($columnGroup as $key => $label): ?>
+                      <label style="display: block; margin-bottom: 8px; font-size: 15px;">
+                        <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
+                        <?= htmlspecialchars($label) ?>
+                      </label>
+                    <?php endforeach; ?>
+                  </div>
+                <?php endforeach; ?>
+              </div>
             </div>
             <button type="submit">Apply</button>
           </form>
@@ -149,6 +161,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
     </div>
 
     <div class="table-container">
+      <div class="device-table-wrapper">
         <table class="device-table" id="device-table">
             <thead>
                 <tr>
@@ -162,7 +175,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
                     <?php endforeach; ?>
                 </tr>
             </thead>
-            <thead class="filter-header">
+            <thead class="filter-header" style="background: white;">
                 <tr>
                     <th></th>
                     <?php foreach ($visible_columns as $col): ?>
@@ -204,6 +217,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
                 <?php endif; ?>
             </tbody>
         </table>
+      </div>
     </div>
 </div>
 <script>
@@ -340,7 +354,6 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
               </tr>
             </thead>
             <tbody id="device-log-history" style="font-size: 0.85em;">
-              <!-- JS will populate log entries here -->
             </tbody>
           </table>
         </div>

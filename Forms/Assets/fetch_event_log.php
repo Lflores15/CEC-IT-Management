@@ -11,7 +11,6 @@ if (!$logPath || !file_exists($logPath)) {
 
 $lines = file($logPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-// Debug output: log the requested asset tag and the raw log file contents
 error_log("Requested asset tag: " . $requestedTag);
 error_log("Raw log file contents:");
 foreach ($lines as $logLine) {
