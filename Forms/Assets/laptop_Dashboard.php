@@ -161,6 +161,7 @@ $conn->close();
     </div>
 
     <div class="table-container">
+      <div class="device-table-wrapper">
         <table class="device-table" id="device-table">
             <thead>
                 <tr>
@@ -174,7 +175,7 @@ $conn->close();
                     <?php endforeach; ?>
                 </tr>
             </thead>
-            <thead class="filter-header">
+            <thead class="filter-header" style="background: white;">
                 <tr>
                     <th></th>
                     <?php foreach ($visible_columns as $col): ?>
@@ -216,6 +217,7 @@ $conn->close();
                 <?php endif; ?>
             </tbody>
         </table>
+      </div>
     </div>
 </div>
 <script>

@@ -1,3 +1,24 @@
+/* =========================================
+   Device Table Wrapper for Sticky Headers
+========================================= */
+.device-table-wrapper {
+  overflow-y: auto;
+  max-height: 900px;
+  border: 1px solid #ccc;
+  background: white;
+}
+
+.device-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #007bff;
+  z-index: 2;
+}
+
+/* Sticky filter (second) header row for device-table */
+.device-table thead.filter-header th {
+    z-index: 1;
+}
 .recent-activity-graph-combo {
   display: flex;
   flex-direction: row;
@@ -1585,7 +1606,7 @@ th.sortable.desc::after {
 .filter-header th {
     margin: 0 !important;
     border-top: none;
-    background: #007bff;
+    /* background: #007bff;  Removed to avoid clashing colors */
     color: white;
     padding-bottom: 10px;
 }

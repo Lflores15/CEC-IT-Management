@@ -84,17 +84,17 @@ while (($row = fgetcsv($file)) !== false) {
         continue;
     }
 
-    // Check if device already exists
-    $stmt = $conn->prepare("SELECT device_id FROM Devices WHERE asset_tag = ? LIMIT 1");
+    // Check if device already exists (using COUNT(*) to avoid stale $deviceId)
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM Devices WHERE asset_tag = ?");
     if ($stmt) {
         $stmt->bind_param("s", $assetTag);
         $stmt->execute();
-        $stmt->bind_result($deviceId);
+        $stmt->bind_result($count);
         $stmt->fetch();
         $stmt->close();
     }
 
-    if ($deviceId) {
+    if ($count > 0) {
         // Duplicate asset_tag found, log error and skip
         $errors[] = "Duplicate asset_tag: $assetTag already exists.";
         continue;
