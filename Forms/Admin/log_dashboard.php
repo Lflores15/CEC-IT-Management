@@ -4,7 +4,7 @@ require_once "../../PHP/config.php";
 require_once "../../includes/navbar.php";
 
 // Admin-only access
-if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'admin') {
+if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'Manager') {
     header("Location: ../Login/login.php");
     exit();
 }

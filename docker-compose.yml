@@ -30,7 +30,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
-      - .:/var/www/html   # ✅ Mount everything, including `/includes/`
+      - .:/var/www/html   
     ports:
       - "8080:80"
     networks:

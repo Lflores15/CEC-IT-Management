@@ -4,7 +4,7 @@ require_once "../../PHP/config.php";
 require_once "../../includes/log_event.php";
 
 // Ensure only admins can delete users
-if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'admin') {
+if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'Manager') {
     header("Location: ../Login/login.php");
     exit();
 }
@@ -20,7 +20,7 @@ if (isset($_GET['id'])) {
     }
 
     // Fetch username before deletion
-    $userQuery = $conn->prepare("SELECT username FROM Users WHERE user_id = ?");
+    $userQuery = $conn->prepare("SELECT login FROM Users WHERE user_id = ?");
     $userQuery->bind_param("i", $user_id);
     $userQuery->execute();
     $userQuery->bind_result($deleted_username);
@@ -54,7 +54,7 @@ if (isset($_GET['id'])) {
         exit();
     }
 } else {
-    logUserEvent("DELETE_USER_FAIL", "Attempted deletion without user ID in URL", $_SESSION["username"]);
+    logUserEvent("DELETE_USER_FAIL", "Attempted deletion without user ID in URL", $_SESSION["login"]);
     header("Location: user_Dashboard.php?error=no_id");
     exit();
 }

@@ -6,15 +6,15 @@ require_once '../../includes/log_event.php';
 $error_message = '';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $username = trim($_POST["username"]);
+    $login = trim($_POST["login"]);
     $password = $_POST["password"];
 
-    $stmt = $conn->prepare("SELECT user_id, password_hash, role FROM Users WHERE username = ?");
+    $stmt = $conn->prepare("SELECT user_id, password_hash, role FROM Users WHERE login = ?");
     if (!$stmt) {
         die("SQL Error: " . $conn->error);
     }
 
-    $stmt->bind_param("s", $username);
+    $stmt->bind_param("s", $login);
     $stmt->execute();
     $stmt->store_result();
 
@@ -24,17 +24,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if (password_verify($password, $hashed_password)) {
             $_SESSION["user_id"] = $user_id;
-            $_SESSION["username"] = $username;
+            $_SESSION["login"] = $login;
             $_SESSION["role"] = $role;
 
-            logUserEvent("LOGIN_SUCCESS", "User '$username' successfully logged in", $username);
+            logUserEvent("LOGIN_SUCCESS", "User '$login' successfully logged in", $login);
             header("Location: ../Assets/dashboard.php");
             exit();
         }
     }
 
-    logUserEvent("LOGIN_FAIL", "Invalid login attempt for username '$username'");
-    $error_message = "❌ Invalid username or password.";
+    logUserEvent("LOGIN_FAIL", "Invalid login attempt for login '$login'");
+    $error_message = "❌ Invalid login or password.";
     $stmt->close();
 }
 ?>
@@ -52,8 +52,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <h2>Login</h2>
 
             <div class="form-group">
-                <label for="username">Username</label>
-                <input name="username" id="username" required>
+                <label for="login">Username</label>
+                <input name="login" id="login" required>
             </div>
 
             <div class="form-group">

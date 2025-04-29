@@ -2,8 +2,7 @@
 session_start();
 require_once "../../PHP/config.php";
 
-// Ensure Employees table has 'active' column
-$conn->query("ALTER TABLE Employees ADD COLUMN IF NOT EXISTS active TINYINT(1) DEFAULT 1");
+
 
 // Ensure no output before header
 if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
@@ -87,7 +86,7 @@ while (($row = fgetcsv($csvFile)) !== false) {
         continue;
     }
 
-    $check = $conn->prepare("SELECT COUNT(*) as cnt FROM Employees WHERE employee_id = ?");
+    $check = $conn->prepare("SELECT COUNT(*) as cnt FROM Employees WHERE emp_code = ?");
     if (!$check) {
         error_log("Prepare failed for select: " . $conn->error);
         continue;
@@ -111,11 +110,11 @@ while (($row = fgetcsv($csvFile)) !== false) {
             continue;
         }
 
-        $insert = $conn->prepare("INSERT INTO Employees (employee_id, first_name, last_name, active) VALUES (?, ?, ?, 1)");
+        $insert = $conn->prepare("INSERT INTO Employees (emp_code, first_name, last_name, active) VALUES (?, ?, ?, 1)");
         if ($insert) {
             $insert->bind_param("sss", $empId, $firstName, $lastName);
             if (!$insert->execute()) {
-                error_log("Insert failed for employee_id '$empId': " . $insert->error);
+                error_log("Insert failed for emp_code '$empId': " . $insert->error);
             } else {
                 error_log("Insert succeeded for '$empId'");
                 // LOG: Each employee inserted into Employees table
@@ -138,7 +137,7 @@ $activated = [];
 if (!empty($employeeIds)) {
     $placeholders = implode(',', array_fill(0, count($employeeIds), '?'));
     $types = str_repeat('s', count($employeeIds));
-    $stmt = $conn->prepare("UPDATE Employees SET active = 1 WHERE REPLACE(employee_id, ' ', '') IN ($placeholders)");
+    $stmt = $conn->prepare("UPDATE Employees SET active = 1 WHERE REPLACE(emp_code, ' ', '') IN ($placeholders)");
     $stmt->bind_param($types, ...$employeeIds);
     $stmt->execute();
     $stmt->close();

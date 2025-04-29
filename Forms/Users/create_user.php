@@ -4,29 +4,30 @@ require_once "../../PHP/config.php";
 require_once "../../includes/log_event.php"; 
 
 // Ensure only admins can create users
-if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'admin') {
+if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'Manager') {
     header("Location: ../Login/login.php");
     exit();
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = trim($_POST["username"]);
-    $email = trim($_POST["email"]);
+    $username = trim($_POST["login"] ?? '');
     $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
     $role = $_POST["role"];
 
-    if (empty($username) || empty($email) || empty($_POST["password"])) {
-        header("Location: manage_users.php?error=missing_fields");
-        exit();
+    $validRoles = ['Technician', 'Manager'];
+    if (!in_array($role, $validRoles)) {
+        die("Invalid role selected.");
     }
 
-    // Check for existing username or email
-    $checkStmt = $conn->prepare("SELECT user_id FROM `Users` WHERE username = ? OR email = ?");
+    
+
+    // Check for existing username 
+    $checkStmt = $conn->prepare("SELECT user_id FROM `Users` WHERE login = ?");
     if (!$checkStmt) {
         die("Check prepare failed: (" . $conn->errno . ") " . $conn->error);
     }
 
-    $checkStmt->bind_param("ss", $username, $email);
+    $checkStmt->bind_param("s", $username);
     $checkStmt->execute();
     $checkStmt->store_result();
 
@@ -38,12 +39,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $checkStmt->close();
 
     // Insert new user using correct column name: password_hash
-    $stmt = $conn->prepare("INSERT INTO `Users` (`username`, `email`, `password_hash`, `role`) VALUES (?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO `Users` (`login`, `password_hash`, `role`) VALUES (?, ?, ?)");
     if (!$stmt) {
         die("Insert prepare failed: (" . $conn->errno . ") " . $conn->error);
     }
 
-    $stmt->bind_param("ssss", $username, $email, $password, $role);
+    $stmt->bind_param("sss", $username, $password, $role);
 
     if ($stmt->execute()) {
         logUserEvent("CREATE_USER", "User '$username' was created by"); 
