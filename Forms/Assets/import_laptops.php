@@ -13,7 +13,7 @@ if (!isset($_FILES["csv_file"]) || $_FILES["csv_file"]["error"] !== UPLOAD_ERR_O
     exit;
 }
 
-// Correct headers based on your CSV format
+//headers to use for importing csv
 $expectedHeaders = ['status', 'internet_policy', 'asset_tag', 'username', 'first_name', 'last_name', 'emp_code', 'phone_number', 'cpu', 'ram', 'os'];
 
 $file = fopen($_FILES["csv_file"]["tmp_name"], "r");
@@ -39,7 +39,6 @@ $conn->begin_transaction();
 $imported = 0;
 $errors = [];
 
-// Create dummy employee for unassigned if not exists
 $conn->query("
     INSERT IGNORE INTO Employees (emp_code, username, first_name, last_name, phone_number)
     VALUES ('0000', 'system', 'Unassigned', 'Unassigned', '')
@@ -54,9 +53,8 @@ while (($row = fgetcsv($file)) !== false) {
     }
 
     $empCode = trim($data["emp_code"]);
-    $empCode = $empCode !== '' ? $empCode : '0000';  // Force to dummy 0000 if missing
+    $empCode = $empCode !== '' ? $empCode : '0000';  
 
-    // Insert employee (IGNORE duplicate emp_code)
     $stmt = $conn->prepare("INSERT IGNORE INTO Employees (emp_code, username, first_name, last_name, phone_number) VALUES (?, ?, ?, ?, ?)");
     if ($stmt) {
         $stmt->bind_param(
@@ -130,7 +128,7 @@ while (($row = fgetcsv($file)) !== false) {
                 $os
             );
             if ($stmt->execute()) {
-                $imported++; // ✅ Only increment if laptop insert succeeded
+                $imported++; 
             } else {
                 $errors[] = "Failed to insert laptop details for asset_tag $assetTag.";
             }

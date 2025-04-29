@@ -12,7 +12,7 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'Manager') {
 if (isset($_GET['id'])) {
     $user_id = intval($_GET['id']);
 
-    // Optional: Prevent deleting your own account
+    // Prevent deleting your own account
     if ($_SESSION["user_id"] == $user_id) {
         logUserEvent("DELETE_USER_FAIL", "Admin attempted to delete their own account");
         header("Location: user_Dashboard.php?error=cannot_delete_self");

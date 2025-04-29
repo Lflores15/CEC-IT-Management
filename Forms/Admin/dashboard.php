@@ -9,7 +9,7 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 $user_id = $_SESSION["user_id"];
-$username = $_SESSION["username"];
+$username = $_SESSION["login"];
 
 // Fetch user info
 $stmt = $conn->prepare("SELECT email, role, emp_id FROM Users WHERE user_id = ?");

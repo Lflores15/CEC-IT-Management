@@ -4,7 +4,6 @@ require_once "../../PHP/config.php";
 
 
 
-// Ensure no output before header
 if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode(['success' => false, 'message' => 'CSV file upload error.']);
@@ -27,14 +26,11 @@ if ($header === false) {
     echo json_encode(['success' => false, 'message' => "CSV file is empty or invalid."]);
     exit;
 }
-// Remove UTF-8 BOM if present from the first header element
 if (isset($header[0])) {
     $header[0] = preg_replace('/^\xEF\xBB\xBF/', '', $header[0]);
 }
 $header = array_map('trim', $header);
-// Logging/debugging: log the parsed headers
 error_log("CSV Header: " . implode(", ", $header));
-// Support either "Employee #" or "Login ID"
 $empIndex = array_search("Employee #", $header);
 $loginIndex = array_search("Login ID", $header);
 
@@ -44,7 +40,6 @@ if ($empIndex === false && $loginIndex === false) {
     exit;
 }
 
-// Extract employee IDs and/or name pairs from CSV
 $employeeIds = [];
 $namePairs = [];
 while (($row = fgetcsv($csvFile)) !== false) {
@@ -52,7 +47,6 @@ while (($row = fgetcsv($csvFile)) !== false) {
         $empId = trim(preg_replace('/\s+/', '', $row[$empIndex]));
         if ($empId !== "") $employeeIds[] = $empId;
     }
-    // Assume these columns exist based on header
     $firstIndex = array_search("First Name", $header);
     $lastIndex = array_search("Last Name", $header);
     if ($firstIndex !== false && $lastIndex !== false) {

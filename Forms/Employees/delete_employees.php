@@ -9,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["employee_ids"])) {
     $ids = $_POST["employee_ids"];
     if (is_array($ids)) {
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $types = str_repeat('s', count($ids));  // using 's' for string since employee_id is varchar
+        $types = str_repeat('s', count($ids));  
         $stmt = $conn->prepare("DELETE FROM Employees WHERE employee_id IN ($placeholders)");
 
         if ($stmt) {

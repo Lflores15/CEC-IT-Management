@@ -1452,7 +1452,7 @@ th.sortable.desc::after {
 
 #column-form {
     text-align: left;
-    padding: 10px 0;
+    
 }
 
 #column-form > div {
@@ -1470,9 +1470,14 @@ th.sortable.desc::after {
     border: none;
     border-radius: 6px;
 }
+
+#column-form button:hover {
+    background-color: #0056b3;
+}
+
 #column-selector .laptop-modal-content {
     max-width: 100%;
-    width: 100%;
+    width: 90%;
 }
 
 #cancel-edit-btn {

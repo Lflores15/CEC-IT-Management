@@ -17,7 +17,7 @@ $currentPage = basename($_SERVER['PHP_SELF'], ".php");
 $assetPages = ["asset_Dashboard", "laptop_Dashboard", "pc_Dashboard", "phone_Dashboard", "tablet_Dashboard"];
 $isAssetPage = in_array($currentPage, $assetPages);
 
-// Set custom titles for each page
+//titles for each page included in the navbar
 $pageTitles = [
     "dashboard" => "Dashboard",
     "assets" => "Assets",
@@ -84,13 +84,9 @@ if (array_key_exists($currentPage, $pageTitles)) {
         <?php endif; ?>
         <a href="../Settings/settings.php" class="<?php echo ($currentPage == 'settings') ? 'active' : ''; ?>">Settings</a>
     </div>
-
     <!-- Main Content Wrapper -->
     <div class="<?php echo $isAssetPage ? 'asset-content' : 'main-content'; ?>">
-
     <!-- Script Link -->
     <script src="/Assets/script.js?v=<?php echo time(); ?>"></script>
-
-
 </body>
 </html>
