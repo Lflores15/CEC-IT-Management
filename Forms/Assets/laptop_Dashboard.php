@@ -191,7 +191,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
                         <tr class="clickable-row log-event-btn<?= $isMissingEmployee ? ' missing-employee' : '' ?>" data-device-id="<?= $device['device_id'] ?>" style="cursor: pointer;">
                             <td><input type="checkbox" class="row-checkbox delete-checkbox" value="<?= $device['device_id'] ?>"></td>
                             <?php foreach ($visible_columns as $col): ?>
-                                <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ?  'class="edit-only"data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>
+                                <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ? 'class="edit-only" data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>
                                     <?php if ($col === 'assigned_to'): ?>
                                         <?= htmlspecialchars(trim(($device['emp_first_name'] ?? '') . ' ' . ($device['emp_last_name'] ?? ''))) . ' (' . ($device['employee_id'] ?? 'N/A') . ')' ?>
                                     <?php else: ?>
@@ -263,13 +263,16 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
           </label>
 
           <label>Internet Policy:
-            <select name="internet_policy">
+            <select name="internet_policy" required>
               <option value="admin">Admin</option>
               <option value="default">Default</option>
               <option value="office">Office</option>
               <option value="accounting">Accounting</option>
-              <option value="estimating">Estimating</option>
               <option value="executive hr">Executive HR</option>
+              <option value="estimating">Estimating</option>
+              <option value="engineering">Engineering</option>
+              <option value="hr">HR</option>
+              <option value="sales">Sales</option>
             </select>
           </label>
 
