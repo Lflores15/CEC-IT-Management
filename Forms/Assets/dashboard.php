@@ -102,7 +102,7 @@ if (file_exists($logFile)) {
     $recentLines = array_reverse($lines);
     $counter = 0;
     foreach ($recentLines as $line) {
-        if ($counter >= 7) break;
+        if ($counter >= 10) break;
         preg_match('/\[(.*?)\] \[(.*?)\] \[(.*?)\] (.*)/', $line, $matches);
         if (count($matches) === 5) {
             $timestamp = $matches[1];
