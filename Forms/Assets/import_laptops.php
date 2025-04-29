@@ -80,7 +80,7 @@ while (($row = fgetcsv($file)) !== false) {
 
     // Ensure status is lower-case to match ENUM exactly
     $status = strtolower(trim($data["status"]));
-    $allowedStatuses = ['active', 'lost', 'shelf-cc', 'shelf-md', 'shelf-hx', 'pending return', 'decommissioned', 'open'];
+    $allowedStatuses = ['active', 'lost', 'shelf-cc', 'shelf-md', 'shelf-hs', 'pending return', 'decommissioned', 'open'];
     if (!in_array($status, $allowedStatuses)) {
         $errors[] = "Invalid status '$status' for asset_tag $assetTag.";
         continue;

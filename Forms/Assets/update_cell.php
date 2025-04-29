@@ -14,19 +14,21 @@ $employeeColumns = ['login_id', 'emp_first_name', 'emp_last_name', 'employee_id'
 
 if (in_array($column, $laptopColumns)) {
     $table = "Laptops";
-    $idField = "device_id";
+    $idField = "laptop_id";
 
-    $lookup = $conn->prepare("SELECT device_id FROM Laptops WHERE device_id = ?");
+    $lookup = $conn->prepare("SELECT laptop_id FROM Laptops WHERE device_id = ?");
     $lookup->bind_param("i", $deviceId);
     $lookup->execute();
-    $lookup->bind_result($existingDeviceId);
+    $lookup->bind_result($laptopId);
 
     if (!$lookup->fetch()) {
         $lookup->close();
-        // No laptop exists yet — create one
+        // No laptop exists yet — create one with safe defaults to avoid NULL issues
         $insertLaptop = $conn->prepare("INSERT INTO Laptops (device_id, internet_policy, cpu, ram, os) VALUES (?, '', '', 0, '')");
         $insertLaptop->bind_param("i", $deviceId);
-        if (!$insertLaptop->execute()) {
+        if ($insertLaptop->execute()) {
+            $laptopId = $conn->insert_id;
+        } else {
             echo "laptop_insert_failed: " . $insertLaptop->error;
             $insertLaptop->close();
             exit;
@@ -35,8 +37,7 @@ if (in_array($column, $laptopColumns)) {
     } else {
         $lookup->close();
     }
-
-    $recordId = $deviceId;
+    $recordId = $laptopId;
 
 } elseif (in_array($column, $deviceColumns)) {
     $table = "Devices";

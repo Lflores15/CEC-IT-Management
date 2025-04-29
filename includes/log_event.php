@@ -1,9 +1,17 @@
 <?php
-function logUserEvent($eventType, $message, $username = 'SYSTEM') {
+function logUserEvent($eventType, $message, $username = null) {
+    if ($username === null) {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $username = $_SESSION['login'] ?? $_SESSION['user'] ?? 'SYSTEM';
+    }
     logToFile(__DIR__ . '/../logs/user_event_log.txt', $eventType, $message, $username);
 }
 
-function logDeviceEvent($eventType, $message, $username = 'SYSTEM') {
+function logDeviceEvent($eventType, $message, $username = null) {
+    if ($username === null) {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $username = $_SESSION['login'] ?? $_SESSION['user'] ?? 'SYSTEM';
+    }
     logToFile(__DIR__ . '/../logs/device_event_log.txt', $eventType, $message, $username);
 }
 
