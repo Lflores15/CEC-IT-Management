@@ -1,10 +1,21 @@
 <?php
 session_start();
+if (!isset($_SESSION['user'])) {
+    if (isset($_SESSION['user_id']) && isset($_SESSION['role'])) {
+        $_SESSION['user'] = $_SESSION['user_id']; // or use 'username' if available
+    } elseif (isset($_SESSION['login'])) {
+        $_SESSION['user'] = $_SESSION['login'];
+    } elseif (isset($_SESSION['username'])) {
+        $_SESSION['user'] = $_SESSION['username'];
+    } else {
+        $_SESSION['user'] = 'unknown';
+    }
+}
 require_once "../../PHP/config.php";
 require_once "../../includes/navbar.php";
 
 // Admin-only access
-if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'admin') {
+if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'Manager') {
     header("Location: ../Login/login.php");
     exit();
 }

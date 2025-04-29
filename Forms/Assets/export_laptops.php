@@ -20,28 +20,26 @@ header('Expires: 0');
 
 $output = fopen('php://output', 'w');
 
-// Write CSV header manually
-fwrite($output, "status,internet_policy,asset_tag,username,first_name,last_name,emp_code,phone_number,cpu,ram,os\n");
+// Write CSV header matching dashboard columns (dynamic, but hard-coded order for export)
+fwrite($output, "Status,Internet Policy,Asset Tag,CPU,RAM (GB),OS,Username,First Name,Last Name,Employee ID,Phone Number\n");
 
 $query = "
 SELECT 
-  Devices.status,
-  Laptops.internet_policy,
-  Devices.asset_tag,
-  Employees.username,
-  Employees.first_name,
-  Employees.last_name,
-  Employees.emp_code,
-  Employees.phone_number,
-  Laptops.cpu,
-  Laptops.ram,
-  Laptops.os
-FROM 
-  Devices
-LEFT JOIN 
-  Laptops ON Devices.device_id = Laptops.device_id
-LEFT JOIN 
-  Employees ON Devices.assigned_to = Employees.emp_code
+  d.status,
+  l.internet_policy,
+  d.asset_tag,
+  l.cpu,
+  l.ram,
+  l.os,
+  e.username,
+  e.first_name,
+  e.last_name,
+  e.emp_code,
+  e.phone_number
+FROM Devices d
+LEFT JOIN Laptops l ON d.device_id = l.device_id
+LEFT JOIN Employees e ON d.assigned_to = e.emp_code
+ORDER BY d.asset_tag
 ";
 
 $result = $conn->query($query);
@@ -62,27 +60,26 @@ while ($row = $result->fetch_assoc()) {
     $phone_number = !empty($phone_number) ? $phone_number : 'N/A';
 
     // Other fields
+    // Match dashboard export column order:
+    // Status,Internet Policy,Asset Tag,CPU,RAM (GB),OS,Username,First Name,Last Name,Employee ID,Phone Number
     $fields = [
         $row['status'] ?? 'N/A',
         $row['internet_policy'] ?? 'N/A',
         $row['asset_tag'] ?? 'N/A',
-        $username,
-        $first_name,
-        $last_name,
-        $emp_code,
-        $phone_number,
         $row['cpu'] ?? 'N/A',
         $row['ram'] !== null ? $row['ram'] : 'N/A',
-        $row['os'] ?? 'N/A'
+        $row['os'] ?? 'N/A',
+        $row['username'] ?? 'N/A',
+        $row['first_name'] ?? 'N/A',
+        $row['last_name'] ?? 'N/A',
+        $row['emp_code'] ?? 'N/A',
+        isset($row['phone_number']) ? (preg_replace('/\D/', '', $row['phone_number']) ?: 'N/A') : 'N/A'
     ];
-
-    // Remove \n, \r
+    // Remove \n, \r from fields
     foreach ($fields as &$field) {
         $field = str_replace(["\r", "\n"], '', $field);
     }
     unset($field);
-
-    // Write clean CSV line
     fwrite($output, implode(",", $fields) . "\n");
 }
 

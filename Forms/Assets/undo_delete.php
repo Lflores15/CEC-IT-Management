@@ -3,8 +3,16 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!isset($_SESSION['user']) && isset($_SESSION['username'])) {
-    $_SESSION['user'] = $_SESSION['username'];
+if (!isset($_SESSION['user'])) {
+    if (isset($_SESSION['user_id']) && isset($_SESSION['role'])) {
+        $_SESSION['user'] = $_SESSION['user_id']; // or use 'username' if available
+    } elseif (isset($_SESSION['login'])) {
+        $_SESSION['user'] = $_SESSION['login'];
+    } elseif (isset($_SESSION['username'])) {
+        $_SESSION['user'] = $_SESSION['username'];
+    } else {
+        $_SESSION['user'] = 'unknown';
+    }
 }
 require_once "../../PHP/config.php";
 
@@ -20,56 +28,49 @@ try {
     $conn->begin_transaction();
 
     foreach ($lastDeleted as $device) {
-        // Insert back into Devices
-        $stmt1 = $conn->prepare("INSERT INTO Devices (device_id, asset_tag, serial_number, category, brand, model, os, status, assigned_to, location, purchase_date, warranty_expiry, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        // Insert back into Devices (only the columns that exist!)
+        $stmt1 = $conn->prepare("INSERT INTO Devices (device_id, asset_tag, status, assigned_to) VALUES (?, ?, ?, ?)");
         $stmt1->bind_param(
-            "issssssssssss",
+            "isss",
             $device['device_id'],
             $device['asset_tag'],
-            $device['serial_number'],
-            $device['category'],
-            $device['brand'],
-            $device['model'],
-            $device['os'],
             $device['status'],
-            $device['assigned_to'],
-            $device['location'],
-            $device['purchase_date'],
-            $device['warranty_expiry'],
-            $device['notes']
+            $device['assigned_to']
         );
-        $stmt1->execute();
+        if (!$stmt1->execute()) {
+            throw new Exception("Devices Insert Failed: " . $stmt1->error);
+        }
 
         // Insert back into Laptops if needed
         if (isset($device['laptop'])) {
             $laptop = $device['laptop'];
-            $stmt2 = $conn->prepare("INSERT INTO Laptops (device_id, cpu, ram, storage, backup_type, internet_policy, backup_removed, sinton_backup, midland_backup, c2_backup, actions_needed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt2 = $conn->prepare("INSERT INTO Laptops (device_id, cpu, ram, os, internet_policy) VALUES (?, ?, ?, ?, ?)");
+            if (!$stmt2) {
+                throw new Exception("Laptops Prepare Failed: " . $conn->error);
+            }
             $stmt2->bind_param(
-                "isiiissssss",
+                "isiss",
                 $device['device_id'],
                 $laptop['cpu'],
                 $laptop['ram'],
-                $laptop['storage'],
-                $laptop['backup_type'],
-                $laptop['internet_policy'],
-                $laptop['backup_removed'],
-                $laptop['sinton_backup'],
-                $laptop['midland_backup'],
-                $laptop['c2_backup'],
-                $laptop['actions_needed']
+                $laptop['os'],
+                $laptop['internet_policy']
             );
-            $stmt2->execute();
+            if (!$stmt2->execute()) {
+                throw new Exception("Laptops Insert Failed: " . $stmt2->error);
+            }
         }
     }
 
     $conn->commit();
     // Logging section
-    $user = $_SESSION['user'] ?? 'unknown';
+    $user = $_SESSION['login'] ?? $_SESSION['user'] ?? 'unknown';
     $logPath = __DIR__ . "/../../Logs/device_event_log.txt";
     $logTime = date("Y-m-d H:i:s");
 
     foreach ($lastDeleted as $device) {
-        file_put_contents($logPath, "[$logTime] [UNDO DELETE] [$user] Restored device_id: {$device['device_id']}\n", FILE_APPEND);
+        $assetTag = $device['asset_tag'] ?? 'unknown';
+        file_put_contents($logPath, "[$logTime] [UNDO DELETE] [$user] Restored asset_tag: $assetTag\n", FILE_APPEND);
     }
     unset($_SESSION['last_deleted_devices']);
     unset($_SESSION['undo_token']);

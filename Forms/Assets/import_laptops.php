@@ -80,28 +80,15 @@ while (($row = fgetcsv($file)) !== false) {
 
     // Ensure status is lower-case to match ENUM exactly
     $status = strtolower(trim($data["status"]));
-    $allowedStatuses = ['active', 'lost', 'shelf-cc', 'shelf-md', 'shelf-hx', 'pending return', 'decommissioned', 'open'];
+    $allowedStatuses = ['active', 'lost', 'shelf-cc', 'shelf-md', 'shelf-hs', 'pending return', 'decommissioned', 'open'];
     if (!in_array($status, $allowedStatuses)) {
         $errors[] = "Invalid status '$status' for asset_tag $assetTag.";
         continue;
     }
 
-    $stmt = $conn->prepare("INSERT IGNORE INTO Devices (status, asset_tag, assigned_to) VALUES (?, ?, ?)");
+    // Check if device already exists
+    $stmt = $conn->prepare("SELECT device_id FROM Devices WHERE asset_tag = ? LIMIT 1");
     if ($stmt) {
-        $stmt->bind_param(
-            "sss",
-            $status,
-            $assetTag,
-            $empCode
-        );
-        $stmt->execute();
-        $deviceId = $conn->insert_id;
-        $stmt->close();
-    }
-
-    // Find device_id if new insert_id is missing (e.g., IGNORE happened)
-    if (empty($deviceId)) {
-        $stmt = $conn->prepare("SELECT device_id FROM Devices WHERE asset_tag = ? LIMIT 1");
         $stmt->bind_param("s", $assetTag);
         $stmt->execute();
         $stmt->bind_result($deviceId);
@@ -109,32 +96,51 @@ while (($row = fgetcsv($file)) !== false) {
         $stmt->close();
     }
 
-    if (!$deviceId) {
-        $errors[] = "Could not find device_id for asset_tag $assetTag.";
+    if ($deviceId) {
+        // Duplicate asset_tag found, log error and skip
+        $errors[] = "Duplicate asset_tag: $assetTag already exists.";
         continue;
+    } else {
+        // Device does not exist, insert it
+        $stmt = $conn->prepare("INSERT INTO Devices (status, asset_tag, assigned_to) VALUES (?, ?, ?)");
+        if ($stmt) {
+            $stmt->bind_param("sss", $status, $assetTag, $empCode);
+            $stmt->execute();
+            $deviceId = $conn->insert_id;
+            $stmt->close();
+        }
     }
 
-    // Insert Laptop
-    $internetPolicy = trim($data["internet_policy"]) ?: "Default";
-    $cpu = trim($data["cpu"]) ?: "Unknown";
-    $ram = is_numeric($data["ram"]) ? intval($data["ram"]) : 0;
-    $os = trim($data["os"]) ?: "Unknown";
+    // After device insert/update
+    if ($deviceId) {
+        // Insert Laptop
+        $internetPolicy = trim($data["internet_policy"]) ?: "Default";
+        $cpu = trim($data["cpu"]) ?: "Unknown";
+        $ram = is_numeric($data["ram"]) ? intval($data["ram"]) : 0;
+        $os = trim($data["os"]) ?: "Unknown";
 
-    $stmt = $conn->prepare("INSERT IGNORE INTO Laptops (device_id, internet_policy, cpu, ram, os) VALUES (?, ?, ?, ?, ?)");
-    if ($stmt) {
-        $stmt->bind_param(
-            "issis",
-            $deviceId,
-            $internetPolicy,
-            $cpu,
-            $ram,
-            $os
-        );
-        $stmt->execute();
-        $stmt->close();
+        $stmt = $conn->prepare("INSERT IGNORE INTO Laptops (device_id, internet_policy, cpu, ram, os) VALUES (?, ?, ?, ?, ?)");
+        if ($stmt) {
+            $stmt->bind_param(
+                "issis",
+                $deviceId,
+                $internetPolicy,
+                $cpu,
+                $ram,
+                $os
+            );
+            if ($stmt->execute()) {
+                $imported++; // ✅ Only increment if laptop insert succeeded
+            } else {
+                $errors[] = "Failed to insert laptop details for asset_tag $assetTag.";
+            }
+            $stmt->close();
+        } else {
+            $errors[] = "Failed to prepare laptop insert for asset_tag $assetTag.";
+        }
+    } else {
+        $errors[] = "Failed to insert or update device for asset_tag $assetTag.";
     }
-
-    $imported++;
 }
 
 fclose($file);
@@ -147,7 +153,7 @@ if ($imported > 0) {
 
 header('Content-Type: application/json');
 echo json_encode([
-    "status" => $imported > 0 ? "success" : "error",
+    "status" => $imported > 0 ? (count($errors) > 0 ? "partial" : "success") : "error",
     "message" => $imported > 0
         ? "✅ Imported $imported laptop(s)." . (count($errors) ? "<br>⚠️ Some issues: " . implode(" | ", $errors) : "")
         : "❌ No laptops imported. Errors: " . implode(" | ", $errors)
