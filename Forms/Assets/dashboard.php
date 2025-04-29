@@ -32,7 +32,7 @@ $query = "
         (SELECT COUNT(*) FROM Devices WHERE status = 'Decommissioned') AS decommissioned, 
         (SELECT COUNT(*) FROM Devices WHERE status = 'Lost') AS lost, 
         (SELECT COUNT(*) FROM Devices WHERE status = 'Pending Return') AS pending, 
-        (SELECT COUNT(*) FROM Devices WHERE status = 'Shelf') AS shelf
+        (SELECT COUNT(*) FROM Devices WHERE status LIKE 'Shelf%') AS shelf
 ";
 $result = $conn->query($query);
 if (!$result) {
@@ -55,7 +55,7 @@ $conn->close();
 <body>
     <div class="dashboard-wrapper">
       <div class="dashboard-left">
-        <h2>Device Status Overview</h2>
+        <h4>Device Status Overview</h4>
         <section class="dashboard-cards">
             <div class="card total">
                 <h3>Total Devices</h3>

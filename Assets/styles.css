@@ -2,10 +2,10 @@
    Device Table Wrapper for Sticky Headers
 ========================================= */
 .device-table-wrapper {
-  overflow-y: auto;
-  max-height: 900px;
-  border: 1px solid #ccc;
-  background: white;
+    overflow-y: auto;
+    height: calc(108vh - 300px); /* Adjust 300px based on what’s above the table */
+    border: 1px solid #ccc;
+    background: white;
 }
 
 .device-table thead th {
@@ -13,6 +13,8 @@
   top: 0;
   background-color: #007bff;
   z-index: 2;
+  padding:5px;
+
 }
 
 /* Sticky filter (second) header row for device-table */
@@ -77,7 +79,7 @@ h1 {
     font-size: 2rem;
     text-align: center;
     color: #333;
-    margin: 20px 0;
+    margin-top: 40px;
 }
 
 h2 {
@@ -91,6 +93,11 @@ h3 {
     
 }
 
+h4{
+    text-align: center;
+    font-size: 2em;
+    margin-top: 10px;
+}
 
 /* =========================================
    Top Navbar
@@ -340,7 +347,7 @@ h3 {
 ========================================= */
 .asset-content-user {
     padding: 20px;
-    padding-top: 40px;
+    padding-top: 10px;
     overflow-x: auto;
 }
 .create-user-btn {
