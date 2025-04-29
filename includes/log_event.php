@@ -2,7 +2,7 @@
 function logUserEvent($eventType, $message, $username = null) {
     if ($username === null) {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        $username = $_SESSION['login'] ?? $_SESSION['user'] ?? 'SYSTEM';
+        $username = $_SESSION['login'] ?? $_SESSION['user'] ?? 'unknown';
     }
     logToFile(__DIR__ . '/../logs/user_event_log.txt', $eventType, $message, $username);
 }
@@ -10,7 +10,7 @@ function logUserEvent($eventType, $message, $username = null) {
 function logDeviceEvent($eventType, $message, $username = null) {
     if ($username === null) {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        $username = $_SESSION['login'] ?? $_SESSION['user'] ?? 'SYSTEM';
+        $username = $_SESSION['login'] ?? $_SESSION['user'] ?? 'unknown';
     }
     logToFile(__DIR__ . '/../logs/device_event_log.txt', $eventType, $message, $username);
 }

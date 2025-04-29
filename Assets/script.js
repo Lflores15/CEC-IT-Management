@@ -903,15 +903,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectOptions = {
         status: ['Active', 'Pending Return', 'Shelf-CC', 'Shelf-MD', 'Shelf-HS', 'Lost', 'Decommissioned'],
         internet_policy: [
-            'Admin',
             'Default',
             'Office',
+            'Admin',
             'Accounting',
-            'Executive HR',
             'Estimating',
-            'Engineering',
-            'HR',
-            'Sales'
+            'Executive',
+            'HR'
         ],
         assigned_to: window.employeeOptions || []  // will be injected from PHP
     };
