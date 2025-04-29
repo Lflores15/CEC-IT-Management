@@ -147,7 +147,7 @@ if ($imported > 0) {
 
 header('Content-Type: application/json');
 echo json_encode([
-    "status" => $imported > 0 ? "success" : "error",
+    "status" => $imported > 0 ? (count($errors) > 0 ? "partial" : "success") : "error",
     "message" => $imported > 0
         ? "✅ Imported $imported laptop(s)." . (count($errors) ? "<br>⚠️ Some issues: " . implode(" | ", $errors) : "")
         : "❌ No laptops imported. Errors: " . implode(" | ", $errors)

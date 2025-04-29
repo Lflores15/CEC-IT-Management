@@ -446,7 +446,6 @@ tables.forEach((table) => {
         button.addEventListener("click", function () {
             document.getElementById("edit-user-id").value = this.dataset.id;
             document.getElementById("edit-username").value = this.dataset.username;
-            document.getElementById("edit-email").value = this.dataset.email;
             document.getElementById("edit-role").value = this.dataset.role;
             modal.style.display = "block";
         });
@@ -512,13 +511,11 @@ if (editModal && closeEditModal) {
         button.addEventListener("click", function () {
             const userId = this.dataset.id;
             const username = this.dataset.username;
-            const email = this.dataset.email;
             const role = this.dataset.role;
 
-            // Populate form fields
+            // Populate form fields (no email field)
             document.getElementById("edit-user-id").value = userId;
             document.getElementById("edit-username").value = username;
-            document.getElementById("edit-email").value = email;
             document.getElementById("edit-role").value = role;
 
             // Show modal
@@ -551,8 +548,12 @@ if (editModal && closeEditModal) {
                 const userId = this.dataset.id;
                 const username = this.dataset.username;
 
+                const deleteUserForm = document.getElementById('deleteUserForm');
                 document.getElementById('delete-user-id').value = userId;
                 document.getElementById('delete-username').textContent = username;
+
+                // Update the form action dynamically to include the user ID
+                deleteUserForm.action = `delete_user.php?id=${userId}`;
 
                 deleteModal.style.display = "block";
             });
@@ -1337,4 +1338,20 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function closeLogEventModal() {
     document.getElementById('logEventModal').style.display = 'none';
+}
+
+
+// ========== Fetch Employee Details for Assign To Dropdown ==========
+function fetchEmployeeDetails(emp_code) {
+  if (!emp_code) return;
+
+  fetch(`/Forms/Employees/get_employee_info.php?emp_code=${encodeURIComponent(emp_code)}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('first_name').value = data.first_name || '';
+      document.getElementById('last_name').value = data.last_name || '';
+      document.getElementById('username').value = data.username || '';
+      document.getElementById('phone_number').value = data.phone_number || '';
+    })
+    .catch(err => console.error("Failed to fetch employee details:", err));
 }

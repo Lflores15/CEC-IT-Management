@@ -50,8 +50,9 @@ if (array_key_exists($currentPage, $pageTitles)) {
         <img src="/Assets/CEC-Logo.png" alt="CEC-IT Logo" class="logo">
 
         <div class="navbar-right">
+        <!-- Depricated Search Bar 
             <input type="text" placeholder="Search assets...">
-
+        -->
             <!-- Profile Dropdown -->
             <div class="profile-dropdown">
                 <button class="profile-btn">Profile ▼</button>
@@ -69,17 +70,20 @@ if (array_key_exists($currentPage, $pageTitles)) {
         <h2><?php echo $pageTitle; ?></h2>
         <a href="../Assets/dashboard.php" class="<?php echo ($currentPage == 'dashboard') ? 'active' : ''; ?>">Dashboard</a>
 
- <!-- Assets dropdown -->
- <div class="dropdown">
-      <button class="dropdown-btn <?= in_array($currentPage, ['laptop_Dashboard','pc_Dashboard','tablet_Dashboard','phone_Dashboard']) ? 'open' : '' ?>">
-        Assets
-      </button>
-      <div class="dropdown-content">
-        <a href="../Assets/laptop_Dashboard.php"
-           class="<?= $currentPage==='laptop_Dashboard' ? 'active' : '' ?>">
-          Laptops
-        </a>
-      </div>
+        <!-- Assets Dropdown -->
+        <div class="dropdown">
+            <button class="dropdown-btn laptops-dropdown">Assets</button>
+            <div class="dropdown-content">
+                <a href="../Assets/laptop_Dashboard.php">Laptops</a>
+            </div>
+        </div>
+        <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'Manager'): ?>
+            <a href="../Users/user_Dashboard.php" class="<?php echo ($currentPage == 'users') ? 'active' : ''; ?>">Users</a>
+
+            <a href="/Forms/Employees/employee_Dashboard.php" class="<?php echo ($currentPage == 'employees') ? 'active' : ''; ?>">Employees</a>
+            <a href="../Admin/log_dashboard.php" class="<?php echo ($currentPage == 'logs') ? 'active' : ''; ?>">Logs</a>
+        <?php endif; ?>
+        <a href="../Settings/settings.php" class="<?php echo ($currentPage == 'settings') ? 'active' : ''; ?>">Settings</a>
     </div>
 
     <!-- Users: only for Managers -->

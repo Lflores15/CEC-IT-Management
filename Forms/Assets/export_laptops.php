@@ -62,21 +62,22 @@ while ($row = $result->fetch_assoc()) {
     $phone_number = !empty($phone_number) ? $phone_number : 'N/A';
 
     // Other fields
+    // Match dashboard export column order:
+    // Status,Internet Policy,Asset Tag,CPU,RAM (GB),OS,Username,First Name,Last Name,Employee ID,Phone Number
     $fields = [
         $row['status'] ?? 'N/A',
         $row['internet_policy'] ?? 'N/A',
         $row['asset_tag'] ?? 'N/A',
-        $username,
-        $first_name,
-        $last_name,
-        $emp_code,
-        $phone_number,
         $row['cpu'] ?? 'N/A',
         $row['ram'] !== null ? $row['ram'] : 'N/A',
-        $row['os'] ?? 'N/A'
+        $row['os'] ?? 'N/A',
+        $row['username'] ?? 'N/A',
+        $row['first_name'] ?? 'N/A',
+        $row['last_name'] ?? 'N/A',
+        $row['emp_code'] ?? 'N/A',
+        isset($row['phone_number']) ? (preg_replace('/\D/', '', $row['phone_number']) ?: 'N/A') : 'N/A'
     ];
-
-    // Remove \n, \r
+    // Remove \n, \r from fields
     foreach ($fields as &$field) {
         $field = str_replace(["\r", "\n"], '', $field);
     }
@@ -90,3 +91,4 @@ fclose($output);
 $conn->close();
 exit;
 ?>
+
