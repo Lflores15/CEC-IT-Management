@@ -1369,11 +1369,13 @@ th.sortable.desc::after {
   /* Success/Failure messages */
   #audit-result-message,
   #import-result-message {
-    padding: 10px;
-    border-radius: 5px;
+    padding: 12px;
+    font-size: 15px;
     font-weight: bold;
-    margin-top: 15px;
+    border-radius: 4px;
+    margin-top: 12px;
   }
+  
   
   #import-result-wrapper {
     padding-top: 10px;

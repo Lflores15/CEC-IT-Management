@@ -42,13 +42,19 @@ document.addEventListener("DOMContentLoaded", function () {
         openImportBtn.addEventListener("click", function (e) {
             e.preventDefault();
             openModal("importLaptopModal");
+            importResult.style.display = "none"; // ✅ clear previous result
+            importResult.innerHTML = "";
         });
+        
     }
 
     if (closeImportBtn) {
         closeImportBtn.addEventListener("click", function () {
+            const success = importResult?.innerHTML.includes("Imported/updated");
             closeModal("importLaptopModal");
+            if (success) location.reload(); // ✅ refresh if import success
         });
+        
     }
 
     if (importForm && importResult) {
@@ -111,14 +117,20 @@ document.addEventListener("DOMContentLoaded", function () {
         openAuditBtn.addEventListener("click", function (e) {
             e.preventDefault();
             openModal("auditLaptopModal");
+            auditResultBox.style.display = "none"; // ✅ clear previous result
+            auditResultBox.innerHTML = "";
         });
     }
 
     if (closeAuditBtn) {
         closeAuditBtn.addEventListener("click", function () {
+            const success = auditResultBox?.innerHTML.includes("Audit complete");
             closeModal("auditLaptopModal");
+            if (success) location.reload(); // ✅ refresh if audit success was shown
         });
-    }
+    } // ✅ THIS was missing and is required
+    
+        
 
     if (runAuditBtn && auditFileInput && auditResultBox) {
         runAuditBtn.addEventListener("click", function auditHandler(e) {
@@ -129,6 +141,8 @@ document.addEventListener("DOMContentLoaded", function () {
             auditResultBox.style.display = "block";
             auditResultBox.style.color = "#333";
             auditResultBox.style.backgroundColor = "#fff3cd";
+            auditResultBox.style.padding = "12px"; // ✅ add this if missing
+
             auditResultBox.innerHTML = "⏳ Auditing employee assignments...";
 
             const formData = new FormData();
@@ -143,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (data.success) {
                     auditResultBox.style.color = "#155724";
                     auditResultBox.style.backgroundColor = "#d4edda";
-                    auditResultBox.innerHTML = `✅ Audit complete: ${data.count} employee(s) processed.`;
+                    auditResultBox.innerHTML = `Audit complete: ${data.count} employee(s) processed.`;
 
                     runAuditBtn.textContent = "Refresh Page Now";
                     runAuditBtn.style.backgroundColor = "#28a745";
