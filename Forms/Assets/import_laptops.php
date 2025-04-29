@@ -13,7 +13,6 @@ if (!isset($_FILES["csv_file"]) || $_FILES["csv_file"]["error"] !== UPLOAD_ERR_O
     exit;
 }
 
-// Correct headers based on your CSV format
 $expectedHeaders = ['status', 'internet_policy', 'asset_tag', 'username', 'first_name', 'last_name', 'emp_code', 'phone_number', 'cpu', 'ram', 'os'];
 
 $file = fopen($_FILES["csv_file"]["tmp_name"], "r");
@@ -39,11 +38,8 @@ $conn->begin_transaction();
 $imported = 0;
 $errors = [];
 
-// Create dummy employee for unassigned if not exists
-$conn->query("
-    INSERT IGNORE INTO Employees (emp_code, username, first_name, last_name, phone_number)
-    VALUES ('0000', 'system', 'Unassigned', 'Unassigned', '')
-");
+// Insert dummy employee (0000) to prevent FK failures
+$conn->query("INSERT IGNORE INTO Employees (emp_code, username, first_name, last_name, phone_number) VALUES ('0000','system','Unassigned','Unassigned','')");
 
 while (($row = fgetcsv($file)) !== false) {
     $row = array_pad($row, count($expectedHeaders), '');
@@ -53,94 +49,107 @@ while (($row = fgetcsv($file)) !== false) {
         continue;
     }
 
-    $empCode = trim($data["emp_code"]);
-    $empCode = $empCode !== '' ? $empCode : '0000';  // Force to dummy 0000 if missing
-
-    // Insert employee (IGNORE duplicate emp_code)
-    $stmt = $conn->prepare("INSERT IGNORE INTO Employees (emp_code, username, first_name, last_name, phone_number) VALUES (?, ?, ?, ?, ?)");
-    if ($stmt) {
-        $stmt->bind_param(
-            "sssss",
-            $empCode,
-            $data["username"],
-            $data["first_name"],
-            $data["last_name"],
-            $data["phone_number"]
-        );
-        $stmt->execute();
-        $stmt->close();
-    }
-
-    // Insert Device
+    $empCode = trim($data["emp_code"]) ?: '0000';
+    $status = strtolower(trim($data["status"]));
     $assetTag = trim($data["asset_tag"]);
-    if (empty($assetTag)) {
-        $errors[] = "Missing asset_tag for a device.";
+    $cpu = trim($data["cpu"]) ?: "Unknown";
+    $ram = is_numeric($data["ram"]) ? intval($data["ram"]) : 0;
+    $os = trim($data["os"]) ?: "Unknown";
+    $internetPolicy = trim($data["internet_policy"]) ?: "Default";
+
+    if (!$assetTag) {
+        $errors[] = "Missing asset tag in row: " . implode(", ", $row);
         continue;
     }
 
-    // Ensure status is lower-case to match ENUM exactly
-    $status = strtolower(trim($data["status"]));
-    $allowedStatuses = ['active', 'lost', 'shelf-cc', 'shelf-md', 'shelf-hs', 'pending return', 'decommissioned', 'open'];
+    // Validate ENUM
+    $allowedStatuses = ['active', 'lost', 'shelf-cc', 'shelf-md', 'shelf-hx', 'pending return', 'decommissioned', 'open'];
     if (!in_array($status, $allowedStatuses)) {
         $errors[] = "Invalid status '$status' for asset_tag $assetTag.";
         continue;
     }
 
-    // Check if device already exists
-    $stmt = $conn->prepare("SELECT device_id FROM Devices WHERE asset_tag = ? LIMIT 1");
-    if ($stmt) {
-        $stmt->bind_param("s", $assetTag);
-        $stmt->execute();
-        $stmt->bind_result($deviceId);
-        $stmt->fetch();
-        $stmt->close();
-    }
-
-    if ($deviceId) {
-        // Duplicate asset_tag found, log error and skip
-        $errors[] = "Duplicate asset_tag: $assetTag already exists.";
+    // UPSERT employee
+    $stmt = $conn->prepare("
+        INSERT INTO Employees (emp_code, username, first_name, last_name, phone_number)
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            username = VALUES(username),
+            first_name = VALUES(first_name),
+            last_name = VALUES(last_name),
+            phone_number = VALUES(phone_number)
+    ");
+    if (!$stmt) {
+        $errors[] = "Employee statement error: " . $conn->error;
         continue;
-    } else {
-        // Device does not exist, insert it
-        $stmt = $conn->prepare("INSERT INTO Devices (status, asset_tag, assigned_to) VALUES (?, ?, ?)");
-        if ($stmt) {
-            $stmt->bind_param("sss", $status, $assetTag, $empCode);
-            $stmt->execute();
-            $deviceId = $conn->insert_id;
-            $stmt->close();
-        }
+    }
+    $stmt->bind_param("sssss", $empCode, $data["username"], $data["first_name"], $data["last_name"], $data["phone_number"]);
+    if (!$stmt->execute()) {
+        $errors[] = "Employee insert failed: " . $stmt->error;
+        logDeviceImport("Employee insert failed: " . $stmt->error);
+        $stmt->close();
+        continue;
+    }
+    $stmt->close();
+
+    // UPSERT device
+    $stmt = $conn->prepare("
+        INSERT INTO Devices (status, asset_tag, assigned_to)
+        VALUES (?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            status = VALUES(status),
+            assigned_to = VALUES(assigned_to)
+    ");
+    if (!$stmt) {
+        $errors[] = "Device statement error: " . $conn->error;
+        continue;
+    }
+    $stmt->bind_param("sss", $status, $assetTag, $empCode);
+    if (!$stmt->execute()) {
+        $errors[] = "Device insert failed for asset_tag $assetTag: " . $stmt->error;
+        logDeviceImport("Device insert failed: " . $stmt->error);
+        $stmt->close();
+        continue;
+    }
+    $stmt->close();
+
+    // Get device_id (new or existing)
+    $stmt = $conn->prepare("SELECT device_id FROM Devices WHERE asset_tag = ? LIMIT 1");
+    $stmt->bind_param("s", $assetTag);
+    $stmt->execute();
+    $stmt->bind_result($deviceId);
+    $stmt->fetch();
+    $stmt->close();
+
+    if (!$deviceId) {
+        $errors[] = "Could not retrieve device_id for asset_tag $assetTag.";
+        continue;
     }
 
-    // After device insert/update
-    if ($deviceId) {
-        // Insert Laptop
-        $internetPolicy = trim($data["internet_policy"]) ?: "Default";
-        $cpu = trim($data["cpu"]) ?: "Unknown";
-        $ram = is_numeric($data["ram"]) ? intval($data["ram"]) : 0;
-        $os = trim($data["os"]) ?: "Unknown";
-
-        $stmt = $conn->prepare("INSERT IGNORE INTO Laptops (device_id, internet_policy, cpu, ram, os) VALUES (?, ?, ?, ?, ?)");
-        if ($stmt) {
-            $stmt->bind_param(
-                "issis",
-                $deviceId,
-                $internetPolicy,
-                $cpu,
-                $ram,
-                $os
-            );
-            if ($stmt->execute()) {
-                $imported++; // ✅ Only increment if laptop insert succeeded
-            } else {
-                $errors[] = "Failed to insert laptop details for asset_tag $assetTag.";
-            }
-            $stmt->close();
-        } else {
-            $errors[] = "Failed to prepare laptop insert for asset_tag $assetTag.";
-        }
-    } else {
-        $errors[] = "Failed to insert or update device for asset_tag $assetTag.";
+    // UPSERT laptop
+    $stmt = $conn->prepare("
+        INSERT INTO Laptops (device_id, internet_policy, cpu, ram, os)
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            internet_policy = VALUES(internet_policy),
+            cpu = VALUES(cpu),
+            ram = VALUES(ram),
+            os = VALUES(os)
+    ");
+    if (!$stmt) {
+        $errors[] = "Laptop statement error: " . $conn->error;
+        continue;
     }
+    $stmt->bind_param("issis", $deviceId, $internetPolicy, $cpu, $ram, $os);
+    if (!$stmt->execute()) {
+        $errors[] = "Laptop insert failed for asset_tag $assetTag: " . $stmt->error;
+        logDeviceImport("Laptop insert failed: " . $stmt->error);
+        $stmt->close();
+        continue;
+    }
+    $stmt->close();
+
+    $imported++;
 }
 
 fclose($file);
@@ -153,9 +162,9 @@ if ($imported > 0) {
 
 header('Content-Type: application/json');
 echo json_encode([
-    "status" => $imported > 0 ? (count($errors) > 0 ? "partial" : "success") : "error",
+    "status" => $imported > 0 ? "success" : "error",
     "message" => $imported > 0
-        ? "✅ Imported $imported laptop(s)." . (count($errors) ? "<br>⚠️ Some issues: " . implode(" | ", $errors) : "")
+        ? "✅ Imported/updated $imported laptop(s)." . (count($errors) ? "<br>⚠️ Issues: " . implode(" | ", $errors) : "")
         : "❌ No laptops imported. Errors: " . implode(" | ", $errors)
 ]);
 exit;

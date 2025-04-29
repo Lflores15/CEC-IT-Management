@@ -237,13 +237,20 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
       <h2 style="margin: 0;">Audit Laptops</h2>
       <span id="closeAuditLaptopModal" class="close" style="font-size: 24px; cursor: pointer;">&times;</span>
     </div>
-    <div id="auditLaptopForm">
+
+    <!-- ✅ Form Content -->
+    <form id="auditForm" style="margin-top: 10px;">
       <p>Select an Active Employee CSV file to audit assigned laptops.</p>
-      <input type="file" id="auditCsvFile" accept=".csv" required>
-      <button type="button" id="runAuditBtn">Run Audit</button>
-    </div>
+      <input type="file" id="auditCsvFile" name="csv_file" accept=".csv" required style="margin-bottom: 10px;">
+      <button type="submit" id="runAuditBtn" style="padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px;">
+        Run Audit
+      </button>
+        <!-- 🔥 ADD THIS RIGHT HERE -->
+        <div id="audit-result-message" style="display:none; padding: 10px; margin-top: 15px; border-radius: 5px; font-weight: bold;"></div>
+    </form>
   </div>
 </div>
+
 <!-- All modal, import, and row navigation JS logic is handled by script.js -->
   <!-- Create Device Modal -->
   <div id="create-device-modal" class="modal create-device-modal" style="display: none;">

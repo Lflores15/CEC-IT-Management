@@ -50,9 +50,8 @@ if (array_key_exists($currentPage, $pageTitles)) {
         <img src="/Assets/CEC-Logo.png" alt="CEC-IT Logo" class="logo">
 
         <div class="navbar-right">
-        <!-- Depricated Search Bar 
             <input type="text" placeholder="Search assets...">
-        -->
+
             <!-- Profile Dropdown -->
             <div class="profile-dropdown">
                 <button class="profile-btn">Profile ▼</button>
