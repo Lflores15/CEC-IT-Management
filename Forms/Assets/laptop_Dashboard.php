@@ -110,7 +110,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
 
         <div style="display: flex; gap: 10px;">
             <button id="openImportLaptopModal" class="import-btn">Populate Table</button>
-            <button id="audit-laptop-btn" class="edit-btn">Audit Laptops</button>
+            <button id="audit-laptop-btn" class="audit-btn">Audit Laptops</button>
             <button id="export-csv-btn" class="edit-btn">Export CSV</button>
         </div>
       </div>
