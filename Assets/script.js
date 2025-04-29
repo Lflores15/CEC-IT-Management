@@ -664,6 +664,30 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
     }
+
+    // Column selector buttons toggle logic with background color update
+    document.querySelectorAll('.column-toggle-btn').forEach(button => {
+      const input = button.nextElementSibling;
+
+      // Set initial color based on 'active' class
+      if (button.classList.contains('active')) {
+        button.style.backgroundColor = '#28a745'; // green
+      } else {
+        button.style.backgroundColor = '#dc3545'; // red
+      }
+
+      button.addEventListener('click', () => {
+        const isActive = button.classList.toggle('active');
+        input.disabled = !isActive;
+
+        // Update color based on active state
+        if (isActive) {
+          button.style.backgroundColor = '#28a745'; // green
+        } else {
+          button.style.backgroundColor = '#dc3545'; // red
+        }
+      });
+    });
 });
 
 

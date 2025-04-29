@@ -3,7 +3,7 @@
 ========================================= */
 .device-table-wrapper {
     overflow-y: auto;
-    height: calc(108vh - 300px); /* Adjust 300px based on what’s above the table */
+    height: calc(105vh - 280px); /* Adjust 300px based on what’s above the table */
     border: 1px solid #ccc;
     background: white;
 }
@@ -536,6 +536,7 @@ th.sortable.desc::after {
     background: #ffffff;
     padding: 10px;
     border: 2px solid #007bff;
+    height: auto;
 }
 
 #employee-table th {
@@ -1820,4 +1821,26 @@ th.sortable.desc::after {
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   overflow: hidden;
+}
+/* =========================================
+   Column Toggle Button Styles
+========================================= */
+.column-toggle-btn {
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+.column-toggle-btn:hover {
+    background-color: #ddd;
+}
+
+.column-toggle-btn.active {
+    background-color: #28a745; /* Green when active */
+    color: white;
+    border: 2px solid #28a745;
 }

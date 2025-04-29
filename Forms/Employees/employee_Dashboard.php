@@ -25,38 +25,40 @@ require_once("../../includes/session.php");
             </div>
         </div>
 
-        <table id="employee-table" class="device-table">
-            <thead>
-                <tr>
-                    <th class="checkbox-col" style="display: none;"><input type="checkbox" id="select-all"></th>
-                    <th style="text-align: left;">Employee Code<br><input type="text" class="filter-input" data-column="1"></th>
-                    <th style="text-align: left;">First Name<br><input type="text" class="filter-input" data-column="2"></th>
-                    <th style="text-align: left;">Last Name<br><input type="text" class="filter-input" data-column="3"></th>
-                    <th style="text-align: left;">Username<br><input type="text" class="filter-input" data-column="4"></th>
-                    <th style="text-align: left;">Phone Number<br><input type="text" class="filter-input" data-column="5"></th>
-                    <th class="checkbox-col" style="display: none;"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                $stmt = $conn->prepare("SELECT emp_code, first_name, last_name, username, phone_number, active FROM Employees");
-                $stmt->execute();
-                $result = $stmt->get_result();
+        <div style="overflow-y: auto; height: calc(105vh - 280px);">
+            <table id="employee-table" class="device-table">
+                <thead style="position: sticky; top: 0; background-color: #007bff; z-index: 2;">
+                    <tr>
+                        <th class="checkbox-col" style="display: none;"><input type="checkbox" id="select-all"></th>
+                        <th style="text-align: left;">Employee Code<br><input type="text" class="filter-input" data-column="1"></th>
+                        <th style="text-align: left;">First Name<br><input type="text" class="filter-input" data-column="2"></th>
+                        <th style="text-align: left;">Last Name<br><input type="text" class="filter-input" data-column="3"></th>
+                        <th style="text-align: left;">Username<br><input type="text" class="filter-input" data-column="4"></th>
+                        <th style="text-align: left;">Phone Number<br><input type="text" class="filter-input" data-column="5"></th>
+                        <th class="checkbox-col" style="display: none;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $stmt = $conn->prepare("SELECT emp_code, first_name, last_name, username, phone_number, active FROM Employees");
+                    $stmt->execute();
+                    $result = $stmt->get_result();
 
-                while ($row = $result->fetch_assoc()):
-                ?>
-                <tr class="clickable-row<?php echo $row['active'] ? '' : ' missing-employee'; ?>" data-id="<?php echo $row['emp_code']; ?>">
-                    <td class="checkbox-col" style="display: none;"><input type="checkbox" class="row-select"></td>
-                    <td><?php echo htmlspecialchars($row['emp_code']); ?></td>
-                    <td><?php echo htmlspecialchars($row['first_name']); ?></td>
-                    <td><?php echo htmlspecialchars($row['last_name']); ?></td>
-                    <td><?php echo htmlspecialchars($row['username']); ?></td>
-                    <td><?php echo htmlspecialchars($row['phone_number']); ?></td>
-                    <td class="checkbox-col" style="display: none;"><span class="edit-icon">✏️</span></td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+                    while ($row = $result->fetch_assoc()):
+                    ?>
+                    <tr class="clickable-row<?php echo $row['active'] ? '' : ' missing-employee'; ?>" data-id="<?php echo $row['emp_code']; ?>">
+                        <td class="checkbox-col" style="display: none;"><input type="checkbox" class="row-select"></td>
+                        <td><?php echo htmlspecialchars($row['emp_code']); ?></td>
+                        <td><?php echo htmlspecialchars($row['first_name']); ?></td>
+                        <td><?php echo htmlspecialchars($row['last_name']); ?></td>
+                        <td><?php echo htmlspecialchars($row['username']); ?></td>
+                        <td><?php echo htmlspecialchars($row['phone_number']); ?></td>
+                        <td class="checkbox-col" style="display: none;"><span class="edit-icon">✏️</span></td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
     </main>
 
     <!-- Add Employee Modal -->
