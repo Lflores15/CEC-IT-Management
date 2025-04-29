@@ -3,15 +3,18 @@ session_start();
 require_once "../../PHP/config.php";
 require_once "../../includes/navbar.php";
 
-// Redirect if not admin
-if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'admin') {
+// Redirect if not manager
+if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'Manager') {
     header("Location: ../Login/login.php");
     exit();
 }
 
 // Fetch all users
-$query = "SELECT user_id, username, email, role FROM Users";
+$query = "SELECT user_id, login, role FROM Users";
 $result = $conn->query($query);
+if (!$result) {
+    die("Query failed: (" . $conn->errno . ") " . $conn->error);
+}
 ?>
 
 <!DOCTYPE html>
@@ -21,6 +24,7 @@ $result = $conn->query($query);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Users</title>
     <link rel="stylesheet" href="/Assets/styles.css">
+    <script src="../../Assets/scripts.js"></script>
 </head>
 <h1>Manage Users</h1>
 <?php if (isset($_GET['created']) && $_GET['created'] == 1): ?>
@@ -40,7 +44,7 @@ $result = $conn->query($query);
     </script>
 <?php elseif (isset($_GET['error']) && $_GET['error'] === 'cannot_delete_self'): ?>
     <script>
-        alert("⚠️ You cannot delete your own admin account.");
+        alert("⚠️ You cannot delete your own manager account.");
         window.location.href = window.location.pathname;
     </script>
 <?php endif; ?>
@@ -51,7 +55,6 @@ $result = $conn->query($query);
             <thead>
                 <tr>
                     <th>Username</th>
-                    <th>Email</th>
                     <th>Role</th>
                     <th>Actions</th>
                 </tr>
@@ -59,18 +62,15 @@ $result = $conn->query($query);
             <tbody>
                 <?php while ($user = $result->fetch_assoc()) : ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($user["username"]); ?></td>
-                        <td><?php echo htmlspecialchars($user["email"]); ?></td>
+                        <td><?php echo htmlspecialchars($user["login"]); ?></td>
                         <td><?php echo htmlspecialchars($user["role"]); ?></td>
                         <td>
                             <button class="edit-btn" data-id="<?php echo $user['user_id']; ?>"
-                                data-username="<?php echo $user['username']; ?>"
-                                data-email="<?php echo $user['email']; ?>"
+                                data-username="<?php echo $user['login']; ?>"
                                 data-role="<?php echo $user['role']; ?>">Edit</button>
 
                             <button class="delete-btn" data-id="<?php echo $user['user_id']; ?>"
-                                data-username="<?php echo $user['username']; ?>"
-                                data-email="<?php echo $user['email']; ?>"
+                                data-username="<?php echo $user['login']; ?>"
                                 data-role="<?php echo $user['role']; ?>">Delete</button>
                         </td>
                     </tr>
@@ -86,18 +86,15 @@ $result = $conn->query($query);
             <h3>Create New User</h3>
             <form action="create_user.php" method="POST">
                 <label for="new-username">Username:</label>
-                <input type="text" id="new-username" name="username" required>
-
-                <label for="new-email">Email:</label>
-                <input type="email" id="new-email" name="email" required>
+                <input type="text" id="new-username" name="login" required>
 
                 <label for="new-password">Password:</label>
                 <input type="password" id="new-password" name="password" required>
 
                 <label for="new-role">Role:</label>
                 <select id="new-role" name="role">
-                    <option value="admin">Admin</option>
-                    <option value="user" selected>User</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Technician">Technician</option>
                 </select>
 
                 <button type="submit">Create User</button>
@@ -113,15 +110,11 @@ $result = $conn->query($query);
             <form id="editUserForm">
                 <input type="hidden" id="edit-user-id" name="user_id">
                 <label for="edit-username">Username:</label>
-                <input type="text" id="edit-username" name="username" required>
-
-                <label for="edit-email">Email:</label>
-                <input type="email" id="edit-email" name="email" required>
-
+                <input type="text" id="edit-username" name="login" required>
                 <label for="edit-role">Role:</label>
                 <select id="edit-role" name="role">
-                    <option value="admin">Admin</option>
-                    <option value="user">User</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Technician">Technician</option>
                 </select>
 
                 <button type="submit">Update</button>

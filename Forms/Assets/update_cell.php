@@ -8,32 +8,40 @@ $column = $_POST['column'] ?? '';
 $value = $_POST['value'] ?? '';
 
 // Whitelist allowed columns and determine which table to update
-$deviceColumns = ['asset_tag', 'status', 'os', 'assigned_to'];
 $laptopColumns = ['cpu', 'ram', 'internet_policy'];
+$deviceColumns = ['asset_tag', 'status', 'os', 'assigned_to'];
 $employeeColumns = ['login_id', 'emp_first_name', 'emp_last_name', 'employee_id', 'phone_number'];
 
-if (in_array($column, $deviceColumns)) {
-    $table = "Devices";
-    $idField = "device_id";
-    $recordId = $deviceId; // Set recordId for Devices
-
-} elseif (in_array($column, $laptopColumns)) {
+if (in_array($column, $laptopColumns)) {
     $table = "Laptops";
-    $idField = "laptop_id";
+    $idField = "device_id";
 
-    $lookup = $conn->prepare("SELECT laptop_id FROM Laptops WHERE device_id = ?");
+    $lookup = $conn->prepare("SELECT device_id FROM Laptops WHERE device_id = ?");
     $lookup->bind_param("i", $deviceId);
     $lookup->execute();
-    $lookup->bind_result($laptopId);
+    $lookup->bind_result($existingDeviceId);
 
     if (!$lookup->fetch()) {
-        echo "laptop_not_found";
         $lookup->close();
-        exit;
+        // No laptop exists yet — create one
+        $insertLaptop = $conn->prepare("INSERT INTO Laptops (device_id, internet_policy, cpu, ram, os) VALUES (?, '', '', 0, '')");
+        $insertLaptop->bind_param("i", $deviceId);
+        if (!$insertLaptop->execute()) {
+            echo "laptop_insert_failed: " . $insertLaptop->error;
+            $insertLaptop->close();
+            exit;
+        }
+        $insertLaptop->close();
+    } else {
+        $lookup->close();
     }
-    $lookup->close();
 
-    $recordId = $laptopId;
+    $recordId = $deviceId;
+
+} elseif (in_array($column, $deviceColumns)) {
+    $table = "Devices";
+    $idField = "device_id";
+    $recordId = $deviceId;
 
 } elseif (in_array($column, $employeeColumns)) {
     $table = "Employees";
@@ -67,12 +75,7 @@ if (!$stmt) {
     exit;
 }
 
-if ($column === "assigned_to" && $value === "") {
-    // Bind NULL for assigned_to when value is empty (Not Assigned)
-    $stmt->bind_param("ii", $null = null, $recordId);
-} else {
-    $stmt->bind_param("si", $value, $recordId);
-}
+$stmt->bind_param("si", $value, $recordId);
 
 if ($stmt->execute()) {
     $username = $_SESSION['username'] ?? 'unknown';

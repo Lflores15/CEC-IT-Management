@@ -29,28 +29,28 @@ require_once("../../includes/session.php");
             <thead>
                 <tr>
                     <th class="checkbox-col" style="display: none;"><input type="checkbox" id="select-all"></th>
-                    <th style="text-align: left;">Employee ID<br><input type="text" class="filter-input" data-column="1"></th>
+                    <th style="text-align: left;">Employee Code<br><input type="text" class="filter-input" data-column="1"></th>
                     <th style="text-align: left;">First Name<br><input type="text" class="filter-input" data-column="2"></th>
                     <th style="text-align: left;">Last Name<br><input type="text" class="filter-input" data-column="3"></th>
-                    <th style="text-align: left;">Login ID<br><input type="text" class="filter-input" data-column="4"></th>
+                    <th style="text-align: left;">Username<br><input type="text" class="filter-input" data-column="4"></th>
                     <th style="text-align: left;">Phone Number<br><input type="text" class="filter-input" data-column="5"></th>
                     <th class="checkbox-col" style="display: none;"></th>
                 </tr>
             </thead>
             <tbody>
                 <?php
-                $stmt = $conn->prepare("SELECT employee_id, first_name, last_name, login_id, phone_number FROM Employees");
+                $stmt = $conn->prepare("SELECT emp_code, first_name, last_name, username, phone_number, active FROM Employees");
                 $stmt->execute();
                 $result = $stmt->get_result();
 
                 while ($row = $result->fetch_assoc()):
                 ?>
-                <tr class="clickable-row" data-id="<?php echo $row['employee_id']; ?>">
+                <tr class="clickable-row<?php echo $row['active'] ? '' : ' missing-employee'; ?>" data-id="<?php echo $row['emp_code']; ?>">
                     <td class="checkbox-col" style="display: none;"><input type="checkbox" class="row-select"></td>
-                    <td><?php echo htmlspecialchars($row['employee_id']); ?></td>
+                    <td><?php echo htmlspecialchars($row['emp_code']); ?></td>
                     <td><?php echo htmlspecialchars($row['first_name']); ?></td>
                     <td><?php echo htmlspecialchars($row['last_name']); ?></td>
-                    <td><?php echo htmlspecialchars($row['login_id']); ?></td>
+                    <td><?php echo htmlspecialchars($row['username']); ?></td>
                     <td><?php echo htmlspecialchars($row['phone_number']); ?></td>
                     <td class="checkbox-col" style="display: none;"><span class="edit-icon">✏️</span></td>
                 </tr>

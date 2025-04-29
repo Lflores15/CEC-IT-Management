@@ -49,8 +49,9 @@ if (array_key_exists($currentPage, $pageTitles)) {
         <img src="/Assets/CEC-Logo.png" alt="CEC-IT Logo" class="logo">
 
         <div class="navbar-right">
+        <!-- Depricated Search Bar 
             <input type="text" placeholder="Search assets...">
-
+        -->
             <!-- Profile Dropdown -->
             <div class="profile-dropdown">
                 <button class="profile-btn">Profile ▼</button>
@@ -70,12 +71,12 @@ if (array_key_exists($currentPage, $pageTitles)) {
 
         <!-- Assets Dropdown -->
         <div class="dropdown">
-            <button class="dropdown-btn">Assets</button>
+            <button class="dropdown-btn laptops-dropdown">Assets</button>
             <div class="dropdown-content">
                 <a href="../Assets/laptop_Dashboard.php">Laptops</a>
             </div>
         </div>
-        <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'admin'): ?>
+        <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'Manager'): ?>
             <a href="../Users/user_Dashboard.php" class="<?php echo ($currentPage == 'users') ? 'active' : ''; ?>">Users</a>
 
             <a href="/Forms/Employees/employee_Dashboard.php" class="<?php echo ($currentPage == 'employees') ? 'active' : ''; ?>">Employees</a>

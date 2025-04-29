@@ -3,7 +3,7 @@ require_once "../../PHP/config.php";
 session_start();
 
 function logDeviceImport($message) {
-    $user = $_SESSION["username"] ?? ($_SESSION["user_id"] ?? "unknown");
+    $user = $_SESSION["username"] ?? "unknown";
     $timestamp = date("Y-m-d H:i:s");
     file_put_contents("../../Logs/device_event_log.txt", "[$timestamp] [IMPORT] [$user] $message\n", FILE_APPEND);
 }
@@ -13,15 +13,18 @@ if (!isset($_FILES["csv_file"]) || $_FILES["csv_file"]["error"] !== UPLOAD_ERR_O
     exit;
 }
 
-$expectedHeaders = ['status', 'internet_policy', 'asset_tag', 'login_id', 'first_name', 'last_name', 'user_id', 'phone_number', 'cpu', 'ram', 'os'];
+// Correct headers based on your CSV format
+$expectedHeaders = ['status', 'internet_policy', 'asset_tag', 'username', 'first_name', 'last_name', 'emp_code', 'phone_number', 'cpu', 'ram', 'os'];
 
 $file = fopen($_FILES["csv_file"]["tmp_name"], "r");
-$header = fgetcsv($file);
+if (!$file) {
+    echo json_encode(["status" => "error", "message" => "Failed to open uploaded file"]);
+    exit;
+}
 
+$header = fgetcsv($file);
 $normalizedExpected = array_map('strtolower', $expectedHeaders);
-$normalized = array_map(function($h) {
-    return strtolower(trim($h));
-}, $header);
+$normalized = array_map(fn($h) => strtolower(trim($h)), $header);
 $normalized = array_slice($normalized, 0, count($expectedHeaders));
 
 if (implode(',', $normalized) !== implode(',', $normalizedExpected)) {
@@ -32,109 +35,128 @@ if (implode(',', $normalized) !== implode(',', $normalizedExpected)) {
     exit;
 }
 
+$conn->begin_transaction();
 $imported = 0;
 $errors = [];
 
+// Create dummy employee for unassigned if not exists
+$conn->query("
+    INSERT IGNORE INTO Employees (emp_code, username, first_name, last_name, phone_number)
+    VALUES ('0000', 'system', 'Unassigned', 'Unassigned', '')
+");
+
 while (($row = fgetcsv($file)) !== false) {
-    if (count($row) < count($expectedHeaders)) {
-        $row = array_pad($row, count($expectedHeaders), '');
-    }
-    $data = @array_combine($expectedHeaders, array_slice($row, 0, count($expectedHeaders)));
-    if ($data === false) {
+    $row = array_pad($row, count($expectedHeaders), '');
+    $data = @array_combine($expectedHeaders, $row);
+    if (!$data) {
         $errors[] = "Malformed row: " . implode(", ", $row);
         continue;
     }
-    $cpu = trim($data["cpu"]);
-    $ram = trim($data["ram"]);
-    $os = trim($data["os"]);
-    $employeeId = trim($data["user_id"]);
+
+    $empCode = trim($data["emp_code"]);
+    $empCode = $empCode !== '' ? $empCode : '0000';  // Force to dummy 0000 if missing
+
+    // Insert employee (IGNORE duplicate emp_code)
+    $stmt = $conn->prepare("INSERT IGNORE INTO Employees (emp_code, username, first_name, last_name, phone_number) VALUES (?, ?, ?, ?, ?)");
+    if ($stmt) {
+        $stmt->bind_param(
+            "sssss",
+            $empCode,
+            $data["username"],
+            $data["first_name"],
+            $data["last_name"],
+            $data["phone_number"]
+        );
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    // Insert Device
     $assetTag = trim($data["asset_tag"]);
-
-    logDeviceImport("Trying to import: CPU=$cpu, RAM=$ram, OS=$os, EMP_ID=$employeeId");
-
-    $assignedTo = null;
-
-    if (!empty($employeeId)) {
-        $empCheck = $conn->prepare("SELECT emp_id FROM Employees WHERE employee_id = ?");
-        $empCheck->bind_param("s", $employeeId);
-        $empCheck->execute();
-        $empCheck->bind_result($empIdFound);
-        if ($empCheck->fetch()) {
-            $assignedTo = $empIdFound;
-        }
-        $empCheck->close();
+    if (empty($assetTag)) {
+        $errors[] = "Missing asset_tag for a device.";
+        continue;
     }
 
-    if ($assignedTo === null && !empty($data["login_id"])) {
-        $empCheck = $conn->prepare("SELECT emp_id FROM Employees WHERE login_id = ?");
-        $empCheck->bind_param("s", $data["login_id"]);
-        $empCheck->execute();
-        $empCheck->bind_result($empIdFound);
-        if ($empCheck->fetch()) {
-            $assignedTo = $empIdFound;
-        }
-        $empCheck->close();
+    // Ensure status is lower-case to match ENUM exactly
+    $status = strtolower(trim($data["status"]));
+    $allowedStatuses = ['active', 'lost', 'shelf-cc', 'shelf-md', 'shelf-hx', 'pending return', 'decommissioned', 'open'];
+    if (!in_array($status, $allowedStatuses)) {
+        $errors[] = "Invalid status '$status' for asset_tag $assetTag.";
+        continue;
     }
 
-    if ($assignedTo === null && ($data["first_name"] || $data["last_name"] || $data["login_id"])) {
-        $empInsert = $conn->prepare("INSERT INTO Employees (employee_id, first_name, last_name, login_id, phone_number) VALUES (?, ?, ?, ?, ?)");
-        $empInsert->bind_param("sssss", $employeeId, $data["first_name"], $data["last_name"], $data["login_id"], $data["phone_number"]);
-        if ($empInsert->execute()) {
-            $assignedTo = $empInsert->insert_id;
-        }
-        $empInsert->close();
+    // Check if device already exists
+    $stmt = $conn->prepare("SELECT device_id FROM Devices WHERE asset_tag = ? LIMIT 1");
+    if ($stmt) {
+        $stmt->bind_param("s", $assetTag);
+        $stmt->execute();
+        $stmt->bind_result($deviceId);
+        $stmt->fetch();
+        $stmt->close();
     }
 
-    // Insert into Devices
-    if ($assignedTo !== null) {
-        $deviceInsert = $conn->prepare("INSERT INTO Devices (asset_tag, status, os, assigned_to) VALUES (?, ?, ?, ?)");
-        $deviceInsert->bind_param("sssi", $assetTag, $data["status"], $os, $assignedTo);
+    if ($deviceId) {
+        // Duplicate asset_tag found, log error and skip
+        $errors[] = "Duplicate asset_tag: $assetTag already exists.";
+        continue;
     } else {
-        $deviceInsert = $conn->prepare("INSERT INTO Devices (asset_tag, status, os) VALUES (?, ?, ?)");
-        $deviceInsert->bind_param("sss", $assetTag, $data["status"], $os);
+        // Device does not exist, insert it
+        $stmt = $conn->prepare("INSERT INTO Devices (status, asset_tag, assigned_to) VALUES (?, ?, ?)");
+        if ($stmt) {
+            $stmt->bind_param("sss", $status, $assetTag, $empCode);
+            $stmt->execute();
+            $deviceId = $conn->insert_id;
+            $stmt->close();
+        }
     }
-    if (!$deviceInsert) {
-        $errors[] = "Device insert prepare failed: " . $conn->error;
-        logDeviceImport("Device insert prepare failed: " . $conn->error);
-        continue;
-    }
-    if (!$deviceInsert->execute()) {
-        $errors[] = "Device insert failed: " . $deviceInsert->error;
-        logDeviceImport("Device insert failed: " . $deviceInsert->error);
-        $deviceInsert->close();
-        continue;
-    }
-    $deviceId = $deviceInsert->insert_id;
-    $deviceInsert->close();
 
-    // Insert into Laptops
-    $internet_policy = trim($data["internet_policy"]);
-    if (empty($cpu)) { $cpu = "N/A"; }
-    if (empty($ram)) { $ram = "N/A"; }
-    if (empty($internet_policy)) { $internet_policy = "N/A"; }
-    $laptopInsert = $conn->prepare("INSERT INTO Laptops (device_id, cpu, ram, internet_policy) VALUES (?, ?, ?, ?)");
-    $laptopInsert->bind_param("isis", $deviceId, $cpu, $ram, $internet_policy);
-    if (!$laptopInsert->execute()) {
-        $errors[] = "Laptop insert failed: " . $laptopInsert->error;
-        logDeviceImport("Laptop insert failed: " . $laptopInsert->error);
-        $laptopInsert->close();
-        continue;
-    }
-    $laptopInsert->close();
+    // After device insert/update
+    if ($deviceId) {
+        // Insert Laptop
+        $internetPolicy = trim($data["internet_policy"]) ?: "Default";
+        $cpu = trim($data["cpu"]) ?: "Unknown";
+        $ram = is_numeric($data["ram"]) ? intval($data["ram"]) : 0;
+        $os = trim($data["os"]) ?: "Unknown";
 
-    $imported++;
-    logDeviceImport("Successfully imported laptop with asset_tag: $assetTag");
+        $stmt = $conn->prepare("INSERT IGNORE INTO Laptops (device_id, internet_policy, cpu, ram, os) VALUES (?, ?, ?, ?, ?)");
+        if ($stmt) {
+            $stmt->bind_param(
+                "issis",
+                $deviceId,
+                $internetPolicy,
+                $cpu,
+                $ram,
+                $os
+            );
+            if ($stmt->execute()) {
+                $imported++; // ✅ Only increment if laptop insert succeeded
+            } else {
+                $errors[] = "Failed to insert laptop details for asset_tag $assetTag.";
+            }
+            $stmt->close();
+        } else {
+            $errors[] = "Failed to prepare laptop insert for asset_tag $assetTag.";
+        }
+    } else {
+        $errors[] = "Failed to insert or update device for asset_tag $assetTag.";
+    }
 }
 
 fclose($file);
 
+if ($imported > 0) {
+    $conn->commit();
+} else {
+    $conn->rollback();
+}
+
 header('Content-Type: application/json');
 echo json_encode([
-    "status" => $imported > 0 ? "success" : "error",
+    "status" => $imported > 0 ? (count($errors) > 0 ? "partial" : "success") : "error",
     "message" => $imported > 0
-        ? "✅ Import attempted. $imported of " . ($imported + count($errors)) . " laptop(s) successfully imported."
-            . (count($errors) > 0 ? " Issues: " . implode(" | ", $errors) : "")
-        : "❌ Import failed. " . implode(" | ", $errors)
+        ? "✅ Imported $imported laptop(s)." . (count($errors) ? "<br>⚠️ Some issues: " . implode(" | ", $errors) : "")
+        : "❌ No laptops imported. Errors: " . implode(" | ", $errors)
 ]);
 exit;
 ?>

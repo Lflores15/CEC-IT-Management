@@ -9,31 +9,46 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 $default_columns = [
-    'status' => 'Status',
-    'internet_policy' => 'Internet Policy',
-    'asset_tag' => 'Asset Tag',    
-    'login_id' => 'Login ID',
-    'emp_first_name' => 'First Name',
-    'emp_last_name' => 'Last Name',
-    'employee_id' => 'Employee ID',
-    'phone_number' => 'Phone Number',
-    'cpu' => 'CPU',
-    'ram' => 'RAM (GB)',
-    'os' => 'OS',
-    'assigned_to' => 'Assigned To' 
+  'status'          => 'Status',
+  'internet_policy'=> 'Internet Policy',
+  'asset_tag'      => 'Asset Tag',
+  'username'       => 'Login ID',       // matches e.username
+  'first_name'     => 'First Name',     // matches e.first_name
+  'last_name'      => 'Last Name',      // matches e.last_name
+  'emp_code'       => 'Employee ID',    // matches e.emp_code
+  'phone_number'   => 'Phone Number',
+  'cpu'            => 'CPU',
+  'ram'            => 'RAM (GB)',
+  'os'             => 'OS',
+  'assigned_to'    => 'Assigned To'
 ];
 
 $visible_columns = $_SESSION['visible_columns'] ?? array_keys($default_columns);
 
-$query = " SELECT d.device_id, d.asset_tag, d.serial_number, d.brand, d.model, d.os, l.cpu, l.ram, l.storage, d.status, d.assigned_to, l.internet_policy, d.category,
-           e.first_name AS emp_first_name, e.last_name AS emp_last_name, e.login_id AS login_id, e.employee_id AS employee_id, e.phone_number AS phone_number
-    FROM Devices d
-    LEFT JOIN Laptops l ON d.device_id = l.device_id
-LEFT JOIN Decommissioned_Laptops dl
-  ON l.id = dl.laptop_id
-    LEFT JOIN Employees e ON d.assigned_to = e.emp_id
-    ORDER BY d.asset_tag
+
+$query = "
+SELECT
+  d.device_id,
+  d.status,
+  l.internet_policy,
+  d.asset_tag,
+  l.cpu,
+  l.ram,
+  l.os,
+  e.username      AS username,
+  e.first_name    AS first_name,
+  e.last_name     AS last_name,
+  e.emp_code      AS emp_code,
+  e.phone_number  AS phone_number,
+  d.assigned_to
+FROM Devices   AS d
+LEFT JOIN Laptops   AS l ON d.device_id    = l.device_id
+LEFT JOIN Employees AS e ON d.assigned_to  = e.emp_code
+ORDER BY d.asset_tag
 ";
+
+
+
 
 $stmt = $conn->prepare($query);
 if (!$stmt) {
@@ -45,13 +60,24 @@ $devices = $result->fetch_all(MYSQLI_ASSOC);
 // Fetch employee dropdown values before closing the connection
 // Fetch employee dropdown values before closing the connection
 $employeeOptions = [['id' => '', 'name' => 'Not Assigned']];
-$empQuery = $conn->query("SELECT emp_id, CONCAT(first_name, ' ', last_name) AS name FROM Employees ORDER BY name ASC");
+$empQuery = $conn->query("
+  SELECT emp_id, emp_code, first_name, last_name
+    FROM Employees
+ORDER BY first_name ASC, last_name ASC
+");
 while ($row = $empQuery->fetch_assoc()) {
+    // If the dummy row, only use one “Unassigned”
+    if ($row['emp_code'] === '0000') {
+        $displayName = 'Unassigned';
+    } else {
+        $displayName = trim($row['first_name'] . ' ' . $row['last_name']);
+    }
     $employeeOptions[] = [
-        'id' => $row['emp_id'],
-        'name' => $row['name']
+        'id'   => $row['emp_code'], // Use emp_code as value for dropdown
+        'name' => $displayName,
     ];
 }
+
 $stmt->close();
 $conn->close();
 
@@ -98,6 +124,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
         <div style="display: flex; gap: 10px;">
             <button id="openImportLaptopModal" class="import-btn">Populate Table</button>
             <button id="audit-laptop-btn" class="create-device-btn">Audit Laptops</button>
+            <button id="export-csv-btn" class="create-device-btn">Export CSV</button>
         </div>
       </div>
       <!-- JS logic for undo, delete, modals, import, etc. is handled by script.js -->
@@ -150,18 +177,22 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
             </thead>
             <tbody>
                 <?php if (empty($devices)) : ?>
-                    <tr><td colspan="<?= count($visible_columns) + 1 ?>">No devices found.</td></tr>
+                    <tr style="background-color: #ffffff;">
+                        <td colspan="<?= count($visible_columns) + 1 ?>" style="padding: 12px; text-align: center; color: #555; font-size: 0.9em;">
+                            No devices found.
+                        </td>
+                    </tr>
                 <?php else : ?>
                     <?php foreach ($devices as $device): ?>
                         <?php
-                        // Determine if this device's employee_id is NOT in the active employee list
-                        $empId = isset($device['employee_id']) ? trim($device['employee_id']) : null;
-                        $isMissingEmployee = $empId && !in_array($empId, $activeEmployeeIDs);
+                        $empId = isset($device['emp_code']) ? trim($device['emp_code']) : null;
+                        $isUnassigned = $empId === '0000';
+                        $isMissingEmployee = !$isUnassigned && $empId && !in_array($empId, $activeEmployeeIDs);
                         ?>
-                        <tr class="clickable-row<?= $isMissingEmployee ? ' missing-employee' : '' ?>" data-device-id="<?= $device['device_id'] ?>">
+                        <tr class="clickable-row log-event-btn<?= $isMissingEmployee ? ' missing-employee' : '' ?>" data-device-id="<?= $device['device_id'] ?>" style="cursor: pointer;">
                             <td><input type="checkbox" class="row-checkbox delete-checkbox" value="<?= $device['device_id'] ?>"></td>
                             <?php foreach ($visible_columns as $col): ?>
-                                <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ?  'class="edit-only"data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>
+                                <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ? 'class="edit-only" data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>
                                     <?php if ($col === 'assigned_to'): ?>
                                         <?= htmlspecialchars(trim(($device['emp_first_name'] ?? '') . ' ' . ($device['emp_last_name'] ?? ''))) . ' (' . ($device['employee_id'] ?? 'N/A') . ')' ?>
                                     <?php else: ?>
@@ -191,7 +222,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
       <input type="file" name="csv_file" accept=".csv" required>
       <button type="submit">Import</button>
     </form>
-    <div id="import-result-message" style="margin-top: 10px; display: none;"></div>
+    <div id="import-result-message" style="margin-top: 10px; display: none; max-height: 200px; overflow-y: auto; padding: 10px; background-color: #f8f9fa; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9em;"></div>
   </div>
 </div>
 <!-- Audit Laptop Modal -->
@@ -219,35 +250,51 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
       <form id="create-device-form" method="post" action="create_laptop.php">
         <fieldset>
           <legend>Device Info</legend>
- 
+
           <label>Status:
             <select name="status">
-              <option value="Active">Active</option>
-              <option value="Pending Return">Pending Return</option>
-              <option value="Shelf">Shelf</option>
-              <option value="Lost">Lost</option>
-              <option value="Decommissioned">Decommissioned</option>
+              <option value="active">Active</option>
+              <option value="shelf-cc">Shelf-CC</option>
+              <option value="shelf-md">Shelf-MD</option>
+              <option value="shelf-hx">Shelf-HX</option>
+              <option value="pending return">Pending Return</option>
+              <option value="lost">Lost</option>
+              <option value="decommissioned">Decommissioned</option>
             </select>
           </label>
- 
+
           <label>Internet Policy:
-            <select name="internet_policy">
+            <select name="internet_policy" required>
               <option value="admin">Admin</option>
               <option value="default">Default</option>
               <option value="office">Office</option>
+              <option value="accounting">Accounting</option>
+              <option value="executive hr">Executive HR</option>
+              <option value="estimating">Estimating</option>
+              <option value="engineering">Engineering</option>
+              <option value="hr">HR</option>
+              <option value="sales">Sales</option>
             </select>
           </label>
- 
+
           <label>Asset Tag: <input type="text" name="asset_tag" required></label>
-          <label>Login ID: <input type="text" name="login_id"></label>
-          <label>First Name: <input type="text" name="first_name"></label>
-          <label>Last Name: <input type="text" name="last_name"></label>
-          <label>Employee ID: <input type="text" name="employee_id"></label>
-          <label>Phone Number: <input type="text" name="phone_number"></label>
+
+          <label>Assign To:
+            <select name="assigned_to" id="assigned_to" required onchange="fetchEmployeeDetails(this.value)">
+              <?php foreach ($employeeOptions as $employee): ?>
+                <option value="<?= htmlspecialchars($employee['id']) ?>"><?= htmlspecialchars($employee['name']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </label>
+          <input type="hidden" name="first_name" id="first_name">
+          <input type="hidden" name="last_name" id="last_name">
+          <input type="hidden" name="username" id="username">
+          <input type="hidden" name="phone_number" id="phone_number">
+
           <label>CPU: <input type="text" name="cpu"></label>
           <label>RAM (GB): <input type="number" name="ram"></label>
           <label>OS: <input type="text" name="os"></label>
- 
+
         </fieldset>
         <button type="submit">Submit</button>
       </form>
@@ -257,31 +304,50 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
 </html>
   <!-- Log Event Modal -->
   <div id="logEventModal" class="modal create-device-modal" style="display: none;">
-    <div class="laptop-modal-content">
-      <div class="laptop-modal-header">
-        <h2>Log Laptop Event</h2>
-        <span class="close" onclick="document.getElementById('logEventModal').style.display='none'">&times;</span>
+    <div class="laptop-modal-content" style="display: flex; gap: 30px; align-items: flex-start;">
+      <div style="flex: 1 1 50%; min-width: 300px;">
+        <div class="laptop-modal-header">
+          <h2>Log Laptop Event</h2>
+          <span class="close" onclick="document.getElementById('logEventModal').style.display='none'">&times;</span>
+        </div>
+        <form id="log-event-form" method="post" action="manual_log.php" style="display: flex; flex-direction: column; gap: 10px;">
+          <input type="hidden" id="log-device-id" name="device_id">
+          <label for="log-event-time">Event Time:</label>
+          <p id="log-event-time" style="font-style: italic; font-size: 1em; color: #555;"></p>
+          <label for="event_type">Event Type:</label>
+          <select name="event_type" required>
+            <option value="">Select Event Type</option>
+            <option value="New User Setup">New User Setup</option>
+            <option value="Updated">Updated</option>
+            <option value="User Archived">User Archived</option>
+            <option value="Maintenance">Maintenance</option>
+            <option value="Damaged">Damaged</option>
+            <option value="Decommissioned">Decommissioned</option>
+            <option value="Location Change">Location Change</option>
+          </select>
+          <label for="memo">Memo:</label>
+          <textarea name="memo" rows="4" placeholder="Add a note about this event..." required></textarea>
+          <button type="submit">Log Event</button>
+        </form>
       </div>
-      <form id="log-event-form" method="post" action="log_event.php">
-        <input type="hidden" id="log-device-id" name="device_id">
-
-        <label for="event_type">Event Type:</label>
-        <select name="event_type" required>
-          <option value="">Select Event Type</option>
-          <option value="New User Setup">New User Setup</option>
-          <option value="Updated">Updated</option>
-          <option value="User Archived">User Archived</option>
-          <option value="Maintenance">Maintenance</option>
-          <option value="Damaged">Damaged</option>
-          <option value="Decommissioned">Decommissioned</option>
-          <option value="Location Change">Location Change</option>
-        </select>
-
-        <label for="memo">Memo:</label>
-        <textarea name="memo" rows="4" placeholder="Add a note about this event..." required></textarea>
-
-        <button type="submit">Log Event</button>
-      </form>
+      <div style="flex: 1 1 50%; min-width: 300px;">
+        <h3>Asset History Log</h3>
+        <div id="log-history-container" class="log-table-scrollable" style= "overflow-y: auto;">
+          <table class="device-table" style="font-size: 0.85em;">
+            <thead>
+              <tr id="log-header-row">
+                <th>Date</th>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Memo</th>
+              </tr>
+            </thead>
+            <tbody id="device-log-history" style="font-size: 0.85em;">
+              <!-- JS will populate log entries here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </html>
