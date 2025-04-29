@@ -1,28 +1,19 @@
 <?php
-/**
- * Log helpers: user events and device events.
- * Auto-creates the logs directory if missing.
- */
 
-/**
- * Log a user-related event.
- *
- * @param string $eventType  A short code for the event (e.g. "LOGIN_SUCCESS")
- * @param string $message    Detailed message about what happened
- * @param string $username   Who triggered the event (defaults to SYSTEM)
- */
-function logUserEvent($eventType, $message, $username = 'SYSTEM') {
+function logUserEvent($eventType, $message, $username = null) {
+    if ($username === null) {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $username = $_SESSION['login'] ?? $_SESSION['user'] ?? 'unknown';
+    }
     logToFile(__DIR__ . '/../logs/user_event_log.txt', $eventType, $message, $username);
 }
 
-/**
- * Log a device-related event.
- *
- * @param string $eventType
- * @param string $message
- * @param string $username
- */
-function logDeviceEvent($eventType, $message, $username = 'SYSTEM') {
+function logDeviceEvent($eventType, $message, $username = null) {
+    if ($username === null) {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $username = $_SESSION['login'] ?? $_SESSION['user'] ?? 'unknown';
+    }
+
     logToFile(__DIR__ . '/../logs/device_event_log.txt', $eventType, $message, $username);
 }
 

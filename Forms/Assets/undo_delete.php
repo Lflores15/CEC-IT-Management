@@ -3,8 +3,16 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!isset($_SESSION['user']) && isset($_SESSION['username'])) {
-    $_SESSION['user'] = $_SESSION['username'];
+if (!isset($_SESSION['user'])) {
+    if (isset($_SESSION['user_id']) && isset($_SESSION['role'])) {
+        $_SESSION['user'] = $_SESSION['user_id']; // or use 'username' if available
+    } elseif (isset($_SESSION['login'])) {
+        $_SESSION['user'] = $_SESSION['login'];
+    } elseif (isset($_SESSION['username'])) {
+        $_SESSION['user'] = $_SESSION['username'];
+    } else {
+        $_SESSION['user'] = 'unknown';
+    }
 }
 require_once "../../PHP/config.php";
 
@@ -56,14 +64,7 @@ try {
 
     $conn->commit();
     // Logging section
-    if (!isset($_SESSION['user'])) {
-        if (isset($_SESSION['username'])) {
-            $_SESSION['user'] = $_SESSION['username'];
-        } else {
-            $_SESSION['user'] = 'unknown';
-        }
-    }
-    $user = $_SESSION['user'];
+    $user = $_SESSION['login'] ?? $_SESSION['user'] ?? 'unknown';
     $logPath = __DIR__ . "/../../Logs/device_event_log.txt";
     $logTime = date("Y-m-d H:i:s");
 

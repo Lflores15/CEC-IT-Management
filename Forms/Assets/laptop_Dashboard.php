@@ -59,21 +59,20 @@ $result = $stmt->get_result();
 $devices = $result->fetch_all(MYSQLI_ASSOC);
 // Fetch employee dropdown values before closing the connection
 // Fetch employee dropdown values before closing the connection
-$employeeOptions = [['id' => '', 'name' => 'Not Assigned']];
+$employeeOptions = [];
 $empQuery = $conn->query("
   SELECT emp_id, emp_code, first_name, last_name
-    FROM Employees
-ORDER BY first_name ASC, last_name ASC
+  FROM Employees
+  ORDER BY CASE WHEN emp_code = '0000' THEN 0 ELSE 1 END, first_name ASC, last_name ASC
 ");
 while ($row = $empQuery->fetch_assoc()) {
-    // If the dummy row, only use one “Unassigned”
     if ($row['emp_code'] === '0000') {
         $displayName = 'Unassigned';
     } else {
         $displayName = trim($row['first_name'] . ' ' . $row['last_name']);
     }
     $employeeOptions[] = [
-        'id'   => $row['emp_code'], // Use emp_code as value for dropdown
+        'id'   => $row['emp_code'],
         'name' => $displayName,
     ];
 }
@@ -194,7 +193,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
                             <?php foreach ($visible_columns as $col): ?>
                                 <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ? 'class="edit-only" data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>
                                     <?php if ($col === 'assigned_to'): ?>
-                                        <?= htmlspecialchars(trim(($device['emp_first_name'] ?? '') . ' ' . ($device['emp_last_name'] ?? ''))) . ' (' . ($device['employee_id'] ?? 'N/A') . ')' ?>
+                                        <?= htmlspecialchars(trim(($device['first_name'] ?? '') . ' ' . ($device['last_name'] ?? ''))) . ' (' . ($device['emp_code'] ?? 'N/A') . ')' ?>
                                     <?php else: ?>
                                         <?= htmlspecialchars($device[$col] ?? 'N/A') ?>
                                     <?php endif; ?>
@@ -256,7 +255,7 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
               <option value="active">Active</option>
               <option value="shelf-cc">Shelf-CC</option>
               <option value="shelf-md">Shelf-MD</option>
-              <option value="shelf-hx">Shelf-HX</option>
+              <option value="shelf-hs">Shelf-HS</option>
               <option value="pending return">Pending Return</option>
               <option value="lost">Lost</option>
               <option value="decommissioned">Decommissioned</option>
@@ -265,15 +264,13 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
 
           <label>Internet Policy:
             <select name="internet_policy" required>
-              <option value="admin">Admin</option>
-              <option value="default">Default</option>
-              <option value="office">Office</option>
-              <option value="accounting">Accounting</option>
-              <option value="executive hr">Executive HR</option>
-              <option value="estimating">Estimating</option>
-              <option value="engineering">Engineering</option>
-              <option value="hr">HR</option>
-              <option value="sales">Sales</option>
+              <option value="Default">Default</option>
+              <option value="Office">Office</option>
+              <option value="Admin">Admin</option>
+              <option value="Accounting">Accounting</option>
+              <option value="Estimating">Estimating</option>
+              <option value="Executive">Executive</option>
+              <option value="HR">HR</option>
             </select>
           </label>
 

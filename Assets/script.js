@@ -901,8 +901,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.addEventListener("DOMContentLoaded", function () {
     const selectOptions = {
-        status: ['Active', 'Pending Return', 'Shelf', 'Lost', 'Decommissioned'],
-        internet_policy: ['Admin', 'Default', 'Office'],
+        status: ['Active', 'Pending Return', 'Shelf-CC', 'Shelf-MD', 'Shelf-HS', 'Lost', 'Decommissioned'],
+        internet_policy: [
+            'Default',
+            'Office',
+            'Admin',
+            'Accounting',
+            'Estimating',
+            'Executive',
+            'HR'
+        ],
         assigned_to: window.employeeOptions || []  // will be injected from PHP
     };
 

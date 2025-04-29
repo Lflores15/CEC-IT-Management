@@ -61,13 +61,12 @@ try {
 
     $conn->commit();
     // Logging section
-    $user = $_SESSION['user'] ?? 'unknown';
+    $user = $_SESSION['login'] ?? $_SESSION['user'] ?? 'unknown';
     $logPath = __DIR__ . "/../../Logs/device_event_log.txt";
     $logTime = date("Y-m-d H:i:s");
 
-    foreach ($lastDeleted as $device) {
-        $assetTag = $device['asset_tag'] ?? 'unknown';
-        file_put_contents($logPath, "[$logTime] [DELETE] [$user] Deleted asset_tag: $assetTag\n", FILE_APPEND);
+    foreach ($deviceIds as $id) {
+        file_put_contents($logPath, "[$logTime] [DELETE] [$user] Deleted device_id: $id\n", FILE_APPEND);
     }
     echo "Successfully deleted selected laptops.";
 } catch (Exception $e) {
