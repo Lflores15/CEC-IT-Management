@@ -725,6 +725,18 @@ th.sortable.desc::after {
     background-color: #0056b3;
 }
 
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 900; /* Just under modals */
+    display: none;
+  }
+  
+
 .create-device-modal {
     max-width: 95%;
     width: 1080px;
@@ -1289,88 +1301,107 @@ th.sortable.desc::after {
 #importLaptopModal button[type="submit"]:hover {
     background-color: #0056b3;
 }
+/* Consistent Modal Layout */
 .laptop-modal-content-wrapper {
     display: none;
     position: fixed;
-    z-index: 2000;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    z-index: 1050;
+    left: 0;
+    top: 0;
     width: 100%;
-    max-width: 650px;
-    margin-left: 100px;
-}
-
-.laptop-modal-content {
-    position: relative;
-    max-width: 600px;
-    padding: 30px;
-    border-radius: 12px;
-    background: #fff;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    text-align: center;
-}
-
-.laptop-modal .modal-header {
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+  }
+  
+  .laptop-modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px 25px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  
+  .laptop-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-}
-
-.laptop-modal .modal-header h2 {
+  }
+  
+  .laptop-modal-header h2 {
     margin: 0;
-    font-size: 1.4rem;
-    color: #333;
-}
-
-#closeImportLaptopModal {
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-    color: #333;
-}
-
-.laptop-modal input[type="file"] {
+    font-size: 1.5em;
+  }
+  
+  .laptop-modal-content input[type="file"] {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .laptop-modal-content button {
     width: 100%;
-    padding: 12px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background-color: #f9f9f9;
-    font-size: 14px;
-}
-
-.laptop-modal button[type="submit"] {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    background-color: #007bff;
-    color: white;
-    font-weight: bold;
+    padding: 10px;
+    margin-top: 10px;
     border: none;
-    border-radius: 6px;
+    font-weight: bold;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+  }
+  
+  .laptop-modal-content button[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  .laptop-modal-content button.refresh-button {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  /* Close icon */
+  .laptop-modal-content .close {
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  /* Success/Failure messages */
+  #audit-result-message,
+  #import-result-message {
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-top: 15px;
+  }
+  
+  #import-result-wrapper {
+    padding-top: 10px;
+  }
+  
+  #import-refresh-btn {
+    margin-top: 12px;
+    display: none;
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    width: 100%;
+  }
+  
 
-.laptop-modal button[type="submit"]:hover {
-    background-color: #0056b3;
-}
-.laptop-column {
-    flex: 1;
-    min-width: 300px;
-}
-
-/* Modal Header Style for Import Laptop Modal */
-.laptop-modal-header {
-    justify-content: space-between;
-    align-items: center;
-}
+  .success-message {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
 /* Modal styling for create-device-modal */
 #create-device-modal.modal {
     display: none;
