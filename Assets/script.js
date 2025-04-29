@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const resultBox = document.getElementById("audit-result-message");
 
     if (runAuditBtn && auditFileInput && resultBox) {
-        runAuditBtn.addEventListener("click", (e) => {
+        runAuditBtn.addEventListener("click", function auditHandler(e) {
             e.preventDefault();
             const file = auditFileInput.files[0];
             if (!file) return alert("Please select a CSV file to audit.");
@@ -211,24 +211,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (data.success) {
                     resultBox.style.color = "green";
                     resultBox.style.backgroundColor = "#d4edda";
-                    resultBox.innerHTML = `
-                        ✅ Audit complete: ${data.count} employee(s) processed.
-                        <br><br>
-                        <button id="refreshNowBtn" style="padding: 8px 12px; margin-top: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                          Refresh Page Now
-                        </button>
-                    `;
+                    resultBox.innerHTML = `✅ Audit complete: ${data.count} employee(s) processed.`;
 
-                    // Wait for the button to render
-                    setTimeout(() => {
-                        const refreshBtn = document.getElementById("refreshNowBtn");
-                        if (refreshBtn) {
-                            refreshBtn.addEventListener("click", () => {
-                                document.getElementById("auditLaptopModal").style.display = "none"; // Close modal
-                                location.reload(); // THEN refresh
-                            });
-                        }
-                    }, 100);
+                    // Change the "Run Audit" button itself
+                    runAuditBtn.textContent = "Refresh Page Now";
+                    runAuditBtn.style.backgroundColor = "#28a745"; // make it green
+                    runAuditBtn.removeEventListener("click", auditHandler); // remove original listener
+
+                    // Now clicking the button will close modal and reload page
+                    runAuditBtn.addEventListener("click", function () {
+                        document.getElementById("auditLaptopModal").style.display = "none"; // Close modal
+                        location.reload(); // THEN refresh
+                    });
                 } else {
                     resultBox.style.color = "red";
                     resultBox.style.backgroundColor = "#f8d7da";
@@ -243,7 +237,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
-
 
 
 

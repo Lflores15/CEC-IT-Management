@@ -240,16 +240,17 @@ $activeEmployeeIDs = $_SESSION['active_employee_ids'] ?? [];
 
     <!-- ✅ Form Content -->
     <form id="auditForm" style="margin-top: 10px;">
-      <p>Select an Active Employee CSV file to audit assigned laptops.</p>
-      <input type="file" id="auditCsvFile" name="csv_file" accept=".csv" required style="margin-bottom: 10px;">
-      <button type="submit" id="runAuditBtn" style="padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px;">
-        Run Audit
-      </button>
-        <!-- 🔥 ADD THIS RIGHT HERE -->
-        <div id="audit-result-message" style="display:none; padding: 10px; margin-top: 15px; border-radius: 5px; font-weight: bold;"></div>
-    </form>
-  </div>
-</div>
+  <p>Select an Active Employee CSV file to audit assigned laptops.</p>
+  <input type="file" id="auditCsvFile" name="csv_file" accept=".csv" required style="margin-bottom: 10px;">
+
+  <!-- ✅ move success message here -->
+  <div id="audit-result-message" style="display:none; padding: 10px; margin-bottom: 15px; border-radius: 5px; font-weight: bold;"></div>
+
+  <button type="submit" id="runAuditBtn" style="padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px;">
+    Run Audit
+  </button>
+</form>
+
 
 <!-- All modal, import, and row navigation JS logic is handled by script.js -->
   <!-- Create Device Modal -->
