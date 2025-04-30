@@ -240,65 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 // ========== Delete Selected Devices and Undo Delete ==========
-document.addEventListener("DOMContentLoaded", function () {
-    const deleteBtn = document.getElementById("delete-selected-btn");
-    // Add deleteInProgress variable to prevent double prompts
-    let deleteInProgress = false;
-    if (deleteBtn) {
-        deleteBtn.addEventListener("click", function () {
-            if (deleteBtn.disabled || deleteInProgress) return;
-            deleteInProgress = true;
-            const checkboxes = document.querySelectorAll(".row-checkbox:checked");
-            if (!checkboxes.length) {
-                alert("Please select devices to delete.");
-                deleteInProgress = false;
-                return;
-            }
-            if (!confirm("Are you sure you want to delete the selected devices?")) {
-                deleteInProgress = false;
-                return;
-            }
-            const ids = Array.from(checkboxes).map(cb => cb.value);
-            deleteBtn.disabled = true;
-            fetch("delete_laptop.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ device_ids: ids })
-            })
-            .then(res => res.text())
-            .then(msg => {
-                alert(msg);
-                location.reload();
-            })
-            .catch(err => {
-                alert("Delete failed: " + err);
-                deleteBtn.disabled = false;
-            })
-            .finally(() => {
-                deleteInProgress = false;
-            });
-        });
-    }
-    // Undo Last Delete button
-    const undoBtn = document.getElementById("undo-delete-btn");
-    if (undoBtn) {
-        let undoInProgress = false;
-        undoBtn.addEventListener("click", () => {
-            if (undoInProgress) return;
-            undoInProgress = true;
-            fetch("undo_delete.php")
-                .then(res => res.text())
-                .then(msg => {
-                    alert(msg);
-                    location.reload();
-                })
-                .catch(err => alert("Undo failed: " + err))
-                .finally(() => {
-                    undoInProgress = false;
-                });
-        });
-    }
-});
+// The delete-selected-btn logic for employees is now handled inline in employee_Dashboard.php
 // ========== Script Initialization & UI Interaction Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
     console.log("JavaScript Loaded ✅");
@@ -596,33 +538,36 @@ if (editModal && closeEditModal) {
             
         });
         
-// Add sort functionality to each column header in the table
-const table = document.getElementById("device-table");
-if (table) {
-  const headers = table.querySelectorAll("th.sortable");
-  let sortDirection = 1;
-  let sortColumnIndex = null;
+// Add sort functionality to each column header in the employee-table
+document.addEventListener("DOMContentLoaded", function () {
+  const employeeTable = document.getElementById("employee-table");
+  if (employeeTable) {
+    const headers = employeeTable.querySelectorAll("th.sortable");
+    let sortDirection = 1;
+    let sortColumnIndex = null;
 
-  headers.forEach((header, index) => {
-    header.addEventListener("click", () => {
-      if (sortColumnIndex === index) sortDirection *= -1;
-      else {
-        sortColumnIndex = index;
-        sortDirection = 1;
-      }
+    headers.forEach((header, index) => {
+      header.addEventListener("click", () => {
+        if (sortColumnIndex === index) sortDirection *= -1;
+        else {
+          sortColumnIndex = index;
+          sortDirection = 1;
+        }
 
-      const rows = Array.from(table.querySelectorAll("tbody > tr"));
-      rows.sort((a, b) => {
-        const cellA = a.children[index].textContent.trim().toLowerCase();
-        const cellB = b.children[index].textContent.trim().toLowerCase();
-        return cellA.localeCompare(cellB) * sortDirection;
+        const rows = Array.from(employeeTable.querySelector("tbody > tr"));
+        // +1 offset: skip the first checkbox column
+        rows.sort((a, b) => {
+          const cellA = a.children[index + 1].textContent.trim().toLowerCase();
+          const cellB = b.children[index + 1].textContent.trim().toLowerCase();
+          return cellA.localeCompare(cellB) * sortDirection;
+        });
+
+        const tbody = employeeTable.querySelector("tbody");
+        rows.forEach(row => tbody.appendChild(row));
       });
-
-      const tbody = table.querySelector("tbody");
-      rows.forEach(row => tbody.appendChild(row));
     });
-  });
-}
+  }
+});
 
 // Toggle modal for selecting visible table columns
 const editBtn = document.getElementById("edit-columns-btn");
@@ -699,6 +644,61 @@ document.addEventListener("DOMContentLoaded", function () {
     const deleteBtn = document.getElementById("delete-selected-btn");
     const undoBtn = document.getElementById("undo-delete-btn");
     let editing = false;
+
+    // Restore delete-selected-btn logic for laptops
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", () => {
+        const selected = Array.from(document.querySelectorAll(".row-checkbox:checked")).map(cb => cb.value);
+        if (selected.length === 0) {
+          alert("Please select device(s) to delete.");
+          return;
+        }
+
+        if (!confirm(`Are you sure you want to delete ${selected.length} device(s)?`)) return;
+
+        fetch("/Forms/Assets/delete_laptop.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ device_ids: selected })
+        })
+        .then(res => res.text())
+        .then(response => {
+          if (response.trim().toLowerCase().includes("successfully deleted selected laptops")) {
+            alert("Devices deleted successfully.");
+            location.reload();
+          } else {
+            alert("Error deleting devices: " + response);
+          }
+        })
+        .catch(err => {
+          alert("Request failed: " + err);
+        });
+      });
+    }
+
+    // Undo delete logic for laptops
+    if (undoBtn) {
+      undoBtn.addEventListener("click", function () {
+        // Optionally, confirm undo
+        if (!confirm("Are you sure you want to undo the last delete?")) return;
+        fetch("/Forms/Assets/undo_delete.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        })
+        .then(res => res.text())
+        .then(response => {
+          if (response.trim().toLowerCase().includes("undo successful")) {
+            alert("Undo successful. Devices have been restored.");
+            location.reload();
+          } else {
+            alert("Undo failed: " + response);
+          }
+        })
+        .catch(err => {
+          alert("Undo request failed: " + err);
+        });
+      });
+    }
 
     // Toggle editing mode
     editBtn.addEventListener("click", () => {

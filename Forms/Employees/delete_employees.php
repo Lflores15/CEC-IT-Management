@@ -2,15 +2,13 @@
 <?php
 require_once("../../PHP/config.php");
 
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["employee_ids"])) {
-    file_put_contents("debug.log", print_r($_POST, true), FILE_APPEND);
-
-   
-    $ids = $_POST["employee_ids"];
-    if (is_array($ids)) {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $data = json_decode(file_get_contents('php://input'), true);
+    if (isset($data["employee_ids"]) && is_array($data["employee_ids"])) {
+        $ids = $data["employee_ids"];
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $types = str_repeat('s', count($ids));  
-        $stmt = $conn->prepare("DELETE FROM Employees WHERE employee_id IN ($placeholders)");
+        $types = str_repeat('s', count($ids));
+        $stmt = $conn->prepare("DELETE FROM Employees WHERE emp_code IN ($placeholders)");
 
         if ($stmt) {
             $stmt->bind_param($types, ...$ids);

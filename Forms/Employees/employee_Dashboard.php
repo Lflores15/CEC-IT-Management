@@ -21,7 +21,7 @@ require_once("../../includes/session.php");
             <button id="toggle-edit-mode" class="edit-btn">Edit Table</button>
             <div id="edit-controls" style="display: none;">
                 <button id="open-create-employee" class="create-device-btn">Add New Employee</button>
-                <button id="delete-selected" class="delete-btn" disabled>Delete Selected</button>
+                <button id="delete-selected-btn" class="delete-btn" disabled>Delete Selected</button>
             </div>
         </div>
 
@@ -30,11 +30,11 @@ require_once("../../includes/session.php");
                 <thead style="position: sticky; top: 0; background-color: #007bff; z-index: 2;">
                     <tr>
                         <th class="checkbox-col" style="display: none;"><input type="checkbox" id="select-all"></th>
-                        <th style="text-align: left;">Employee Code<br><input type="text" class="filter-input" data-column="1"></th>
-                        <th style="text-align: left;">First Name<br><input type="text" class="filter-input" data-column="2"></th>
-                        <th style="text-align: left;">Last Name<br><input type="text" class="filter-input" data-column="3"></th>
-                        <th style="text-align: left;">Username<br><input type="text" class="filter-input" data-column="4"></th>
-                        <th style="text-align: left;">Phone Number<br><input type="text" class="filter-input" data-column="5"></th>
+                        <th class="sortable" data-column="1" style="text-align: left;">Employee Code<br><input type="text" class="filter-input" data-column="1" placeholder="Filter Employee Code"></th>
+                        <th class="sortable" data-column="2" style="text-align: left;">First Name<br><input type="text" class="filter-input" data-column="2" placeholder="Filter First Name"></th>
+                        <th class="sortable" data-column="3" style="text-align: left;">Last Name<br><input type="text" class="filter-input" data-column="3" placeholder="Filter Last Name"></th>
+                        <th class="sortable" data-column="4" style="text-align: left;">Username<br><input type="text" class="filter-input" data-column="4" placeholder="Filter Username"></th>
+                        <th class="sortable" data-column="5" style="text-align: left;">Phone Number<br><input type="text" class="filter-input" data-column="5" placeholder="Filter Phone Number"></th>
                         <th class="checkbox-col" style="display: none;"></th>
                     </tr>
                 </thead>
@@ -47,7 +47,7 @@ require_once("../../includes/session.php");
                     while ($row = $result->fetch_assoc()):
                     ?>
                     <tr class="clickable-row<?php echo $row['active'] ? '' : ' missing-employee'; ?>" data-id="<?php echo $row['emp_code']; ?>">
-                        <td class="checkbox-col" style="display: none;"><input type="checkbox" class="row-select"></td>
+                        <td class="checkbox-col" style="display: none;"><input type="checkbox" class="row-select" value="<?php echo htmlspecialchars($row['emp_code']); ?>"></td>
                         <td><?php echo htmlspecialchars($row['emp_code']); ?></td>
                         <td><?php echo htmlspecialchars($row['first_name']); ?></td>
                         <td><?php echo htmlspecialchars($row['last_name']); ?></td>
@@ -97,7 +97,7 @@ require_once("../../includes/session.php");
         const toggleEdit = document.getElementById("toggle-edit-mode");
         const controls = document.getElementById("edit-controls");
         const checkCols = document.querySelectorAll(".checkbox-col");
-        const deleteBtn = document.getElementById("delete-selected");
+        const deleteBtn = document.getElementById("delete-selected-btn");
 
         toggleEdit.addEventListener("click", () => {
             const editing = document.body.classList.toggle("editing-mode");
@@ -121,6 +121,37 @@ require_once("../../includes/session.php");
                 deleteBtn.disabled = !anyChecked;
             });
         });
+
+        // Delete selected employees
+        if (deleteBtn) {
+            deleteBtn.addEventListener("click", function () {
+                if (deleteBtn.disabled) return;
+                const checkboxes = document.querySelectorAll(".row-select:checked");
+                if (!checkboxes.length) {
+                    alert("Please select employees to delete.");
+                    return;
+                }
+                if (!confirm("Are you sure you want to delete the selected employees?")) {
+                    return;
+                }
+                const ids = Array.from(checkboxes).map(cb => cb.value);
+                deleteBtn.disabled = true;
+                fetch("delete_employees.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ employee_ids: ids })
+                })
+                .then(res => res.text())
+                .then(msg => {
+                    alert(msg);
+                    location.reload();
+                })
+                .catch(err => {
+                    alert("Delete failed: " + err);
+                    deleteBtn.disabled = false;
+                });
+            });
+        }
 
         // Placeholder click event for edit icon
         document.querySelectorAll(".edit-icon").forEach(icon => {
@@ -171,3 +202,34 @@ require_once("../../includes/session.php");
     </script>
 </body>
 </html>
+    <script>
+    // Add sorting to employee-table columns
+    document.addEventListener("DOMContentLoaded", function () {
+      const employeeTable = document.getElementById("employee-table");
+      if (employeeTable) {
+        const headers = employeeTable.querySelectorAll("th.sortable");
+        let sortDirection = 1;
+        let sortColumnIndex = null;
+
+        headers.forEach((header, index) => {
+          header.addEventListener("click", () => {
+            if (sortColumnIndex === index) sortDirection *= -1;
+            else {
+              sortColumnIndex = index;
+              sortDirection = 1;
+            }
+
+            const rows = Array.from(employeeTable.querySelector("tbody > tr"));
+            rows.sort((a, b) => {
+              const cellA = a.children[index + 1].textContent.trim().toLowerCase();
+              const cellB = b.children[index + 1].textContent.trim().toLowerCase();
+              return cellA.localeCompare(cellB) * sortDirection;
+            });
+
+            const tbody = employeeTable.querySelector("tbody");
+            rows.forEach(row => tbody.appendChild(row));
+          });
+        });
+      }
+    });
+    </script>

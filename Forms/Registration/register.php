@@ -1,62 +1,58 @@
 <?php
-// Enable error reporting for debugging
+// Enable error reporting for debugging (remove in production)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Include the database connection
 require_once '../../PHP/config.php';
 
-// Check if the form was submitted
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Get user inputs and sanitize them
-    $username = trim($_POST['username']);
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
+$registrationMessage = '';
 
-    // Check if passwords match
-    if ($password !== $confirm_password) {
-        die("❌ Passwords do not match.");
-    }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $login = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirmPassword = $_POST['confirm_password'] ?? '';
 
-    // Check if username or email already exists
-    $stmt = $conn->prepare("SELECT user_id FROM Users WHERE username = ? OR email = ?");
-    if (!$stmt) {
-        die("❌ SQL Error: " . $conn->error);
-    }
-
-    $stmt->bind_param("ss", $username, $email);
-    $stmt->execute();
-    $stmt->store_result();
-
-    if ($stmt->num_rows > 0) {
-        die("❌ User already exists. Try a different username or email.");
-    }
-    $stmt->close();
-
-    // Hash the password securely
-    $hashedPassword = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
-
-    // Set default role
-    $role = 'user';
-
-    // Insert user into the database
-    $stmt = $conn->prepare("INSERT INTO Users (username, email, password_hash, role) VALUES (?, ?, ?, ?)");
-    if (!$stmt) {
-        die("❌ SQL Error on INSERT: " . $conn->error);
-    }
-
-    $stmt->bind_param("ssss", $username, $email, $hashedPassword, $role);
-
-    if ($stmt->execute()) {
-        echo "✅ Registration successful! You can now <a href='../Login/login.php'>login here</a>.";
+    if (empty($login) || empty($password) || empty($confirmPassword)) {
+        $registrationMessage = "❌ All fields are required.";
+    } elseif ($password !== $confirmPassword) {
+        $registrationMessage = "❌ Passwords do not match.";
     } else {
-        die("❌ Error executing query: " . $stmt->error);
-    }
+        // Check if the username already exists
+        $stmt = $conn->prepare("SELECT user_id FROM Users WHERE login = ?");
+        if ($stmt) {
+            $stmt->bind_param("s", $login);
+            $stmt->execute();
+            $stmt->store_result();
 
-    $stmt->close();
+            if ($stmt->num_rows > 0) {
+                $registrationMessage = "❌ Username already taken.";
+            } else {
+                // Username is available; create user
+                $hashedPassword = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
+                $role = 'Technician'; // Default role
+
+                $insertStmt = $conn->prepare("INSERT INTO Users (login, password_hash, role) VALUES (?, ?, ?)");
+                if ($insertStmt) {
+                    $insertStmt->bind_param("sss", $login, $hashedPassword, $role);
+                    if ($insertStmt->execute()) {
+                        $registrationMessage = "✅ Registration successful! Click 'Back to Login' to sign in.";
+
+                    } else {
+                        $registrationMessage = "❌ Registration failed: " . htmlspecialchars($insertStmt->error);
+                    }
+                    $insertStmt->close();
+                } else {
+                    $registrationMessage = "❌ Database error during insert: " . htmlspecialchars($conn->error);
+                }
+            }
+            $stmt->close();
+        } else {
+            $registrationMessage = "❌ Database error during username check: " . htmlspecialchars($conn->error);
+        }
+    }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -67,22 +63,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="../../Assets/styles.css">
 </head>
 <body>
-    <div class="register-form">
-        <h2>Register</h2>
-        <form action="register.php" method="POST">
-            <label for="username">Username:</label>
-            <input type="text" name="username" required><br>
+    <div class="login-wrapper">
+        <form class="login-form" method="POST" action="register.php">
+            <h2 class="form-title">Register</h2>
 
-            <label for="email">Email:</label>
-            <input type="email" name="email" required><br>
+            <?php if (!empty($registrationMessage)): ?>
+                <div class="registration-success"><?= $registrationMessage ?></div>
+            <?php endif; ?>
 
-            <label for="password">Password:</label>
-            <input type="password" name="password" required><br>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input class="login-input" type="text" name="username" required>
+            </div>
 
-            <label for="confirm_password">Confirm Password:</label>
-            <input type="password" name="confirm_password" required><br>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input class="login-input" type="password" name="password" required>
+            </div>
 
-            <button type="submit">Register</button>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input class="login-input" type="password" name="confirm_password" required>
+            </div>
+
+            <button type="submit" class="login-btn">Register</button>
+
+            <div class="form-buttons">
+                <a href="../Login/login.php" class="register-btn">Back to Login</a>
+            </div>
         </form>
     </div>
 </body>
