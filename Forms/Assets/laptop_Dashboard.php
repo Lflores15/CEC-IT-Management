@@ -236,8 +236,8 @@ $conn->close();
 <div id="importLaptopModal" class="laptop-modal-content-wrapper">
   <div class="laptop-modal-content">
     <div class="laptop-modal-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-      <h2 style="margin: 10px;">Import Laptops from CSV</h2>
-      <span id="closeImportLaptopModal" class="close" style="font-size: 24px; cursor: pointer;">&times;</span>
+      <h2>Import Laptops from CSV</h2>
+      <span id="closeImportLaptopModal" class="close" style="font-size: 24px; padding-bottom: 50px; cursor: pointer;">&times;</span>
     </div>
     <form id="importLaptopForm" enctype="multipart/form-data">
       <input type="file" name="csv_file" accept=".csv" required>

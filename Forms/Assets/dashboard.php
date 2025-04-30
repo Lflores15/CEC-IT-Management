@@ -131,8 +131,7 @@ if (file_exists($logFile)) {
           <div class="dashboard-right">
             <div class="dashboard-graph">
               <h3>Asset Distribution</h3>
-              <canvas id="deviceChart" style="width: 280px; height: 280px;"></canvas>
-            </div>
+              <canvas id="deviceChart" style="width: 100%; max-width: 600px; height: auto;"></canvas>            </div>
           </div>
         </section>
       </div>
