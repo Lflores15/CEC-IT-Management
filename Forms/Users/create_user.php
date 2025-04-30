@@ -19,8 +19,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Invalid role selected.");
     }
 
-    
-
     // Check for existing username 
     $checkStmt = $conn->prepare("SELECT user_id FROM `Users` WHERE login = ?");
     if (!$checkStmt) {

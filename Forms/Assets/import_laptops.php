@@ -76,7 +76,6 @@ while (($row = fgetcsv($file)) !== false) {
         continue;
     }
 
-    // Ensure status is lower-case to match ENUM exactly
     $status = strtolower(trim($data["status"]));
     $allowedStatuses = ['active', 'lost', 'shelf-cc', 'shelf-md', 'shelf-hs', 'pending return', 'decommissioned', 'open'];
     if (!in_array($status, $allowedStatuses)) {
@@ -84,7 +83,7 @@ while (($row = fgetcsv($file)) !== false) {
         continue;
     }
 
-    // Check if device already exists (using COUNT(*) to avoid stale $deviceId)
+    // Check if device already exists 
     $stmt = $conn->prepare("SELECT COUNT(*) FROM Devices WHERE asset_tag = ?");
     if ($stmt) {
         $stmt->bind_param("s", $assetTag);
@@ -95,7 +94,6 @@ while (($row = fgetcsv($file)) !== false) {
     }
 
     if ($count > 0) {
-        // Duplicate asset_tag found, log error and skip
         $errors[] = "Duplicate asset_tag: $assetTag already exists.";
         continue;
     } else {
@@ -109,7 +107,6 @@ while (($row = fgetcsv($file)) !== false) {
         }
     }
 
-    // After device insert/update
     if ($deviceId) {
         // Insert Laptop
         $internetPolicy = trim($data["internet_policy"]) ?: "Default";
@@ -129,6 +126,7 @@ while (($row = fgetcsv($file)) !== false) {
             );
             if ($stmt->execute()) {
                 $imported++; 
+                logDeviceImport("Imported laptop with asset_tag '$assetTag' assigned to emp_code '$empCode'.");
             } else {
                 $errors[] = "Failed to insert laptop details for asset_tag $assetTag.";
             }

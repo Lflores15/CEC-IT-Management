@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once("../../PHP/config.php");
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -31,10 +32,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->bind_param("sssss", $employee_id, $first_name, $last_name, $username, $phone_number);
 
     if ($stmt->execute()) {
-        header("Location: employee_Dashboard.php");
-        exit;
+        require_once "../../includes/log_event.php";
+        $actor = $_SESSION['login'] ?? $_SESSION['username'] ?? $_SESSION['user'] ?? 'unknown';
+        $message = "Employee '$employee_id' was created";
+        logUserEvent("CREATE_EMPLOYEE", $message, $actor);
+        echo json_encode(["success" => true, "message" => "Employee created successfully."]);
     } else {
-        echo "Error: " . $stmt->error;
+        echo json_encode(["success" => false, "message" => "Error: " . $stmt->error]);
     }
+    exit;
 }
 ?>

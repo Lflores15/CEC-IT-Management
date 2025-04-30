@@ -615,8 +615,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const undoBtn = document.getElementById("undo-delete-btn");
     let editing = false;
 
-    // Restore delete-selected-btn logic for laptops
-    if (deleteBtn) {
+    // Only enable device deletion logic if on the laptop dashboard (device management page)
+    const deviceTable = document.querySelector("#device-table");
+    // Robustly check for a table header labeled "Asset Tag"
+    const isDevicePage = deviceTable && Array.from(deviceTable.querySelectorAll('th')).some(th => th.textContent.trim() === "Asset Tag");
+
+    if (isDevicePage && deleteBtn) {
       deleteBtn.addEventListener("click", () => {
         const selected = Array.from(document.querySelectorAll(".row-checkbox:checked")).map(cb => cb.value);
         if (selected.length === 0) {
@@ -1289,3 +1293,14 @@ function fetchEmployeeDetails(emp_code) {
     })
     .catch(err => console.error("Failed to fetch employee details:", err));
 }
+
+// ========== Flexible Phone Input Pattern for Employee Creation ==========
+document.addEventListener("DOMContentLoaded", function () {
+  // Find the employee creation phone input (by name attribute)
+  const phoneInputs = document.querySelectorAll('input[type="tel"][name="phone_number"]');
+  phoneInputs.forEach(input => {
+    // Update pattern and placeholder for flexible phone number formats
+    input.setAttribute('pattern', '\\(?\\d{3}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}');
+    input.setAttribute('placeholder', '(123) 456-7890');
+  });
+});

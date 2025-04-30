@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once "../../PHP/config.php";
-require_once "../../includes/log_event.php"; 
+require_once "../../includes/log_event.php";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $user_id = $_POST["user_id"];

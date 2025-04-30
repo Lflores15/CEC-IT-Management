@@ -881,8 +881,10 @@ th.sortable.desc::after {
     font-weight: bold;
     padding: 10px;
     border: none;
+    padding: 10px;
+    font-size: 16px;
     border-radius: 6px;
-    margin-top: 10px;
+    margin-top: 20px;
     cursor: pointer;
     width: 100%;
 }
@@ -1616,6 +1618,8 @@ th.sortable.desc::after {
     color: white;
     border: none;
     border-radius: 6px;
+    margin: 10 0 0 0;
+    font-size: 16px;
 }
 
 #column-form button:hover {

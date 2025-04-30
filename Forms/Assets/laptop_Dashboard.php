@@ -209,6 +209,12 @@ $conn->close();
                                 <td data-column="<?= $col ?>" data-id="<?= $device['device_id'] ?>" <?= $col === 'assigned_to' ? 'class="edit-only" data-emp-id="' . $device['assigned_to'] . '"' : '' ?>>
                                     <?php if ($col === 'assigned_to'): ?>
                                         <?= htmlspecialchars(trim(($device['first_name'] ?? '') . ' ' . ($device['last_name'] ?? ''))) . ' (' . ($device['emp_code'] ?? 'N/A') . ')' ?>
+                                    <?php elseif ($col === 'phone_number'): ?>
+                                        <?php
+                                          $raw = preg_replace('/\D/', '', $device[$col] ?? '');
+                                          $formatted = (strlen($raw) === 10) ? '(' . substr($raw, 0, 3) . ') ' . substr($raw, 3, 3) . '-' . substr($raw, 6) : htmlspecialchars($device[$col] ?? 'N/A');
+                                        ?>
+                                        <?= $formatted ?>
                                     <?php else: ?>
                                         <?= htmlspecialchars($device[$col] ?? 'N/A') ?>
                                     <?php endif; ?>
@@ -230,7 +236,7 @@ $conn->close();
 <div id="importLaptopModal" class="laptop-modal-content-wrapper">
   <div class="laptop-modal-content">
     <div class="laptop-modal-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-      <h2 style="margin: 0;">Import Laptops from CSV</h2>
+      <h2 style="margin: 10px;">Import Laptops from CSV</h2>
       <span id="closeImportLaptopModal" class="close" style="font-size: 24px; cursor: pointer;">&times;</span>
     </div>
     <form id="importLaptopForm" enctype="multipart/form-data">

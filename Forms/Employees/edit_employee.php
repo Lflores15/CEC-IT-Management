@@ -2,6 +2,8 @@
 session_start();
 require_once "../../PHP/config.php";
 
+header('Content-Type: application/json');
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $emp_id = isset($_POST['emp_id']) ? intval($_POST['emp_id']) : 0;
     $emp_code = $_POST['emp_code'] ?? '';
@@ -11,30 +13,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $phone_number = $_POST['phone_number'] ?? '';
     $active = isset($_POST['active']) ? 1 : 0;
 
-    if ($emp_id <= 0) {
-        echo json_encode(["success" => false, "message" => "Missing employee ID."]);
+    if (empty($emp_code)) {
+        echo json_encode(["success" => false, "message" => "Missing employee code."]);
         exit;
     }
 
-    $sql = "UPDATE Employees SET emp_code=?, username=?, first_name=?, last_name=?, phone_number=?, active=? WHERE emp_id=?";
+    $sql = "UPDATE Employees SET emp_code=?, username=?, first_name=?, last_name=?, phone_number=?, active=? WHERE emp_code=?";
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         echo json_encode(["success" => false, "message" => "SQL prepare failed: " . $conn->error]);
         exit;
     }
-    $stmt->bind_param("ssssssi", $emp_code, $username, $first_name, $last_name, $phone_number, $active, $emp_id);
+    $stmt->bind_param("ssssssi", $emp_code, $username, $first_name, $last_name, $phone_number, $active, $emp_code);
 
     if ($stmt->execute()) {
-        // Log to user_event_log.txt
-        $logPath = __DIR__ . "/../../logs/user_event_log.txt";
-        $user = $_SESSION['username'] ?? 'unknown';
-        $timestamp = date("Y-m-d H:i:s");
-        $logMsg = "$user\tUPDATE\t$timestamp\tUpdated employee: $emp_code\n";
-        file_put_contents($logPath, $logMsg, FILE_APPEND);
-
-        $debugLogMsg = "$user\tDEBUG\t$timestamp\tEMP_ID=$emp_id | CODE=$emp_code | USERNAME=$username | FIRST=$first_name | LAST=$last_name | PHONE=$phone_number | ACTIVE=$active\n";
-        file_put_contents($logPath, $debugLogMsg, FILE_APPEND);
-
+        require_once "../../includes/log_event.php";
+        $actor = $_SESSION['login'] ?? $_SESSION['username'] ?? $_SESSION['user'] ?? 'unknown';
+        $message = "Employee '$emp_code' updated: username='$username', first='$first_name', last='$last_name', phone='$phone_number', active=$active";
+        logUserEvent("UPDATE_EMPLOYEE", $message, $actor);
         echo json_encode(["success" => true, "message" => "Employee updated successfully."]);
     } else {
         echo json_encode(["success" => false, "message" => "Failed to update employee."]);
@@ -42,5 +38,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $stmt->close();
     $conn->close();
+    exit;
 }
 ?>

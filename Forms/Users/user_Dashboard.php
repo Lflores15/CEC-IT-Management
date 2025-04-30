@@ -80,45 +80,49 @@ if (!$result) {
     </div>
 
     <!-- Create User Modal -->
-    <div id="createModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeCreateModal">&times;</span>
-            <h3>Create New User</h3>
+    <div id="createModal" class="modal laptop-modal-content-wrapper">
+        <div class="laptop-modal-content" style="max-width: 600px; padding: 25px 30px;">
+            <div class="modal-header">
+                <h2 style="font-size: 1.5rem;">Create New User</h2>
+                <span class="close" id="closeCreateModal">&times;</span>
+            </div>
             <form action="create_user.php" method="POST">
-                <label for="new-username">Username:</label>
-                <input type="text" id="new-username" name="login" required>
+                <label for="new-username" style="font-weight: 600; display: block; margin: 10px 0 5px;">Username:</label>
+                <input type="text" id="new-username" name="login" required style="padding: 12px 14px; font-size: 1.05rem; border-radius: 6px; border: 1px solid #ccc; width: 100%; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
 
-                <label for="new-password">Password:</label>
-                <input type="password" id="new-password" name="password" required>
+                <label for="new-password" style="font-weight: 600; display: block; margin: 15px 0 5px;">Password:</label>
+                <input type="password" id="new-password" name="password" required style="padding: 12px 14px; font-size: 1.05rem; border-radius: 6px; border: 1px solid #ccc; width: 100%; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
 
-                <label for="new-role">Role:</label>
-                <select id="new-role" name="role">
+                <label for="new-role" style="font-weight: 600; display: block; margin: 15px 0 5px;">Role:</label>
+                <select id="new-role" name="role" style="padding: 12px 14px; font-size: 1.05rem; border-radius: 6px; border: 1px solid #ccc; width: 100%; background-color: #fff; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg fill=\'%23333\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M7 10l5 5 5-5z\'/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px 16px; cursor: pointer;">
                     <option value="Manager">Manager</option>
                     <option value="Technician">Technician</option>
                 </select>
 
-                <button type="submit">Create User</button>
+                <button type="submit" style="margin-top: 20px; padding: 10px 20px; font-size: 1rem; background-color: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold;">Create User</button>
             </form>
         </div>
     </div>
 
     <!-- Edit User Modal -->
     <div id="editModal" class="modal laptop-modal-content-wrapper">
-        <div class="laptop-modal-content">
+        <div class="laptop-modal-content" style="max-width: 600px; padding: 25px 30px;">
             <div class="modal-header">
-                <h2>Edit User</h2>
+                <h2 style="font-size: 1.5rem;">Edit User</h2>
                 <span class="close" id="closeEditModal">&times;</span>
             </div>
             <form id="editUserForm">
                 <input type="hidden" id="edit-user-id" name="user_id">
-                <label for="edit-username">Username:</label>
-                <input type="text" id="edit-username" name="login" required>
-                <label for="edit-role">Role:</label>
-                <select id="edit-role" name="role">
+                <label for="edit-username" style="font-weight: 600; display: block; margin: 10px 0 5px;">Username:</label>
+                <input type="text" id="edit-username" name="login" required style="padding: 12px 14px; font-size: 1.05rem; border-radius: 6px; border: 1px solid #ccc; width: 100%; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+
+                <label for="edit-role" style="font-weight: 600; display: block; margin: 15px 0 5px;">Role:</label>
+                <select id="edit-role" name="role" style="padding: 12px 14px; font-size: 1.05rem; border-radius: 6px; border: 1px solid #ccc; width: 100%; background-color: #fff; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg fill=\'%23333\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M7 10l5 5 5-5z\'/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px 16px; cursor: pointer;">
                     <option value="Manager">Manager</option>
                     <option value="Technician">Technician</option>
                 </select>
-                <button type="submit">Update</button>
+
+                <button type="submit" style="margin-top: 20px; padding: 10px 20px; font-size: 1rem; background-color: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold;">Update</button>
                 <p id="edit-user-message" style="margin-top:10px; text-align:center;"></p>
             </form>
         </div>
@@ -126,17 +130,17 @@ if (!$result) {
 
     <!-- Delete User Modal -->
     <div id="deleteModal" class="modal laptop-modal-content-wrapper">
-        <div class="laptop-modal-content">
+        <div class="laptop-modal-content" style="max-width: 600px; padding: 25px 30px 20px;">
             <div class="modal-header">
-                <h2>Confirm Delete</h2>
+                <h2 style="font-size: 1.6rem;">Confirm User Deletion</h2>
                 <span class="close" id="closeDeleteModal">&times;</span>
             </div>
             <form id="deleteUserForm" method="GET" action="delete_user.php">
                 <input type="hidden" name="id" id="delete-user-id">
-                <p style="text-align:center;">Are you sure you want to delete <strong id="delete-username"></strong>?</p>
-                <div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
-                    <button type="submit" style="background-color: red; color: white;">Delete</button>
-                    <button type="button" id="cancelDeleteBtn">Cancel</button>
+                <p style="text-align:center; font-size: 1.2rem; margin: 20px 0;">Are you sure you want to delete <strong id="delete-username"></strong>?</p>
+                <div style="display:flex; justify-content:center; gap:16px; margin-top:0; margin-bottom:0;">
+                    <button type="submit" style="padding: 10px 20px; font-size: 1rem; border: none; border-radius: 6px; background-color: red; color: white;">Delete</button>
+                    <button type="button" id="cancelDeleteBtn" style="padding: 10px 20px; font-size: 1rem; border: none; border-radius: 6px;">Cancel</button>
                 </div>
             </form>
         </div>
