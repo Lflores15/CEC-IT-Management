@@ -47,7 +47,6 @@ if (!$result) {
 }
 
 while ($row = $result->fetch_assoc()) {
-    // Match dashboard export column order:
     // Status,Internet Policy,Asset Tag,CPU,RAM (GB),OS,Username,First Name,Last Name,Employee ID,Phone Number
     $fields = [
         $row['status'] ?? 'N/A',

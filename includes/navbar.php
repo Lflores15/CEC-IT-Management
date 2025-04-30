@@ -55,8 +55,8 @@ if (array_key_exists($currentPage, $pageTitles)) {
             <div class="profile-dropdown">
                 <button class="profile-btn">Profile ▼</button>
                 <div class="profile-dropdown-content">
-                    <a href="../Users/profile.php">View Profile</a>
-                    <a href="../Settings/settings.php">Settings</a>
+                    <a href="../Users/profile_Dashboard.php">View Profile</a>
+                    <!-- <a href="../Settings/settings.php">Settings</a> -->
                     <a href="../Login/logout.php">Logout</a>
                 </div>
             </div>
@@ -81,7 +81,7 @@ if (array_key_exists($currentPage, $pageTitles)) {
             <a href="/Forms/Employees/employee_Dashboard.php" class="<?php echo ($currentPage == 'employees') ? 'active' : ''; ?>">Employees</a>
             <a href="../Admin/log_dashboard.php" class="<?php echo ($currentPage == 'logs') ? 'active' : ''; ?>">Logs</a>
         <?php endif; ?>
-        <a href="../Settings/settings.php" class="<?php echo ($currentPage == 'settings') ? 'active' : ''; ?>">Settings</a>
+        <!-- <a href="../Settings/settings.php" class="<?php echo ($currentPage == 'settings') ? 'active' : ''; ?>">Settings</a> -->
     </div>
     <!-- Main Content Wrapper -->
     <div class="<?php echo $isAssetPage ? 'asset-content' : 'main-content'; ?>">

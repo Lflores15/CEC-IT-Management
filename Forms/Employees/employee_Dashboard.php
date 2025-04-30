@@ -52,7 +52,12 @@ require_once("../../includes/session.php");
                         <td><?php echo htmlspecialchars($row['first_name']); ?></td>
                         <td><?php echo htmlspecialchars($row['last_name']); ?></td>
                         <td><?php echo htmlspecialchars($row['username']); ?></td>
-                        <td><?php echo htmlspecialchars($row['phone_number']); ?></td>
+                        <td data-column="phone_number"><?php
+                            $raw = preg_replace('/\D/', '', $row['phone_number']);
+                            echo (strlen($raw) === 10)
+                              ? '(' . substr($raw, 0, 3) . ') ' . substr($raw, 3, 3) . '-' . substr($raw, 6)
+                              : htmlspecialchars($row['phone_number']);
+                        ?></td>
                         <td class="checkbox-col" style="display: none;"><span class="edit-icon">✏️</span></td>
                     </tr>
                     <?php endwhile; ?>
@@ -62,16 +67,16 @@ require_once("../../includes/session.php");
     </main>
 
     <!-- Add/Edit Employee Modal -->
-    <div id="createEmployeeModal" class="modal laptop-modal">
+    <div id="createEmployeeModal" class="modal laptop-modal" style="width: 500px;">
         <div class="laptop-modal-content">
             <span id="closeCreateEmployeeModal" class="close">&times;</span>
-            <h2>Add New Employee</h2>
+            <h2>Add/Edit Employee</h2>
             <form id="create-employee-form" method="post" action="create_employee.php">
                 <input type="hidden" name="is_edit" value="false">
                 <div class="form-group">
                     <label for="emp_code">Employee ID:</label>
                     <input type="hidden" name="emp_id" value="">
-                    <input type="text" name="emp_code" required pattern="\d{1,4}" maxlength="4" placeholder="e.g. 1001">
+                    <input type="text" name="emp_code" required pattern="[\w\-]{1,20}" maxlength="20" placeholder="e.g. EMP-1001">
                 </div>
                 <div class="form-group">
                     <label for="first_name">First Name:</label>
@@ -87,9 +92,9 @@ require_once("../../includes/session.php");
                 </div>
                 <div class="form-group">
                     <label for="phone_number">Phone Number:</label>
-                    <input type="tel" name="phone_number" required pattern="\(\d{3}\) \d{3}-\d{4}" placeholder="(123) 456-7890">
+                    <input type="tel" name="phone_number" required pattern="\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}" placeholder="(123) 456-7890">
                 </div>
-                <button type="submit">Create</button>
+                <button type="submit">Save</button>
                 <div id="edit-user-message" style="margin-top: 10px; font-weight: bold;"></div>
             </form>
         </div>
@@ -128,9 +133,8 @@ require_once("../../includes/session.php");
         // Delete selected employees
         if (deleteBtn) {
             deleteBtn.addEventListener("click", function () {
-                if (deleteBtn.disabled) return;
                 const checkboxes = document.querySelectorAll(".row-select:checked");
-                if (!checkboxes.length) {
+                if (checkboxes.length === 0) {
                     alert("Please select employees to delete.");
                     return;
                 }
@@ -191,7 +195,16 @@ require_once("../../includes/session.php");
         const modal = document.getElementById("createEmployeeModal");
         const closeBtn = document.getElementById("closeCreateEmployeeModal");
 
-        openBtn.onclick = () => modal.style.display = "block";
+        openBtn.onclick = () => {
+            // Reset the form to creation mode before showing modal
+            const form = document.getElementById("create-employee-form");
+            form.reset();
+            form.action = "create_employee.php";
+            document.querySelector('#createEmployeeModal h2').textContent = "Add Employee";
+            form.querySelector('input[name="is_edit"]').value = "false";
+            form.querySelector('input[name="emp_id"]').value = "";
+            modal.style.display = "block";
+        };
         closeBtn.onclick = () => modal.style.display = "none";
         window.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
 
@@ -223,6 +236,34 @@ require_once("../../includes/session.php");
             if (input.length > 6) e.target.value = `(${area}) ${middle}-${last}`;
             else if (input.length > 3) e.target.value = `(${area}) ${middle}`;
             else if (input.length > 0) e.target.value = `(${area}`;
+        });
+
+        // AJAX for create/edit employee form
+        const createEmployeeForm = document.getElementById("create-employee-form");
+        createEmployeeForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const formData = new FormData(createEmployeeForm);
+            const isEdit = formData.get("is_edit") === "true";
+            const actionUrl = createEmployeeForm.action;
+
+            fetch(actionUrl, {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                const msg = document.getElementById("edit-user-message");
+                msg.textContent = data.message;
+                msg.style.color = data.success ? "green" : "red";
+                if (data.success) {
+                    setTimeout(() => location.reload(), 1000);
+                }
+            })
+            .catch(err => {
+                const msg = document.getElementById("edit-user-message");
+                msg.textContent = "Error: " + err;
+                msg.style.color = "red";
+            });
         });
     });
     </script>
