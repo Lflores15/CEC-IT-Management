@@ -103,10 +103,12 @@ if (!$result) {
     </div>
 
     <!-- Edit User Modal -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeEditModal">&times;</span>
-            <h3>Edit User</h3>
+    <div id="editModal" class="modal laptop-modal-content-wrapper">
+        <div class="laptop-modal-content">
+            <div class="modal-header">
+                <h2>Edit User</h2>
+                <span class="close" id="closeEditModal">&times;</span>
+            </div>
             <form id="editUserForm">
                 <input type="hidden" id="edit-user-id" name="user_id">
                 <label for="edit-username">Username:</label>
@@ -116,25 +118,29 @@ if (!$result) {
                     <option value="Manager">Manager</option>
                     <option value="Technician">Technician</option>
                 </select>
-
                 <button type="submit">Update</button>
+                <p id="edit-user-message" style="margin-top:10px; text-align:center;"></p>
             </form>
         </div>
     </div>
 
     <!-- Delete User Modal -->
-<div id="deleteModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <span class="close" id="closeDeleteModal">&times;</span>
-        <h3>Confirm Delete</h3>
-        <p>Are you sure you want to delete <strong id="delete-username"></strong>?</p>
-        <form id="deleteUserForm" method="GET" action="delete_user.php">
-            <input type="hidden" name="id" id="delete-user-id">
-            <button type="submit" style="background-color: red; color: white;">Delete</button>
-            <button type="button" id="cancelDeleteBtn">Cancel</button>
-        </form>
+    <div id="deleteModal" class="modal laptop-modal-content-wrapper">
+        <div class="laptop-modal-content">
+            <div class="modal-header">
+                <h2>Confirm Delete</h2>
+                <span class="close" id="closeDeleteModal">&times;</span>
+            </div>
+            <form id="deleteUserForm" method="GET" action="delete_user.php">
+                <input type="hidden" name="id" id="delete-user-id">
+                <p style="text-align:center;">Are you sure you want to delete <strong id="delete-username"></strong>?</p>
+                <div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
+                    <button type="submit" style="background-color: red; color: white;">Delete</button>
+                    <button type="button" id="cancelDeleteBtn">Cancel</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
 </body>
 </html>

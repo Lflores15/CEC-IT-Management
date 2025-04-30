@@ -63,7 +63,7 @@ try {
 
     $conn->commit();
     // Logging section
-    $user = $_SESSION['login'] ?? $_SESSION['user'] ?? 'unknown';
+    $user = $_SESSION['login'] ?? $_SESSION['user'] ?? $_SESSION['username'] ?? 'unknown';
     $logPath = __DIR__ . "/../../Logs/device_event_log.txt";
     $logTime = date("Y-m-d H:i:s");
 

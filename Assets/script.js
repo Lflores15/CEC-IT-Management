@@ -240,65 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 // ========== Delete Selected Devices and Undo Delete ==========
-document.addEventListener("DOMContentLoaded", function () {
-    const deleteBtn = document.getElementById("delete-selected-btn");
-    // Add deleteInProgress variable to prevent double prompts
-    let deleteInProgress = false;
-    if (deleteBtn) {
-        deleteBtn.addEventListener("click", function () {
-            if (deleteBtn.disabled || deleteInProgress) return;
-            deleteInProgress = true;
-            const checkboxes = document.querySelectorAll(".row-checkbox:checked");
-            if (!checkboxes.length) {
-                alert("Please select devices to delete.");
-                deleteInProgress = false;
-                return;
-            }
-            if (!confirm("Are you sure you want to delete the selected devices?")) {
-                deleteInProgress = false;
-                return;
-            }
-            const ids = Array.from(checkboxes).map(cb => cb.value);
-            deleteBtn.disabled = true;
-            fetch("delete_laptop.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ device_ids: ids })
-            })
-            .then(res => res.text())
-            .then(msg => {
-                alert(msg);
-                location.reload();
-            })
-            .catch(err => {
-                alert("Delete failed: " + err);
-                deleteBtn.disabled = false;
-            })
-            .finally(() => {
-                deleteInProgress = false;
-            });
-        });
-    }
-    // Undo Last Delete button
-    const undoBtn = document.getElementById("undo-delete-btn");
-    if (undoBtn) {
-        let undoInProgress = false;
-        undoBtn.addEventListener("click", () => {
-            if (undoInProgress) return;
-            undoInProgress = true;
-            fetch("undo_delete.php")
-                .then(res => res.text())
-                .then(msg => {
-                    alert(msg);
-                    location.reload();
-                })
-                .catch(err => alert("Undo failed: " + err))
-                .finally(() => {
-                    undoInProgress = false;
-                });
-        });
-    }
-});
+// The delete-selected-btn logic for employees is now handled inline in employee_Dashboard.php
 // ========== Script Initialization & UI Interaction Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
     console.log("JavaScript Loaded ✅");
@@ -417,7 +359,7 @@ tables.forEach((table) => {
     // Setup logic for Edit User modal (opening, closing, form submission)
     // Modal Functionality
     const modal = document.getElementById("editModal");
-    const closeModal = document.querySelector(".close");
+    const closeModal = document.getElementById("closeEditModal");
     const editForm = document.getElementById("editUserForm");
 
     document.querySelectorAll(".edit-btn").forEach(button => {
@@ -446,9 +388,14 @@ tables.forEach((table) => {
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
+                const messageElement = document.getElementById("edit-user-message");
+                if (messageElement) {
+                    messageElement.textContent = data.message;
+                    messageElement.style.color = data.success ? "green" : "red";
+                }
+
                 if (data.success) {
-                    location.reload();
+                    setTimeout(() => location.reload(), 1000);
                 }
             });
         });
@@ -478,41 +425,6 @@ document.addEventListener("DOMContentLoaded", function () {
         };
     }
 
-// Edit Modal logic
-const editModal = document.getElementById("editModal");
-const closeEditModal = document.getElementById("closeEditModal");
-
-if (editModal && closeEditModal) {
-    // Setup dynamic population of Edit User modal fields
-    // Example: open modal dynamically with user data
-    document.querySelectorAll(".edit-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            const userId = this.dataset.id;
-            const username = this.dataset.username;
-            const role = this.dataset.role;
-
-            // Populate form fields (no email field)
-            document.getElementById("edit-user-id").value = userId;
-            document.getElementById("edit-username").value = username;
-            document.getElementById("edit-role").value = role;
-
-            // Show modal
-            editModal.style.display = "block";
-        });
-    });
-
-    // Close on "×" button
-    closeEditModal.onclick = () => {
-        editModal.style.display = "none";
-    };
-
-    // Close on outside click
-    window.addEventListener("click", function (event) {
-        if (event.target === editModal) {
-            editModal.style.display = "none";
-        }
-    });
-}
 
     // Setup logic for Delete User modal (opening, closing)
     // Delete Modal logic
@@ -596,33 +508,36 @@ if (editModal && closeEditModal) {
             
         });
         
-// Add sort functionality to each column header in the table
-const table = document.getElementById("device-table");
-if (table) {
-  const headers = table.querySelectorAll("th.sortable");
-  let sortDirection = 1;
-  let sortColumnIndex = null;
+// Add sort functionality to each column header in the employee-table
+document.addEventListener("DOMContentLoaded", function () {
+  const employeeTable = document.getElementById("employee-table");
+  if (employeeTable) {
+    const headers = employeeTable.querySelectorAll("th.sortable");
+    let sortDirection = 1;
+    let sortColumnIndex = null;
 
-  headers.forEach((header, index) => {
-    header.addEventListener("click", () => {
-      if (sortColumnIndex === index) sortDirection *= -1;
-      else {
-        sortColumnIndex = index;
-        sortDirection = 1;
-      }
+    headers.forEach((header, index) => {
+      header.addEventListener("click", () => {
+        if (sortColumnIndex === index) sortDirection *= -1;
+        else {
+          sortColumnIndex = index;
+          sortDirection = 1;
+        }
 
-      const rows = Array.from(table.querySelectorAll("tbody > tr"));
-      rows.sort((a, b) => {
-        const cellA = a.children[index].textContent.trim().toLowerCase();
-        const cellB = b.children[index].textContent.trim().toLowerCase();
-        return cellA.localeCompare(cellB) * sortDirection;
+        const rows = Array.from(employeeTable.querySelector("tbody > tr"));
+        // +1 offset: skip the first checkbox column
+        rows.sort((a, b) => {
+          const cellA = a.children[index + 1].textContent.trim().toLowerCase();
+          const cellB = b.children[index + 1].textContent.trim().toLowerCase();
+          return cellA.localeCompare(cellB) * sortDirection;
+        });
+
+        const tbody = employeeTable.querySelector("tbody");
+        rows.forEach(row => tbody.appendChild(row));
       });
-
-      const tbody = table.querySelector("tbody");
-      rows.forEach(row => tbody.appendChild(row));
     });
-  });
-}
+  }
+});
 
 // Toggle modal for selecting visible table columns
 const editBtn = document.getElementById("edit-columns-btn");
@@ -664,6 +579,30 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
     }
+
+    // Column selector buttons toggle logic with background color update
+    document.querySelectorAll('.column-toggle-btn').forEach(button => {
+      const input = button.nextElementSibling;
+
+      // Set initial color based on 'active' class
+      if (button.classList.contains('active')) {
+        button.style.backgroundColor = '#28a745'; // green
+      } else {
+        button.style.backgroundColor = '#dc3545'; // red
+      }
+
+      button.addEventListener('click', () => {
+        const isActive = button.classList.toggle('active');
+        input.disabled = !isActive;
+
+        // Update color based on active state
+        if (isActive) {
+          button.style.backgroundColor = '#28a745'; // green
+        } else {
+          button.style.backgroundColor = '#dc3545'; // red
+        }
+      });
+    });
 });
 
 
@@ -675,6 +614,61 @@ document.addEventListener("DOMContentLoaded", function () {
     const deleteBtn = document.getElementById("delete-selected-btn");
     const undoBtn = document.getElementById("undo-delete-btn");
     let editing = false;
+
+    // Restore delete-selected-btn logic for laptops
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", () => {
+        const selected = Array.from(document.querySelectorAll(".row-checkbox:checked")).map(cb => cb.value);
+        if (selected.length === 0) {
+          alert("Please select device(s) to delete.");
+          return;
+        }
+
+        if (!confirm(`Are you sure you want to delete ${selected.length} device(s)?`)) return;
+
+        fetch("/Forms/Assets/delete_laptop.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ device_ids: selected })
+        })
+        .then(res => res.text())
+        .then(response => {
+          if (response.trim().toLowerCase().includes("successfully deleted selected laptops")) {
+            alert("Devices deleted successfully.");
+            location.reload();
+          } else {
+            alert("Error deleting devices: " + response);
+          }
+        })
+        .catch(err => {
+          alert("Request failed: " + err);
+        });
+      });
+    }
+
+    // Undo delete logic for laptops
+    if (undoBtn) {
+      undoBtn.addEventListener("click", function () {
+        // Optionally, confirm undo
+        if (!confirm("Are you sure you want to undo the last delete?")) return;
+        fetch("/Forms/Assets/undo_delete.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        })
+        .then(res => res.text())
+        .then(response => {
+          if (response.trim().toLowerCase().includes("undo successful")) {
+            alert("Undo successful. Devices have been restored.");
+            location.reload();
+          } else {
+            alert("Undo failed: " + response);
+          }
+        })
+        .catch(err => {
+          alert("Undo request failed: " + err);
+        });
+      });
+    }
 
     // Toggle editing mode
     editBtn.addEventListener("click", () => {

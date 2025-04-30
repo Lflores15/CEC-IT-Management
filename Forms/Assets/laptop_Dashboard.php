@@ -140,20 +140,22 @@ $conn->close();
             <span class="close" onclick="document.getElementById('column-selector').style.display='none'">&times;</span>
           </div>
           <form id="column-form">
-            <div>
+            <fieldset style="width: 93%; border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
+              <legend style="font-size: 14px; color: #555;">Select the columns you want to display in the table.</legend>
               <div style="display: flex; flex-wrap: wrap; gap: 20px;">
                 <?php foreach (array_chunk($default_columns, ceil(count($default_columns) / 2), true) as $columnGroup): ?>
                   <div style="flex: 1 1 45%; min-width: 200px;">
                     <?php foreach ($columnGroup as $key => $label): ?>
-                      <label style="display: block; margin-bottom: 8px; font-size: 15px;">
-                        <input type="checkbox" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? 'checked' : '' ?>>
+                      <button type="button" class="column-toggle-btn <?= in_array($key, $visible_columns) ? 'active' : '' ?>"
+                              data-column="<?= $key ?>">
                         <?= htmlspecialchars($label) ?>
-                      </label>
+                      </button>
+                      <input type="hidden" name="columns[]" value="<?= $key ?>" <?= in_array($key, $visible_columns) ? '' : 'disabled' ?>>
                     <?php endforeach; ?>
                   </div>
                 <?php endforeach; ?>
               </div>
-            </div>
+            </fieldset>
             <button type="submit">Apply</button>
           </form>
         </div>

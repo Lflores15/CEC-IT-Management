@@ -47,20 +47,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <link rel="stylesheet" href="../../Assets/styles.css"> 
 </head>
 <body>
-    <div class="login-modal modal">
+    <div class="login-wrapper">
         <form class="login-form" method="POST" action="login.php">
-            <h2>Login</h2>
-
+            <div class="form-title">
+                <h2>Login</h2>
+            </div>
             <div class="form-group">
                 <label for="login">Username</label>
-                <input name="login" id="login" required>
+                <input class="login-input" name="login" id="login" required>
             </div>
-
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password" required>
+                <input class="login-input" type="password" name="password" id="password" required>
             </div>
-            <button type="submit">Login</button>
+            <button class="login-btn" type="submit">Login</button>
+
+            <!-- Register link styled as button -->
+            <div class="register-link">
+                <a href="../Registration/register.php" class="register-btn">Register New Account</a>
+            </div>
+
         </form>
     </div>
 </body>

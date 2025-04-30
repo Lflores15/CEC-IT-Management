@@ -21,53 +21,57 @@ require_once("../../includes/session.php");
             <button id="toggle-edit-mode" class="edit-btn">Edit Table</button>
             <div id="edit-controls" style="display: none;">
                 <button id="open-create-employee" class="create-device-btn">Add New Employee</button>
-                <button id="delete-selected" class="delete-btn" disabled>Delete Selected</button>
+                <button id="delete-selected-btn" class="delete-btn" disabled>Delete Selected</button>
             </div>
         </div>
 
-        <table id="employee-table" class="device-table">
-            <thead>
-                <tr>
-                    <th class="checkbox-col" style="display: none;"><input type="checkbox" id="select-all"></th>
-                    <th style="text-align: left;">Employee Code<br><input type="text" class="filter-input" data-column="1"></th>
-                    <th style="text-align: left;">First Name<br><input type="text" class="filter-input" data-column="2"></th>
-                    <th style="text-align: left;">Last Name<br><input type="text" class="filter-input" data-column="3"></th>
-                    <th style="text-align: left;">Username<br><input type="text" class="filter-input" data-column="4"></th>
-                    <th style="text-align: left;">Phone Number<br><input type="text" class="filter-input" data-column="5"></th>
-                    <th class="checkbox-col" style="display: none;"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                $stmt = $conn->prepare("SELECT emp_code, first_name, last_name, username, phone_number, active FROM Employees");
-                $stmt->execute();
-                $result = $stmt->get_result();
+        <div style="overflow-y: auto; height: calc(105vh - 280px);">
+            <table id="employee-table" class="device-table">
+                <thead style="position: sticky; top: 0; background-color: #007bff; z-index: 2;">
+                    <tr>
+                        <th class="checkbox-col" style="display: none;"><input type="checkbox" id="select-all"></th>
+                        <th class="sortable" data-column="1" style="text-align: left;">Employee Code<br><input type="text" class="filter-input" data-column="1" placeholder="Filter Employee Code"></th>
+                        <th class="sortable" data-column="2" style="text-align: left;">First Name<br><input type="text" class="filter-input" data-column="2" placeholder="Filter First Name"></th>
+                        <th class="sortable" data-column="3" style="text-align: left;">Last Name<br><input type="text" class="filter-input" data-column="3" placeholder="Filter Last Name"></th>
+                        <th class="sortable" data-column="4" style="text-align: left;">Username<br><input type="text" class="filter-input" data-column="4" placeholder="Filter Username"></th>
+                        <th class="sortable" data-column="5" style="text-align: left;">Phone Number<br><input type="text" class="filter-input" data-column="5" placeholder="Filter Phone Number"></th>
+                        <th class="checkbox-col" style="display: none;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $stmt = $conn->prepare("SELECT emp_code, first_name, last_name, username, phone_number, active FROM Employees");
+                    $stmt->execute();
+                    $result = $stmt->get_result();
 
-                while ($row = $result->fetch_assoc()):
-                ?>
-                <tr class="clickable-row<?php echo $row['active'] ? '' : ' missing-employee'; ?>" data-id="<?php echo $row['emp_code']; ?>">
-                    <td class="checkbox-col" style="display: none;"><input type="checkbox" class="row-select"></td>
-                    <td><?php echo htmlspecialchars($row['emp_code']); ?></td>
-                    <td><?php echo htmlspecialchars($row['first_name']); ?></td>
-                    <td><?php echo htmlspecialchars($row['last_name']); ?></td>
-                    <td><?php echo htmlspecialchars($row['username']); ?></td>
-                    <td><?php echo htmlspecialchars($row['phone_number']); ?></td>
-                    <td class="checkbox-col" style="display: none;"><span class="edit-icon">✏️</span></td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+                    while ($row = $result->fetch_assoc()):
+                    ?>
+                    <tr class="clickable-row<?php echo $row['active'] ? '' : ' missing-employee'; ?>" data-id="<?php echo $row['emp_code']; ?>">
+                        <td class="checkbox-col" style="display: none;"><input type="checkbox" class="row-select" value="<?php echo htmlspecialchars($row['emp_code']); ?>"></td>
+                        <td><?php echo htmlspecialchars($row['emp_code']); ?></td>
+                        <td><?php echo htmlspecialchars($row['first_name']); ?></td>
+                        <td><?php echo htmlspecialchars($row['last_name']); ?></td>
+                        <td><?php echo htmlspecialchars($row['username']); ?></td>
+                        <td><?php echo htmlspecialchars($row['phone_number']); ?></td>
+                        <td class="checkbox-col" style="display: none;"><span class="edit-icon">✏️</span></td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
     </main>
 
-    <!-- Add Employee Modal -->
-    <div id="createEmployeeModal" class="modal">
-        <div class="modal-content">
+    <!-- Add/Edit Employee Modal -->
+    <div id="createEmployeeModal" class="modal laptop-modal">
+        <div class="laptop-modal-content">
             <span id="closeCreateEmployeeModal" class="close">&times;</span>
             <h2>Add New Employee</h2>
             <form id="create-employee-form" method="post" action="create_employee.php">
+                <input type="hidden" name="is_edit" value="false">
                 <div class="form-group">
-                    <label for="employee_id">Employee ID:</label>
-                    <input type="text" name="employee_id" required pattern="\d{1,4}" maxlength="4" placeholder="e.g. 1001">
+                    <label for="emp_code">Employee ID:</label>
+                    <input type="hidden" name="emp_id" value="">
+                    <input type="text" name="emp_code" required pattern="\d{1,4}" maxlength="4" placeholder="e.g. 1001">
                 </div>
                 <div class="form-group">
                     <label for="first_name">First Name:</label>
@@ -78,14 +82,15 @@ require_once("../../includes/session.php");
                     <input type="text" name="last_name" required>
                 </div>
                 <div class="form-group">
-                    <label for="login_id">Login ID:</label>
-                    <input type="text" name="login_id" required>
+                    <label for="username">Login ID:</label>
+                    <input type="text" name="username" required>
                 </div>
                 <div class="form-group">
                     <label for="phone_number">Phone Number:</label>
                     <input type="tel" name="phone_number" required pattern="\(\d{3}\) \d{3}-\d{4}" placeholder="(123) 456-7890">
                 </div>
                 <button type="submit">Create</button>
+                <div id="edit-user-message" style="margin-top: 10px; font-weight: bold;"></div>
             </form>
         </div>
     </div>
@@ -95,7 +100,7 @@ require_once("../../includes/session.php");
         const toggleEdit = document.getElementById("toggle-edit-mode");
         const controls = document.getElementById("edit-controls");
         const checkCols = document.querySelectorAll(".checkbox-col");
-        const deleteBtn = document.getElementById("delete-selected");
+        const deleteBtn = document.getElementById("delete-selected-btn");
 
         toggleEdit.addEventListener("click", () => {
             const editing = document.body.classList.toggle("editing-mode");
@@ -120,10 +125,64 @@ require_once("../../includes/session.php");
             });
         });
 
-        // Placeholder click event for edit icon
+        // Delete selected employees
+        if (deleteBtn) {
+            deleteBtn.addEventListener("click", function () {
+                if (deleteBtn.disabled) return;
+                const checkboxes = document.querySelectorAll(".row-select:checked");
+                if (!checkboxes.length) {
+                    alert("Please select employees to delete.");
+                    return;
+                }
+                if (!confirm("Are you sure you want to delete the selected employees?")) {
+                    return;
+                }
+                const ids = Array.from(checkboxes).map(cb => cb.value);
+                deleteBtn.disabled = true;
+                fetch("delete_employees.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ employee_ids: ids })
+                })
+                .then(res => res.text())
+                .then(msg => {
+                    alert(msg);
+                    location.reload();
+                })
+                .catch(err => {
+                    alert("Delete failed: " + err);
+                    deleteBtn.disabled = false;
+                });
+            });
+        }
+
+        // Edit icon click event: open modal with prefilled employee data
         document.querySelectorAll(".edit-icon").forEach(icon => {
-            icon.addEventListener("click", () => {
-                alert("Edit form coming soon...");
+            icon.addEventListener("click", function () {
+                const row = this.closest("tr");
+                const empCode = row.querySelector("td:nth-child(2)").textContent.trim();
+                const firstName = row.querySelector("td:nth-child(3)").textContent.trim();
+                const lastName = row.querySelector("td:nth-child(4)").textContent.trim();
+                const username = row.querySelector("td:nth-child(5)").textContent.trim();
+                const phoneNumber = row.querySelector("td:nth-child(6)").textContent.trim();
+
+                // Populate the modal
+                document.querySelector('#createEmployeeModal h2').textContent = "Edit Employee";
+                document.querySelector('input[name="emp_code"]').value = empCode;
+                document.querySelector('input[name="emp_id"]').value = empCode;
+                document.querySelector('input[name="first_name"]').value = firstName;
+                document.querySelector('input[name="last_name"]').value = lastName;
+                document.querySelector('input[name="username"]').value = username;
+                document.querySelector('input[name="phone_number"]').value = phoneNumber;
+
+                // Change form action to edit endpoint
+                const form = document.getElementById("create-employee-form");
+                form.action = "edit_employee.php";
+                // Set is_edit to true
+                form.querySelector('input[name="is_edit"]').value = "true";
+
+                // Show modal
+                document.getElementById("createEmployeeModal").style.display = "block";
             });
         });
 
@@ -169,3 +228,34 @@ require_once("../../includes/session.php");
     </script>
 </body>
 </html>
+    <script>
+    // Add sorting to employee-table columns
+    document.addEventListener("DOMContentLoaded", function () {
+      const employeeTable = document.getElementById("employee-table");
+      if (employeeTable) {
+        const headers = employeeTable.querySelectorAll("th.sortable");
+        let sortDirection = 1;
+        let sortColumnIndex = null;
+
+        headers.forEach((header, index) => {
+          header.addEventListener("click", () => {
+            if (sortColumnIndex === index) sortDirection *= -1;
+            else {
+              sortColumnIndex = index;
+              sortDirection = 1;
+            }
+
+            const rows = Array.from(employeeTable.querySelector("tbody > tr"));
+            rows.sort((a, b) => {
+              const cellA = a.children[index + 1].textContent.trim().toLowerCase();
+              const cellB = b.children[index + 1].textContent.trim().toLowerCase();
+              return cellA.localeCompare(cellB) * sortDirection;
+            });
+
+            const tbody = employeeTable.querySelector("tbody");
+            rows.forEach(row => tbody.appendChild(row));
+          });
+        });
+      }
+    });
+    </script>

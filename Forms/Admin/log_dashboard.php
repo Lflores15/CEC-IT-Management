@@ -64,7 +64,7 @@ foreach ($logFiles as $file => $label) {
 </head>
 <body>
 <div class="asset-content-user">
-    <h2>System Event Logs</h2>
+    <h1>System Event Logs</h1>
     <div class="log-scroll-container">
         <div class="log-tables-scrollable">
             <?php if (!empty($userLogEntries)): ?>
