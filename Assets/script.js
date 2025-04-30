@@ -359,7 +359,7 @@ tables.forEach((table) => {
     // Setup logic for Edit User modal (opening, closing, form submission)
     // Modal Functionality
     const modal = document.getElementById("editModal");
-    const closeModal = document.querySelector(".close");
+    const closeModal = document.getElementById("closeEditModal");
     const editForm = document.getElementById("editUserForm");
 
     document.querySelectorAll(".edit-btn").forEach(button => {
@@ -388,9 +388,14 @@ tables.forEach((table) => {
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
+                const messageElement = document.getElementById("edit-user-message");
+                if (messageElement) {
+                    messageElement.textContent = data.message;
+                    messageElement.style.color = data.success ? "green" : "red";
+                }
+
                 if (data.success) {
-                    location.reload();
+                    setTimeout(() => location.reload(), 1000);
                 }
             });
         });
@@ -420,41 +425,6 @@ document.addEventListener("DOMContentLoaded", function () {
         };
     }
 
-// Edit Modal logic
-const editModal = document.getElementById("editModal");
-const closeEditModal = document.getElementById("closeEditModal");
-
-if (editModal && closeEditModal) {
-    // Setup dynamic population of Edit User modal fields
-    // Example: open modal dynamically with user data
-    document.querySelectorAll(".edit-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            const userId = this.dataset.id;
-            const username = this.dataset.username;
-            const role = this.dataset.role;
-
-            // Populate form fields (no email field)
-            document.getElementById("edit-user-id").value = userId;
-            document.getElementById("edit-username").value = username;
-            document.getElementById("edit-role").value = role;
-
-            // Show modal
-            editModal.style.display = "block";
-        });
-    });
-
-    // Close on "×" button
-    closeEditModal.onclick = () => {
-        editModal.style.display = "none";
-    };
-
-    // Close on outside click
-    window.addEventListener("click", function (event) {
-        if (event.target === editModal) {
-            editModal.style.display = "none";
-        }
-    });
-}
 
     // Setup logic for Delete User modal (opening, closing)
     // Delete Modal logic

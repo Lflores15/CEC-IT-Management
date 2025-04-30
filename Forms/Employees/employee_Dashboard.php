@@ -61,15 +61,17 @@ require_once("../../includes/session.php");
         </div>
     </main>
 
-    <!-- Add Employee Modal -->
-    <div id="createEmployeeModal" class="modal">
-        <div class="modal-content">
+    <!-- Add/Edit Employee Modal -->
+    <div id="createEmployeeModal" class="modal laptop-modal">
+        <div class="laptop-modal-content">
             <span id="closeCreateEmployeeModal" class="close">&times;</span>
             <h2>Add New Employee</h2>
             <form id="create-employee-form" method="post" action="create_employee.php">
+                <input type="hidden" name="is_edit" value="false">
                 <div class="form-group">
-                    <label for="employee_id">Employee ID:</label>
-                    <input type="text" name="employee_id" required pattern="\d{1,4}" maxlength="4" placeholder="e.g. 1001">
+                    <label for="emp_code">Employee ID:</label>
+                    <input type="hidden" name="emp_id" value="">
+                    <input type="text" name="emp_code" required pattern="\d{1,4}" maxlength="4" placeholder="e.g. 1001">
                 </div>
                 <div class="form-group">
                     <label for="first_name">First Name:</label>
@@ -80,14 +82,15 @@ require_once("../../includes/session.php");
                     <input type="text" name="last_name" required>
                 </div>
                 <div class="form-group">
-                    <label for="login_id">Login ID:</label>
-                    <input type="text" name="login_id" required>
+                    <label for="username">Login ID:</label>
+                    <input type="text" name="username" required>
                 </div>
                 <div class="form-group">
                     <label for="phone_number">Phone Number:</label>
                     <input type="tel" name="phone_number" required pattern="\(\d{3}\) \d{3}-\d{4}" placeholder="(123) 456-7890">
                 </div>
                 <button type="submit">Create</button>
+                <div id="edit-user-message" style="margin-top: 10px; font-weight: bold;"></div>
             </form>
         </div>
     </div>
@@ -153,10 +156,33 @@ require_once("../../includes/session.php");
             });
         }
 
-        // Placeholder click event for edit icon
+        // Edit icon click event: open modal with prefilled employee data
         document.querySelectorAll(".edit-icon").forEach(icon => {
-            icon.addEventListener("click", () => {
-                alert("Edit form coming soon...");
+            icon.addEventListener("click", function () {
+                const row = this.closest("tr");
+                const empCode = row.querySelector("td:nth-child(2)").textContent.trim();
+                const firstName = row.querySelector("td:nth-child(3)").textContent.trim();
+                const lastName = row.querySelector("td:nth-child(4)").textContent.trim();
+                const username = row.querySelector("td:nth-child(5)").textContent.trim();
+                const phoneNumber = row.querySelector("td:nth-child(6)").textContent.trim();
+
+                // Populate the modal
+                document.querySelector('#createEmployeeModal h2').textContent = "Edit Employee";
+                document.querySelector('input[name="emp_code"]').value = empCode;
+                document.querySelector('input[name="emp_id"]').value = empCode;
+                document.querySelector('input[name="first_name"]').value = firstName;
+                document.querySelector('input[name="last_name"]').value = lastName;
+                document.querySelector('input[name="username"]').value = username;
+                document.querySelector('input[name="phone_number"]').value = phoneNumber;
+
+                // Change form action to edit endpoint
+                const form = document.getElementById("create-employee-form");
+                form.action = "edit_employee.php";
+                // Set is_edit to true
+                form.querySelector('input[name="is_edit"]').value = "true";
+
+                // Show modal
+                document.getElementById("createEmployeeModal").style.display = "block";
             });
         });
 
