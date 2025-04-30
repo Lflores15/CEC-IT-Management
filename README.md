@@ -68,6 +68,8 @@ MYSQL_PASSWORD=root
 MYSQL_SERVERNAME=db
 ```
 
+Make sure to copy `.env.dev` and rename to `.env` so that all environment variables work with application.
+
 ---
 
 ## 📂 Project Structure
