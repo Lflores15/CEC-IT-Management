@@ -62,10 +62,10 @@ require_once("../../includes/session.php");
     </main>
 
     <!-- Add/Edit Employee Modal -->
-    <div id="createEmployeeModal" class="modal laptop-modal">
+    <div id="createEmployeeModal" class="modal laptop-modal" style="width: 500px;">
         <div class="laptop-modal-content">
             <span id="closeCreateEmployeeModal" class="close">&times;</span>
-            <h2>Add New Employee</h2>
+            <h2>Add/Edit Employee</h2>
             <form id="create-employee-form" method="post" action="create_employee.php">
                 <input type="hidden" name="is_edit" value="false">
                 <div class="form-group">
@@ -89,7 +89,7 @@ require_once("../../includes/session.php");
                     <label for="phone_number">Phone Number:</label>
                     <input type="tel" name="phone_number" required pattern="\(\d{3}\) \d{3}-\d{4}" placeholder="(123) 456-7890">
                 </div>
-                <button type="submit">Create</button>
+                <button type="submit">Save</button>
                 <div id="edit-user-message" style="margin-top: 10px; font-weight: bold;"></div>
             </form>
         </div>
@@ -191,7 +191,16 @@ require_once("../../includes/session.php");
         const modal = document.getElementById("createEmployeeModal");
         const closeBtn = document.getElementById("closeCreateEmployeeModal");
 
-        openBtn.onclick = () => modal.style.display = "block";
+        openBtn.onclick = () => {
+            // Reset the form to creation mode before showing modal
+            const form = document.getElementById("create-employee-form");
+            form.reset();
+            form.action = "create_employee.php";
+            document.querySelector('#createEmployeeModal h2').textContent = "Add Employee";
+            form.querySelector('input[name="is_edit"]').value = "false";
+            form.querySelector('input[name="emp_id"]').value = "";
+            modal.style.display = "block";
+        };
         closeBtn.onclick = () => modal.style.display = "none";
         window.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
 
