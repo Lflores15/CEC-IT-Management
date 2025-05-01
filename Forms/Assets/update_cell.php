@@ -2,44 +2,52 @@
 session_start();
 require_once "../../PHP/config.php";
 
-// Get inputs
 $deviceId = $_POST['device_id'] ?? '';
 $column = $_POST['column'] ?? '';
 $value = $_POST['value'] ?? '';
 
-// Whitelist allowed columns and determine which table to update
-$deviceColumns = ['asset_tag', 'status', 'os', 'assigned_to'];
-$laptopColumns = ['cpu', 'ram', 'internet_policy'];
+$laptopColumns = ['cpu', 'ram', 'internet_policy', 'os'];
+$deviceColumns = ['asset_tag', 'status', 'assigned_to'];
 $employeeColumns = ['login_id', 'emp_first_name', 'emp_last_name', 'employee_id', 'phone_number'];
 
-if (in_array($column, $deviceColumns)) {
-    $table = "Devices";
-    $idField = "device_id";
-    $recordId = $deviceId; // Set recordId for Devices
-
-} elseif (in_array($column, $laptopColumns)) {
+if (in_array($column, $laptopColumns)) {
     $table = "Laptops";
-    $idField = "laptop_id";
+    $recordId = $deviceId;
 
-    $lookup = $conn->prepare("SELECT laptop_id FROM Laptops WHERE device_id = ?");
-    $lookup->bind_param("i", $deviceId);
-    $lookup->execute();
-    $lookup->bind_result($laptopId);
-
-    if (!$lookup->fetch()) {
-        echo "laptop_not_found";
-        $lookup->close();
+    $lookup = $conn->prepare("SELECT device_id FROM Laptops WHERE device_id = ?");
+    if (!$lookup) {
+        echo "prepare_failed: " . $conn->error;
         exit;
     }
-    $lookup->close();
-
-    $recordId = $laptopId;
-
+    $lookup->bind_param("i", $deviceId);
+    $lookup->execute();
+    $lookup->store_result();
+    if ($lookup->num_rows === 0) {
+        $lookup->close();
+        // Insert a new Laptops row with this device_id if not exists
+        $insertLaptop = $conn->prepare("INSERT INTO Laptops (device_id, internet_policy, cpu, ram, os) VALUES (?, '', '', 0, '')");
+        if (!$insertLaptop) {
+            echo "laptop_prepare_failed: " . $conn->error;
+            exit;
+        }
+        $insertLaptop->bind_param("i", $deviceId);
+        if (!$insertLaptop->execute()) {
+            echo "laptop_insert_failed: " . $insertLaptop->error;
+            $insertLaptop->close();
+            exit;
+        }
+        $insertLaptop->close();
+    } else {
+        $lookup->close();
+    }
+} elseif (in_array($column, $deviceColumns)) {
+    $table = "Devices";
+    $idField = "device_id";
+    $recordId = $deviceId;
 } elseif (in_array($column, $employeeColumns)) {
     $table = "Employees";
     $idField = "emp_id";
 
-    // Get emp_id from Devices table (for updates to Employees)
     $empQuery = $conn->prepare("SELECT assigned_to FROM Devices WHERE device_id = ?");
     $empQuery->bind_param("i", $deviceId);
     $empQuery->execute();
@@ -52,14 +60,25 @@ if (in_array($column, $deviceColumns)) {
         exit;
     }
 
-    $recordId = $empId; // Use emp_id instead of device_id
+    $recordId = $empId; 
 } else {
     echo "invalid_column";
     exit;
 }
 
-// Prepare dynamic update
-$sql = "UPDATE $table SET $column = ? WHERE $idField = ?";
+if ($column === 'internet_policy') {
+    $allowedPolicies = ['Default', 'Office', 'Admin', 'Accounting', 'Estimating', 'Executive', 'HR'];
+    if (!in_array($value, $allowedPolicies)) {
+        echo "invalid_internet_policy_value";
+        exit;
+    }
+}
+
+if ($table === "Laptops") {
+    $sql = "UPDATE Laptops SET $column = ? WHERE device_id = ?";
+} else {
+    $sql = "UPDATE $table SET $column = ? WHERE $idField = ?";
+}
 $stmt = $conn->prepare($sql);
 
 if (!$stmt) {
@@ -70,7 +89,7 @@ if (!$stmt) {
 $stmt->bind_param("si", $value, $recordId);
 
 if ($stmt->execute()) {
-    $username = $_SESSION['username'] ?? 'unknown';
+    $username = $_SESSION['login'] ?? $_SESSION['user'] ?? 'unknown';
     // Fetch asset tag for logging if device_id is known
     $logAssetTag = 'unknown';
     if (!empty($deviceId)) {
@@ -86,7 +105,6 @@ if ($stmt->execute()) {
     file_put_contents("../../Logs/device_event_log.txt", $logMessage, FILE_APPEND);
     echo "success";
 
-    // Handle decommission logic
     if ($table === 'Devices' && $column === 'status' && strtolower($value) === 'decommissioned') {
         // Get laptop_id
         $laptopQuery = $conn->prepare("SELECT laptop_id FROM Laptops WHERE device_id = ?");

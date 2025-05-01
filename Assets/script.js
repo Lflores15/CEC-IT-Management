@@ -1,3 +1,184 @@
+// ========== Dynamic Log Event Time Display for Modal ==========
+document.addEventListener("DOMContentLoaded", function () {
+  function updateLogEventTime() {
+    const now = new Date();
+    const options = { month: '2-digit', day: '2-digit', year: 'numeric' };
+    const dateStr = now.toLocaleDateString('en-US', options);
+    const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+    const timeDisplay = document.getElementById("log-event-time");
+    if (timeDisplay) {
+      timeDisplay.textContent = `${dateStr} | ${timeStr}`;
+    }
+  }
+  updateLogEventTime();
+  setInterval(updateLogEventTime, 1000);
+});
+
+// ========== Laptop Log Event Modal and Log Fetching ==========
+function fetchDeviceLog(assetTag) {
+  if (!assetTag || typeof assetTag !== 'string' || assetTag.trim() === '') {
+    console.error("fetchDeviceLog called with invalid asset tag:", assetTag);
+    return;
+  }
+
+  fetch(`/Forms/Assets/fetch_event_log.php?asset_tag=${encodeURIComponent(assetTag.trim())}`)
+    .then(res => res.json())
+    .then(data => {
+      console.log("Fetched log entries:", data);
+      const logHistoryTable = document.getElementById("device-log-history");
+      logHistoryTable.innerHTML = "";
+
+      if (!Array.isArray(data) || data.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 4;
+        cell.textContent = "No logs found for this device.";
+        row.appendChild(cell);
+        logHistoryTable.appendChild(row);
+        return;
+      }
+
+      data.forEach(entry => {
+        const row = document.createElement("tr");
+
+        const dateCell = document.createElement("td");
+        dateCell.textContent = entry.date;
+        row.appendChild(dateCell);
+
+        const timeCell = document.createElement("td");
+        timeCell.textContent = entry.time;
+        row.appendChild(timeCell);
+
+        const typeCell = document.createElement("td");
+        typeCell.textContent = entry.event_type;
+        row.appendChild(typeCell);
+
+        const memoCell = document.createElement("td");
+        memoCell.textContent = entry.memo;
+        row.appendChild(memoCell);
+
+        logHistoryTable.appendChild(row);
+      });
+    })
+    .catch(err => {
+      console.error("Error fetching logs:", err);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const logButtons = document.querySelectorAll("tr.log-event-btn");
+  const modal = document.getElementById("logEventModal");
+  const logDeviceInput = document.getElementById("log-device-id");
+
+  // Modal should open only on double-click, not single-click
+  logButtons.forEach(btn => {
+    btn.addEventListener("dblclick", function (e) {
+      if (document.body.classList.contains("editing-mode")) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      // Use Asset Tag for log filtering
+      const assetTagCell = this.querySelector('td[data-column="asset_tag"]');
+      const assetTag = assetTagCell ? assetTagCell.textContent.trim() : null;
+      logDeviceInput.value = assetTag;
+
+      if (!assetTag) {
+        console.error("Asset tag is missing for selected device.");
+        return;
+      }
+      modal.style.display = "block";
+      fetchDeviceLog(assetTag);
+    });
+  });
+
+  // Optionally handle a manual log modal open (if such a button exists)
+  const manualLogBtn = document.getElementById("open-log-manual-modal");
+  if (manualLogBtn) {
+    manualLogBtn.addEventListener("click", function () {
+      document.getElementById("log-device-id").value = "";
+      document.getElementById("logEventModal").style.display = "block";
+      // No asset tag, so fetch all logs
+      fetch('/Forms/Assets/fetch_event_log.php')
+        .then(res => res.json())
+        .then(data => {
+          const table = document.getElementById("device-log-history");
+          table.innerHTML = "";
+          if (!Array.isArray(data) || data.length === 0) {
+            table.innerHTML = "<tr><td colspan='4'>No logs available.</td></tr>";
+            return;
+          }
+          data.forEach(log => {
+            const row = `<tr>
+              <td>${log.date}</td>
+              <td>${log.time}</td>
+              <td>${log.event_type}</td>
+              <td>${log.memo}</td>
+            </tr>`;
+            table.innerHTML += row;
+          });
+        });
+    });
+  }
+
+  // ADD: Log Event Form Submission Handler (AJAX)
+  const logEventForm = document.getElementById("log-event-form");
+  if (logEventForm) {
+    logEventForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const formData = new FormData(form);
+      // Use value from hidden input for asset tag
+      const assetTag = document.getElementById("log-device-id").value;
+      console.log("Submitting log for asset tag:", assetTag);
+
+      // Ensure assetTag is not null before fetch
+      if (!assetTag) {
+        console.error("No asset tag found, cannot fetch logs.");
+        return;
+      }
+
+      fetch("manual_log.php", {
+        method: "POST",
+        body: formData
+      })
+        .then(() => {
+          // Optionally, reset form fields
+          form.reset();
+          // Fetch updated logs for this asset tag using the hidden input value
+          const refreshedAssetTag = document.getElementById("log-device-id").value;
+          if (refreshedAssetTag) {
+            fetchDeviceLog(refreshedAssetTag);
+          }
+        });
+    });
+  }
+});
+// Per-column filtering for device-table (laptop dashboard)
+document.addEventListener("DOMContentLoaded", function () {
+    // Only run if device-table exists
+    const table = document.getElementById("device-table");
+    if (!table) return;
+    // Listen for input on all filter-inputs
+    document.querySelectorAll(".filter-input").forEach(input => {
+        input.addEventListener("input", () => {
+            const rows = document.querySelectorAll("#device-table tbody tr");
+            rows.forEach(row => {
+                let match = true;
+                document.querySelectorAll(".filter-input").forEach(filter => {
+                    const col = filter.dataset.column;
+                    const val = filter.value.toLowerCase();
+                    const cell = row.querySelector(`td[data-column="${col}"]`);
+                    const text = cell?.textContent.toLowerCase() || '';
+                    if (!text.includes(val)) match = false;
+                });
+                row.style.display = match ? "" : "none";
+            });
+        });
+    });
+});
 document.addEventListener("DOMContentLoaded", function () {
   const runAuditBtn = document.getElementById("runAuditBtn");
   const auditFileInput = document.getElementById("auditCsvFile");
@@ -59,65 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 // ========== Delete Selected Devices and Undo Delete ==========
-document.addEventListener("DOMContentLoaded", function () {
-    const deleteBtn = document.getElementById("delete-selected-btn");
-    // Add deleteInProgress variable to prevent double prompts
-    let deleteInProgress = false;
-    if (deleteBtn) {
-        deleteBtn.addEventListener("click", function () {
-            if (deleteBtn.disabled || deleteInProgress) return;
-            deleteInProgress = true;
-            const checkboxes = document.querySelectorAll(".row-checkbox:checked");
-            if (!checkboxes.length) {
-                alert("Please select devices to delete.");
-                deleteInProgress = false;
-                return;
-            }
-            if (!confirm("Are you sure you want to delete the selected devices?")) {
-                deleteInProgress = false;
-                return;
-            }
-            const ids = Array.from(checkboxes).map(cb => cb.value);
-            deleteBtn.disabled = true;
-            fetch("delete_laptop.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ device_ids: ids })
-            })
-            .then(res => res.text())
-            .then(msg => {
-                alert(msg);
-                location.reload();
-            })
-            .catch(err => {
-                alert("Delete failed: " + err);
-                deleteBtn.disabled = false;
-            })
-            .finally(() => {
-                deleteInProgress = false;
-            });
-        });
-    }
-    // Undo Last Delete button
-    const undoBtn = document.getElementById("undo-delete-btn");
-    if (undoBtn) {
-        let undoInProgress = false;
-        undoBtn.addEventListener("click", () => {
-            if (undoInProgress) return;
-            undoInProgress = true;
-            fetch("undo_delete.php")
-                .then(res => res.text())
-                .then(msg => {
-                    alert(msg);
-                    location.reload();
-                })
-                .catch(err => alert("Undo failed: " + err))
-                .finally(() => {
-                    undoInProgress = false;
-                });
-        });
-    }
-});
+// The delete-selected-btn logic for employees is now handled inline in employee_Dashboard.php
 // ========== Script Initialization & UI Interaction Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
     console.log("JavaScript Loaded ✅");
@@ -236,14 +359,13 @@ tables.forEach((table) => {
     // Setup logic for Edit User modal (opening, closing, form submission)
     // Modal Functionality
     const modal = document.getElementById("editModal");
-    const closeModal = document.querySelector(".close");
+    const closeModal = document.getElementById("closeEditModal");
     const editForm = document.getElementById("editUserForm");
 
     document.querySelectorAll(".edit-btn").forEach(button => {
         button.addEventListener("click", function () {
             document.getElementById("edit-user-id").value = this.dataset.id;
             document.getElementById("edit-username").value = this.dataset.username;
-            document.getElementById("edit-email").value = this.dataset.email;
             document.getElementById("edit-role").value = this.dataset.role;
             modal.style.display = "block";
         });
@@ -266,9 +388,14 @@ tables.forEach((table) => {
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
+                const messageElement = document.getElementById("edit-user-message");
+                if (messageElement) {
+                    messageElement.textContent = data.message;
+                    messageElement.style.color = data.success ? "green" : "red";
+                }
+
                 if (data.success) {
-                    location.reload();
+                    setTimeout(() => location.reload(), 1000);
                 }
             });
         });
@@ -298,43 +425,6 @@ document.addEventListener("DOMContentLoaded", function () {
         };
     }
 
-// Edit Modal logic
-const editModal = document.getElementById("editModal");
-const closeEditModal = document.getElementById("closeEditModal");
-
-if (editModal && closeEditModal) {
-    // Setup dynamic population of Edit User modal fields
-    // Example: open modal dynamically with user data
-    document.querySelectorAll(".edit-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            const userId = this.dataset.id;
-            const username = this.dataset.username;
-            const email = this.dataset.email;
-            const role = this.dataset.role;
-
-            // Populate form fields
-            document.getElementById("edit-user-id").value = userId;
-            document.getElementById("edit-username").value = username;
-            document.getElementById("edit-email").value = email;
-            document.getElementById("edit-role").value = role;
-
-            // Show modal
-            editModal.style.display = "block";
-        });
-    });
-
-    // Close on "×" button
-    closeEditModal.onclick = () => {
-        editModal.style.display = "none";
-    };
-
-    // Close on outside click
-    window.addEventListener("click", function (event) {
-        if (event.target === editModal) {
-            editModal.style.display = "none";
-        }
-    });
-}
 
     // Setup logic for Delete User modal (opening, closing)
     // Delete Modal logic
@@ -348,8 +438,12 @@ if (editModal && closeEditModal) {
                 const userId = this.dataset.id;
                 const username = this.dataset.username;
 
+                const deleteUserForm = document.getElementById('deleteUserForm');
                 document.getElementById('delete-user-id').value = userId;
                 document.getElementById('delete-username').textContent = username;
+
+                // Update the form action dynamically to include the user ID
+                deleteUserForm.action = `delete_user.php?id=${userId}`;
 
                 deleteModal.style.display = "block";
             });
@@ -414,33 +508,36 @@ if (editModal && closeEditModal) {
             
         });
         
-// Add sort functionality to each column header in the table
-const table = document.getElementById("device-table");
-if (table) {
-  const headers = table.querySelectorAll("th.sortable");
-  let sortDirection = 1;
-  let sortColumnIndex = null;
+// Add sort functionality to each column header in the employee-table
+document.addEventListener("DOMContentLoaded", function () {
+  const employeeTable = document.getElementById("employee-table");
+  if (employeeTable) {
+    const headers = employeeTable.querySelectorAll("th.sortable");
+    let sortDirection = 1;
+    let sortColumnIndex = null;
 
-  headers.forEach((header, index) => {
-    header.addEventListener("click", () => {
-      if (sortColumnIndex === index) sortDirection *= -1;
-      else {
-        sortColumnIndex = index;
-        sortDirection = 1;
-      }
+    headers.forEach((header, index) => {
+      header.addEventListener("click", () => {
+        if (sortColumnIndex === index) sortDirection *= -1;
+        else {
+          sortColumnIndex = index;
+          sortDirection = 1;
+        }
 
-      const rows = Array.from(table.querySelectorAll("tbody > tr"));
-      rows.sort((a, b) => {
-        const cellA = a.children[index].textContent.trim().toLowerCase();
-        const cellB = b.children[index].textContent.trim().toLowerCase();
-        return cellA.localeCompare(cellB) * sortDirection;
+        const rows = Array.from(employeeTable.querySelector("tbody > tr"));
+        // +1 offset: skip the first checkbox column
+        rows.sort((a, b) => {
+          const cellA = a.children[index + 1].textContent.trim().toLowerCase();
+          const cellB = b.children[index + 1].textContent.trim().toLowerCase();
+          return cellA.localeCompare(cellB) * sortDirection;
+        });
+
+        const tbody = employeeTable.querySelector("tbody");
+        rows.forEach(row => tbody.appendChild(row));
       });
-
-      const tbody = table.querySelector("tbody");
-      rows.forEach(row => tbody.appendChild(row));
     });
-  });
-}
+  }
+});
 
 // Toggle modal for selecting visible table columns
 const editBtn = document.getElementById("edit-columns-btn");
@@ -482,6 +579,30 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
     }
+
+    // Column selector buttons toggle logic with background color update
+    document.querySelectorAll('.column-toggle-btn').forEach(button => {
+      const input = button.nextElementSibling;
+
+      // Set initial color based on 'active' class
+      if (button.classList.contains('active')) {
+        button.style.backgroundColor = '#28a745'; // green
+      } else {
+        button.style.backgroundColor = '#dc3545'; // red
+      }
+
+      button.addEventListener('click', () => {
+        const isActive = button.classList.toggle('active');
+        input.disabled = !isActive;
+
+        // Update color based on active state
+        if (isActive) {
+          button.style.backgroundColor = '#28a745'; // green
+        } else {
+          button.style.backgroundColor = '#dc3545'; // red
+        }
+      });
+    });
 });
 
 
@@ -493,6 +614,65 @@ document.addEventListener("DOMContentLoaded", function () {
     const deleteBtn = document.getElementById("delete-selected-btn");
     const undoBtn = document.getElementById("undo-delete-btn");
     let editing = false;
+
+    // Only enable device deletion logic if on the laptop dashboard (device management page)
+    const deviceTable = document.querySelector("#device-table");
+    // Robustly check for a table header labeled "Asset Tag"
+    const isDevicePage = deviceTable && Array.from(deviceTable.querySelectorAll('th')).some(th => th.textContent.trim() === "Asset Tag");
+
+    if (isDevicePage && deleteBtn) {
+      deleteBtn.addEventListener("click", () => {
+        const selected = Array.from(document.querySelectorAll(".row-checkbox:checked")).map(cb => cb.value);
+        if (selected.length === 0) {
+          alert("Please select device(s) to delete.");
+          return;
+        }
+
+        if (!confirm(`Are you sure you want to delete ${selected.length} device(s)?`)) return;
+
+        fetch("/Forms/Assets/delete_laptop.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ device_ids: selected })
+        })
+        .then(res => res.text())
+        .then(response => {
+          if (response.trim().toLowerCase().includes("successfully deleted selected laptops")) {
+            alert("Devices deleted successfully.");
+            location.reload();
+          } else {
+            alert("Error deleting devices: " + response);
+          }
+        })
+        .catch(err => {
+          alert("Request failed: " + err);
+        });
+      });
+    }
+
+    // Undo delete logic for laptops
+    if (undoBtn) {
+      undoBtn.addEventListener("click", function () {
+        // Optionally, confirm undo
+        if (!confirm("Are you sure you want to undo the last delete?")) return;
+        fetch("/Forms/Assets/undo_delete.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        })
+        .then(res => res.text())
+        .then(response => {
+          if (response.trim().toLowerCase().includes("undo successful")) {
+            alert("Undo successful. Devices have been restored.");
+            location.reload();
+          } else {
+            alert("Undo failed: " + response);
+          }
+        })
+        .catch(err => {
+          alert("Undo request failed: " + err);
+        });
+      });
+    }
 
     // Toggle editing mode
     editBtn.addEventListener("click", () => {
@@ -528,28 +708,47 @@ document.addEventListener("DOMContentLoaded", function () {
     if (cancelEditBtn) {
         cancelEditBtn.addEventListener("click", () => {
             if (originalTableHTML) {
-                document.querySelector(".device-table tbody").innerHTML = originalTableHTML;
+                const tbody = document.querySelector(".device-table tbody");
+                tbody.innerHTML = originalTableHTML;
+
+                // Clear old double-click handlers by replacing each row with its clone
+                const refreshedRows = document.querySelectorAll(".device-table .clickable-row");
+                refreshedRows.forEach(row => {
+                  const clone = row.cloneNode(true);
+                  row.parentNode.replaceChild(clone, row);
+                });
+                // Rebind double-click modal logic for clickable-row
+                document.querySelectorAll(".device-table .clickable-row").forEach(row => {
+                  row.addEventListener("dblclick", function (e) {
+                    if (document.body.classList.contains("editing-mode")) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      return;
+                    }
+
+                    const assetTagCell = this.querySelector('td[data-column="asset_tag"]');
+                    const assetTag = assetTagCell ? assetTagCell.textContent.trim() : null;
+                    const modal = document.getElementById("logEventModal");
+                    const logDeviceInput = document.getElementById("log-device-id");
+
+                    if (!assetTag) {
+                      console.error("Asset tag is missing for selected device.");
+                      return;
+                    }
+
+                    logDeviceInput.value = assetTag;
+                    modal.style.display = "block";
+                    fetchDeviceLog(assetTag);
+                  });
+                });
             }
+
             editing = false;
             document.body.classList.remove("editing-mode");
             editBtn.textContent = "Edit Table";
             cancelEditBtn.style.display = "none";
             if (deleteBtn) deleteBtn.style.display = "none";
             if (undoBtn) undoBtn.style.display = "none";
-
-            // Re-enable double click handlers on reverted rows
-            document.querySelectorAll(".clickable-row").forEach(row => {
-                row.addEventListener("dblclick", function (e) {
-                    const isEditing = document.body.classList.contains("editing-mode");
-                    const href = this.getAttribute("data-href");
-                    if (!isEditing && href) {
-                        window.location.href = href;
-                    } else {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-                });
-            });
 
             // Rebind inline editing after cancel
             document.querySelectorAll(".device-table td").forEach(cell => {
@@ -620,18 +819,29 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Initial .clickable-row logic: open modal only on double-click
     document.querySelectorAll(".clickable-row").forEach(row => {
-        row.addEventListener("dblclick", function (e) {
-            const isEditing = document.body.classList.contains("editing-mode");
-            const href = this.getAttribute("data-href");
+      row.addEventListener("dblclick", function (e) {
+        if (document.body.classList.contains("editing-mode")) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
 
-            if (!isEditing && href) {
-                window.location.href = href;
-            } else {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        });
+        const assetTagCell = this.querySelector('td[data-column="asset_tag"]');
+        const assetTag = assetTagCell ? assetTagCell.textContent.trim() : null;
+        const modal = document.getElementById("logEventModal");
+        const logDeviceInput = document.getElementById("log-device-id");
+
+        if (!assetTag) {
+          console.error("Asset tag is missing for selected device.");
+          return;
+        }
+
+        logDeviceInput.value = assetTag;
+        modal.style.display = "block";
+        fetchDeviceLog(assetTag);
+      });
     });
 });
 
@@ -687,8 +897,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.addEventListener("DOMContentLoaded", function () {
     const selectOptions = {
-        status: ['Active', 'Pending Return', 'Shelf', 'Lost', 'Decommissioned'],
-        internet_policy: ['Admin', 'Default', 'Office'],
+        status: ['Active', 'Pending Return', 'Shelf-CC', 'Shelf-MD', 'Shelf-HS', 'Lost', 'Decommissioned'],
+        internet_policy: [
+            'Default',
+            'Office',
+            'Admin',
+            'Accounting',
+            'Estimating',
+            'Executive',
+            'HR'
+        ],
         assigned_to: window.employeeOptions || []  // will be injected from PHP
     };
 
@@ -711,14 +929,14 @@ document.addEventListener("DOMContentLoaded", function () {
             if (selectOptions[column?.toLowerCase()]) {
                 const select = document.createElement("select");
                 select.className = "inline-edit-select";
-            
+
                 if (column === "assigned_to") {
                     selectOptions[column.toLowerCase()].forEach(opt => {
                         const option = document.createElement("option");
                         option.value = opt.id;
                         option.textContent = opt.name;
                         const currentId = cell.getAttribute('data-emp-id');
-                        if (opt.name === currentText) option.selected = true;
+                        if ((opt.id === "" && !currentId) || opt.id == currentId) option.selected = true;
                         select.appendChild(option);
                     });
                 } else {
@@ -730,7 +948,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         select.appendChild(option);
                     });
                 }
-            
+
                 select.addEventListener("blur", () => {
                     const newValue = select.value;
                     // 2. Store pending edit instead of sending update
@@ -738,11 +956,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     pendingEdits[deviceId][column] = newValue;
                     cell.textContent = newValue;
                 });
-            
+
                 this.textContent = "";
                 this.appendChild(select);
                 select.focus();
-            
+
             } else {
                 const input = document.createElement("input");
                 input.type = "text";
@@ -853,7 +1071,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 option.value = opt.id;
                                 option.textContent = opt.name;
                                 const currentId = cell.getAttribute('data-emp-id');
-                                if (opt.name === currentText) option.selected = true;
+                                if ((opt.id === "" && !currentId) || opt.id == currentId) option.selected = true;
                                 select.appendChild(option);
                             });
                         } else {
@@ -936,15 +1154,20 @@ function bindRowEvents() {
             e.preventDefault();
             e.stopPropagation();
         });
-
         row.addEventListener("dblclick", function (e) {
-            const isEditing = document.body.classList.contains("editing-mode");
-            const href = this.getAttribute("data-href");
-            if (!isEditing && href) {
-                window.location.href = href;
-            } else {
+            // Retrieve asset tag from the row's asset_tag cell
+            const assetTagCell = this.querySelector('td[data-column="asset_tag"]');
+            const assetTag = assetTagCell ? assetTagCell.textContent.trim() : null;
+            if (assetTag) {
                 e.preventDefault();
                 e.stopPropagation();
+                const modal = document.getElementById("logEventModal");
+                const formDeviceId = document.getElementById("log-device-id");
+                if (modal && formDeviceId) {
+                    formDeviceId.value = assetTag;
+                    modal.style.display = "block";
+                    fetchDeviceLog(assetTag);
+                }
             }
         });
     });
@@ -971,7 +1194,7 @@ function bindRowEvents() {
                         option.value = opt.id;
                         option.textContent = opt.name;
                         const currentId = cell.getAttribute('data-emp-id');
-                        if (opt.name === currentText) option.selected = true;
+                        if ((opt.id === "" && !currentId) || opt.id == currentId) option.selected = true;
                         select.appendChild(option);
                     });
                 } else {
@@ -1015,3 +1238,69 @@ function bindRowEvents() {
         });
     });
 }
+
+
+// Import Laptop CSV Form Submission (AJAX)
+document.addEventListener("DOMContentLoaded", () => {
+  const importForm = document.getElementById("importLaptopForm");
+  const importResult = document.getElementById("import-result-message");
+
+  if (importForm) {
+    importForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(importForm);
+
+      fetch("import_laptops.php", {
+        method: "POST",
+        body: formData
+      })
+        .then(res => res.json())
+        .then(data => {
+          importResult.style.display = "block";
+          importResult.innerHTML = data.message;
+          importResult.style.color = data.status === "success" ? "green" : "red";
+        })
+        .catch(err => {
+          importResult.style.display = "block";
+          importResult.textContent = "An error occurred while importing.";
+          importResult.style.color = "red";
+        });
+    });
+  }
+});
+
+// ========== Export CSV Button Handler ==========
+document.addEventListener("DOMContentLoaded", function () {
+    const exportCsvBtn = document.getElementById("export-csv-btn");
+    if (exportCsvBtn) {
+        exportCsvBtn.addEventListener("click", function () {
+            window.location.href = "export_laptops.php";
+        });
+    }
+});
+
+// ========== Fetch Employee Details for Assign To Dropdown ==========
+function fetchEmployeeDetails(emp_code) {
+  if (!emp_code) return;
+
+  fetch(`/Forms/Employees/get_employee_info.php?emp_code=${encodeURIComponent(emp_code)}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('first_name').value = data.first_name || '';
+      document.getElementById('last_name').value = data.last_name || '';
+      document.getElementById('username').value = data.username || '';
+      document.getElementById('phone_number').value = data.phone_number || '';
+    })
+    .catch(err => console.error("Failed to fetch employee details:", err));
+}
+
+// ========== Flexible Phone Input Pattern for Employee Creation ==========
+document.addEventListener("DOMContentLoaded", function () {
+  // Find the employee creation phone input (by name attribute)
+  const phoneInputs = document.querySelectorAll('input[type="tel"][name="phone_number"]');
+  phoneInputs.forEach(input => {
+    // Update pattern and placeholder for flexible phone number formats
+    input.setAttribute('pattern', '\\(?\\d{3}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}');
+    input.setAttribute('placeholder', '(123) 456-7890');
+  });
+});

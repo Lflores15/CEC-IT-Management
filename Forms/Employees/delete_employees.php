@@ -1,20 +1,36 @@
-
 <?php
+session_start();
 require_once("../../PHP/config.php");
 
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["employee_ids"])) {
-    file_put_contents("debug.log", print_r($_POST, true), FILE_APPEND);
+if (!isset($_SESSION['username']) && isset($_SESSION['user_id'])) {
+    // Attempt to fetch username from database using user_id
+    $user_result = $conn->query("SELECT login FROM Users WHERE user_id = " . intval($_SESSION['user_id']));
+    if ($user_result && $user_result->num_rows > 0) {
+        $user_row = $user_result->fetch_assoc();
+        $_SESSION['username'] = $user_row['login'];
+    }
+}
+$user = $_SESSION['username'] ?? 'unknown';
 
-   
-    $ids = $_POST["employee_ids"];
-    if (is_array($ids)) {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $data = json_decode(file_get_contents('php://input'), true);
+    if (isset($data["employee_ids"]) && is_array($data["employee_ids"])) {
+        $ids = $data["employee_ids"];
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $types = str_repeat('s', count($ids));  // using 's' for string since employee_id is varchar
-        $stmt = $conn->prepare("DELETE FROM Employees WHERE employee_id IN ($placeholders)");
+        $types = str_repeat('s', count($ids));
+        $stmt = $conn->prepare("DELETE FROM Employees WHERE emp_code IN ($placeholders)");
 
         if ($stmt) {
             $stmt->bind_param($types, ...$ids);
             if ($stmt->execute()) {
+                // Log deletion event(s)
+                require_once "../../includes/log_event.php";
+                $actor = $_SESSION['login'] ?? $_SESSION['username'] ?? $_SESSION['user'] ?? 'unknown';
+                $timestamp = date("Y-m-d H:i:s");
+                foreach ($ids as $empCode) {
+                    $message = "Employee '$empCode' was deleted";
+                    logUserEvent("DELETE_EMPLOYEE", $message, $actor);
+                }
                 echo "success";
             } else {
                 http_response_code(500);

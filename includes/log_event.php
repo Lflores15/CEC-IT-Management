@@ -1,29 +1,22 @@
 <?php
-/**
- * Log helpers: user events and device events.
- * Auto-creates the logs directory if missing.
- */
 
-/**
- * Log a user-related event.
- *
- * @param string $eventType  A short code for the event (e.g. "LOGIN_SUCCESS")
- * @param string $message    Detailed message about what happened
- * @param string $username   Who triggered the event (defaults to SYSTEM)
- */
-function logUserEvent($eventType, $message, $username = 'SYSTEM') {
-    logToFile(__DIR__ . '/../logs/user_event_log.txt', $eventType, $message, $username);
+function logUserEvent($eventType, $message, $username = null) {
+    if ($username === null) {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $username = $_SESSION['login'] ?? $_SESSION['user'] ?? 'unknown';
+    }
+    $logPath = getenv('USER_LOG_PATH') ?: __DIR__ . '/../logs/user_event_log.txt';
+    logToFile($logPath, $eventType, $message, $username);
 }
 
-/**
- * Log a device-related event.
- *
- * @param string $eventType
- * @param string $message
- * @param string $username
- */
-function logDeviceEvent($eventType, $message, $username = 'SYSTEM') {
-    logToFile(__DIR__ . '/../logs/device_event_log.txt', $eventType, $message, $username);
+function logDeviceEvent($eventType, $message, $username = null) {
+    if ($username === null) {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $username = $_SESSION['login'] ?? $_SESSION['user'] ?? 'unknown';
+    }
+
+    $logPath = getenv('DEVICE_LOG_PATH') ?: __DIR__ . '/../logs/device_event_log.txt';
+    logToFile($logPath, $eventType, $message, $username);
 }
 
 /**

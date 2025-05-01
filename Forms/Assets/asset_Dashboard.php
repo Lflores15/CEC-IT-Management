@@ -45,7 +45,7 @@ $query = "
            t.imei AS tablet_imei
     FROM Devices d
     LEFT JOIN Laptops l ON d.device_id = l.device_id
-    LEFT JOIN Decommissioned_Laptops dl ON l.id = dl.laptop_id
+    LEFT JOIN Decommissioned_Laptops dl ON l.laptop_id = dl.laptop_id
     LEFT JOIN iPhones iph ON d.device_id = iph.device_id
     LEFT JOIN Tablets t ON d.device_id = t.device_id
     ORDER BY d.device_name
