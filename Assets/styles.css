@@ -3,7 +3,7 @@
 ========================================= */
 .device-table-wrapper {
     overflow-y: auto;
-    height: calc(105vh - 280px); /* Adjust 300px based on what’s above the table */
+    height: calc(105vh - 280px); 
     border: 1px solid #ccc;
     background: white;
 }
@@ -17,7 +17,6 @@
 
 }
 
-/* Sticky filter (second) header row for device-table */
 .device-table thead.filter-header th {
     z-index: 1;
 }
@@ -53,7 +52,7 @@
 }
 
 #deviceLogTable thead th {
-    background-color: #28a745; /* match device log table header */
+    background-color: #28a745; 
 }
 .log-scroll-container {
     max-width: 100%;
@@ -87,7 +86,9 @@ h1 {
 
 h2 {
     text-align: center;
+    
 }
+
 
 h3 {
     font-size: 1.2rem;
@@ -100,6 +101,10 @@ h4{
     text-align: center;
     font-size: 2em;
     margin-top: 10px;
+}
+
+h5 {
+    text-align:center;
 }
 
 /* =========================================
@@ -191,7 +196,6 @@ h4{
     background-color: #f1f1f1;
 }
 
-/* Toggle visibility */
 .profile-dropdown.active .profile-dropdown-content {
     display: block;
 }
@@ -247,7 +251,6 @@ h4{
     display: block;
 }
 
-/* Dropdown - Centered and Block in Sidebar */
 .dropdown-btn {
     background: none;
     color: #ffffff;
@@ -267,7 +270,6 @@ h4{
     box-sizing: border-box;
 }
 
-/* Only the Assets dropdown (for Laptops) should be wider */
 .laptops-dropdown {
     width: 230px;
     box-sizing: border-box;
@@ -277,7 +279,7 @@ h4{
 .dropdown.open .dropdown-btn {
     background-color: #007bff;
     color: white;
-    width: 230px; /* match .laptops-dropdown width */
+    width: 230px; 
     box-sizing: border-box;
 }
 
@@ -329,7 +331,6 @@ h4{
     display: none;
 }
 
-/* Show checkboxes when body has .editing-mode */
 .editing-mode .delete-checkbox {
     display: inline-block;
     margin-right: 6px;
@@ -414,7 +415,7 @@ h4{
 .dashboard-cards {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: center;
     gap: 15px;
     margin-bottom: 20px;
     margin-top: 50px;
@@ -424,9 +425,9 @@ h4{
     background: white;
     padding: 2.5vw;
     border-radius: 10px;
-    flex: 1 1 200px;
-    min-width: 180px;
-    max-width: 200px;
+    flex: 1 1 220px;
+    min-width: 200px;
+    max-width: 240px;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
     color: white;
@@ -446,7 +447,6 @@ h4{
 .card.pending         { background-color: #ffbb00; }
 .card.shelf           { background-color: #17a2b8; }
 
-/* Card Text */
 .card h3 {
     font-size: 1rem;
     margin-bottom: 10px;
@@ -493,7 +493,6 @@ h4{
     padding-top: 0;
 }
 
-/* Highlight rows for missing employees in audit table */
 .missing-employee {
     background-color: #ffcccc !important;
 }
@@ -529,7 +528,6 @@ th.sortable.desc::after {
     background-color: #ffffff;
 }
 
-/* Override hover to match your theme */
 .device-table tbody tr:hover {
     background-color: #eaf4ff;
     transition: background-color 0.2s;
@@ -593,9 +591,8 @@ th.sortable.desc::after {
 /* =========================================
    Clickable Row Behavior in Edit Mode
 ========================================= */
-/* Block row clicks in edit mode but allow inputs inside */
 .editing-mode .clickable-row {
-    pointer-events: auto;      /* Let child elements get pointer events */
+    pointer-events: auto;      
     opacity: 0.8;
 }
 
@@ -628,15 +625,10 @@ th.sortable.desc::after {
 .editing-mode .edit-only {
     display: table-cell;
 }
+
 /* =========================================
-   Column Selector Modal Styles
+   User Table Styles
 ========================================= */
-
-
-
-
-
-
 
 .user-table {
     width: 100%;
@@ -1004,7 +996,7 @@ th.sortable.desc::after {
 }
 
 
-//* =========================================
+/* =========================================
    Login/Register Modal Styles
 ========================================= */
 .login-modal,
@@ -1022,7 +1014,6 @@ th.sortable.desc::after {
     display: block; /* 🚨 NOT flex! */
 }
 
-/* Form inside modals */
 .login-form,
 .register-form {
     width: 100%;
@@ -1080,7 +1071,7 @@ th.sortable.desc::after {
 
 .registration-success {
     text-align: center;
-    color: #28a745; /* green success color */
+    color: #28a745; 
     font-weight: bold;
     font-size: 16px;
     margin-bottom: 20px;
@@ -1088,7 +1079,6 @@ th.sortable.desc::after {
 
 
 
-/* Error message */
 .login-error {
     color: red;
     margin-top: 10px;
@@ -1096,7 +1086,6 @@ th.sortable.desc::after {
     font-weight: bold;
 }
 
-/* Extra buttons below the form */
 .form-buttons {
     display: flex;
     flex-direction: column;
@@ -1104,7 +1093,6 @@ th.sortable.desc::after {
     margin-top: 0px;
 }
 
-/* Back to Login / Register Link */
 .register-link {
     text-align: center;
     margin-top: 0px;
@@ -1194,96 +1182,12 @@ th.sortable.desc::after {
 }
 
 
-/* =========================================
-   Responsive Fixes
-========================================= */
-@media screen and (max-width: 768px) {
-    .sidebar {
-        position: relative;
-        width: 100%;
-        height: auto;
-        flex-direction: row;
-        justify-content: space-around;
-        padding: 10px;
-    }
 
-    .asset-content,
-    .device-details-container {
-        margin-left: 0;
-        padding: 15px;
-    }
-
-    .dashboard-cards {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .card {
-        width: 90%;
-    }
-
-    .device-details-grid {
-        grid-template-columns: 1fr;
-    }
-}
-@media screen and (max-width: 480px) {
-    .top-navbar input {
-        width: 100%;
-    }
-
-    .sidebar a {
-        padding: 5px;
-    }
-
-    .sidebar {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .dashboard-cards {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .card {
-        width: 90%;
-    }
-}
-@media screen and (max-width: 320px) {
-    .top-navbar input {
-        width: 100%;
-    }
-
-    .sidebar a {
-        padding: 5px;
-    }
-
-    .sidebar {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .dashboard-cards {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .card {
-        width: 90%;
-    }
-    .login-form {
-        padding: 20px 15px; /* optional tweak */
-        max-width: 95%;
-    }
-}
-/* Modal Header Style */
 .modal-header {
-    display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* Import Modal Styles */
 #importLaptopModal .modal-header h2 {
     margin: 0;
 }
@@ -1336,7 +1240,9 @@ th.sortable.desc::after {
     margin-top: 20px;
 }
 
-/* Import CSV Modal Improvements */
+/*========================================
+    Import CSV Modal Styles
+=========================================*/
 #importLaptopModal .modal-content {
     max-width: 650px;
     width: 90%;
@@ -1394,7 +1300,6 @@ th.sortable.desc::after {
     background-color: #0056b3;
 }
 
-/* Refined Import Modal Styling */
 #importLaptopModal .modal-content {
     max-width: 600px;
     width: 100%;
@@ -1426,7 +1331,6 @@ th.sortable.desc::after {
 #importLaptopModal .modal-content button:hover {
     background-color: #0056b3;
 }
-/* Import CSV Modal Styling */
 #importLaptopModal .modal-content {
     max-width: 600px;
     width: 100%;
@@ -1529,6 +1433,10 @@ th.sortable.desc::after {
     color: #333;
 }
 
+/*========================================
+    Laptop Modal Styles    
+========================================= */
+
 .laptop-modal input[type="file"] {
     width: 100%;
     padding: 12px;
@@ -1560,12 +1468,14 @@ th.sortable.desc::after {
     min-width: 300px;
 }
 
-/* Modal Header Style for Import Laptop Modal */
 .laptop-modal-header {
     justify-content: space-between;
     align-items: center;
 }
-/* Modal styling for create-device-modal */
+
+/*========================================
+    Create Device Modal Styles
+========================================= */
 #create-device-modal.modal {
     display: none;
     position: fixed;
@@ -1589,6 +1499,10 @@ th.sortable.desc::after {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
+
+/*========================================
+   Column Selector Modal Styles
+========================================= */
 /* Column Selector Modal Styles */
 #column-selector {
     display: none;
@@ -1746,6 +1660,10 @@ th.sortable.desc::after {
     padding-bottom: 10px;
 }
 
+/* =========================================
+   Log Event Modal Styles
+========================================= */
+
 #logEventModal .laptop-modal-content {
     width: 1000px;
     height: 775px;
@@ -1861,6 +1779,7 @@ th.sortable.desc::after {
     color: #333;
     margin: 0 0 15px 0;
 }
+
 /* =========================================
    Dashboard Two-Column Layout
 ========================================= */
@@ -1913,11 +1832,14 @@ th.sortable.desc::after {
     background-color: #f1f1f1;
 }
 .dashboard-graph {
-    padding: 2vw;
+    padding: 1vw;
     border-radius: 10px;
-    width: 100%;
-    max-width: 100%;
-    height: auto;
+    width: 500px;
+    height: 400px;
+    min-width: 500px;
+    min-height: 400px;
+    max-width: 500px;
+    max-height: 400px;
     box-sizing: border-box;
 }
 
@@ -1974,4 +1896,87 @@ th.sortable.desc::after {
     background-color: #28a745; /* Green when active */
     color: white;
     border: 2px solid #28a745;
+}
+
+/* =========================================
+   Responsive Fixes
+========================================= */
+@media screen and (max-width: 768px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 10px;
+    }
+
+    .asset-content,
+    .device-details-container {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    .dashboard-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        width: 90%;
+    }
+
+    .device-details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+@media screen and (max-width: 480px) {
+    .top-navbar input {
+        width: 100%;
+    }
+
+    .sidebar a {
+        padding: 5px;
+    }
+
+    .sidebar {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .dashboard-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        width: 90%;
+    }
+}
+@media screen and (max-width: 320px) {
+    .top-navbar input {
+        width: 100%;
+    }
+
+    .sidebar a {
+        padding: 5px;
+    }
+
+    .sidebar {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .dashboard-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        width: 90%;
+    }
+    .login-form {
+        padding: 20px 15px; /* optional tweak */
+        max-width: 95%;
+    }
 }

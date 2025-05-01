@@ -65,12 +65,12 @@ function fetchDeviceLog(assetTag) {
     });
 }
 
+//========= Log Event Modal Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
   const logButtons = document.querySelectorAll("tr.log-event-btn");
   const modal = document.getElementById("logEventModal");
   const logDeviceInput = document.getElementById("log-device-id");
 
-  // Modal should open only on double-click, not single-click
   logButtons.forEach(btn => {
     btn.addEventListener("dblclick", function (e) {
       if (document.body.classList.contains("editing-mode")) {
@@ -93,13 +93,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Optionally handle a manual log modal open (if such a button exists)
   const manualLogBtn = document.getElementById("open-log-manual-modal");
   if (manualLogBtn) {
     manualLogBtn.addEventListener("click", function () {
       document.getElementById("log-device-id").value = "";
       document.getElementById("logEventModal").style.display = "block";
-      // No asset tag, so fetch all logs
       fetch('/Forms/Assets/fetch_event_log.php')
         .then(res => res.json())
         .then(data => {
@@ -122,7 +120,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // ADD: Log Event Form Submission Handler (AJAX)
   const logEventForm = document.getElementById("log-event-form");
   if (logEventForm) {
     logEventForm.addEventListener("submit", function (e) {
@@ -130,11 +127,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const form = e.target;
       const formData = new FormData(form);
-      // Use value from hidden input for asset tag
       const assetTag = document.getElementById("log-device-id").value;
       console.log("Submitting log for asset tag:", assetTag);
 
-      // Ensure assetTag is not null before fetch
       if (!assetTag) {
         console.error("No asset tag found, cannot fetch logs.");
         return;
@@ -145,9 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
         body: formData
       })
         .then(() => {
-          // Optionally, reset form fields
           form.reset();
-          // Fetch updated logs for this asset tag using the hidden input value
           const refreshedAssetTag = document.getElementById("log-device-id").value;
           if (refreshedAssetTag) {
             fetchDeviceLog(refreshedAssetTag);
@@ -156,12 +149,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
-// Per-column filtering for device-table (laptop dashboard)
 document.addEventListener("DOMContentLoaded", function () {
-    // Only run if device-table exists
     const table = document.getElementById("device-table");
     if (!table) return;
-    // Listen for input on all filter-inputs
     document.querySelectorAll(".filter-input").forEach(input => {
         input.addEventListener("input", () => {
             const rows = document.querySelectorAll("#device-table tbody tr");
@@ -179,6 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+//========= Audit Laptop CSV Upload Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
   const runAuditBtn = document.getElementById("runAuditBtn");
   const auditFileInput = document.getElementById("auditCsvFile");
@@ -195,10 +186,10 @@ document.addEventListener("DOMContentLoaded", function () {
         method: "POST",
         body: formData
       })
-      .then(res => res.text()) // read as raw text first
+      .then(res => res.text()) 
       .then(text => {
         try {
-          const data = JSON.parse(text); // parse JSON safely
+          const data = JSON.parse(text);
           if (data.success) {
             alert("Audit complete. Refreshing...");
             location.reload();
@@ -216,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
-// Audit Laptop Modal logic
+//========= Audit Laptop Modal Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
   const auditModal = document.getElementById("auditLaptopModal");
   const openAuditBtn = document.getElementById("audit-laptop-btn");
@@ -239,14 +230,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+
 // ========== Delete Selected Devices and Undo Delete ==========
 // The delete-selected-btn logic for employees is now handled inline in employee_Dashboard.php
 // ========== Script Initialization & UI Interaction Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
     console.log("JavaScript Loaded ✅");
-
-    // Handle profile dropdown menu toggle on click
-    // Profile Dropdown
+    
     const profileBtn = document.querySelector(".profile-btn");
     const profileDropdown = document.querySelector(".profile-dropdown");
 
@@ -257,15 +247,13 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Close profile dropdown if clicking outside
     document.addEventListener("click", function (event) {
         if (!profileDropdown.contains(event.target)) {
             profileDropdown.classList.remove("active");
         }
     });
 
-    // Handle expandable sidebar dropdown sections
-    // Sidebar Dropdowns
+    
     const dropdownBtns = document.querySelectorAll(".dropdown-btn");
     
     dropdownBtns.forEach((btn) => {
@@ -273,10 +261,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const dropdownContainer = this.parentElement;
             const isOpen = dropdownContainer.classList.toggle("open");
 
-            // Toggle 'open' class on the button itself
             this.classList.toggle("open", isOpen);
 
-            // Close other dropdowns when one is opened
             dropdownBtns.forEach(otherBtn => {
                 if (otherBtn !== btn) {
                     otherBtn.classList.remove("open");
@@ -286,8 +272,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Enable column sorting on tables
-    // Table Sorting
+    
     const tables = document.querySelectorAll("table");
 
 tables.forEach((table) => {
@@ -295,7 +280,7 @@ tables.forEach((table) => {
 
     headers.forEach((header, index) => {
         header.addEventListener("click", function () {
-            const actualIndex = index + 1; // Offset for checkbox column
+            const actualIndex = index + 1; 
             let tbody = table.querySelector("tbody");
             let rows = Array.from(tbody.rows);
             let isAscending = header.classList.contains("asc");
@@ -319,17 +304,14 @@ tables.forEach((table) => {
     });
 });
 
-    // Setup filtering by name, tag, category, and status
-    // Table Filtering
+   //========== Filter Logic for Device Table ==========
     const filterName = document.getElementById("filter-name");
     const filterTag = document.getElementById("filter-tag");
     const filterCategory = document.getElementById("filter-category");
     const filterStatus = document.getElementById("filter-status");
 
-    // Updated: Filter table dynamically for Asset Tag and Status columns
     function filterTable() {
         const headers = document.querySelectorAll("#device-table thead th");
-        // Find column indexes by header label
         const tagIndex = Array.from(headers).findIndex(th => th.textContent.trim() === "Asset Tag");
         const statusIndex = Array.from(headers).findIndex(th => th.textContent.trim() === "Status");
 
@@ -344,7 +326,6 @@ tables.forEach((table) => {
             const status = cells[statusIndex]?.textContent.toLowerCase() || "";
 
             const tagMatch = tagValue === "" || tag.includes(tagValue);
-            // "status" option (default) acts as "All"
             const statusMatch = statusValue === "status" || status.includes(statusValue);
 
             row.style.display = tagMatch && statusMatch ? "" : "none";
@@ -356,8 +337,7 @@ tables.forEach((table) => {
     if (filterCategory) filterCategory.addEventListener("change", filterTable);
     if (filterStatus) filterStatus.addEventListener("change", filterTable);
 
-    // Setup logic for Edit User modal (opening, closing, form submission)
-    // Modal Functionality
+   
     const modal = document.getElementById("editModal");
     const closeModal = document.getElementById("closeEditModal");
     const editForm = document.getElementById("editUserForm");
@@ -401,10 +381,9 @@ tables.forEach((table) => {
         });
     }
 });
-
+//========= Create User Modal Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
-    // Setup logic for Create Device modal (opening, closing, form submission)
-    // Create Modal logic
+   
     const createModal = document.getElementById('createModal');
     const openBtn = document.getElementById('openCreateModal');
     const closeBtn = document.getElementById('closeCreateModal');
@@ -426,8 +405,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // Setup logic for Delete User modal (opening, closing)
-    // Delete Modal logic
+   //========== Delete User Modal Logic ==========
     const deleteModal = document.getElementById("deleteModal");
     const closeDeleteModal = document.getElementById("closeDeleteModal");
     const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
@@ -442,7 +420,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById('delete-user-id').value = userId;
                 document.getElementById('delete-username').textContent = username;
 
-                // Update the form action dynamically to include the user ID
                 deleteUserForm.action = `delete_user.php?id=${userId}`;
 
                 deleteModal.style.display = "block";
@@ -466,6 +443,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
 });
 
+//========= Device Table Sorting Logic ==========
         document.addEventListener("DOMContentLoaded", function () {
             const table = document.getElementById("device-table");
             const headers = table.querySelectorAll("th.sortable");
@@ -508,7 +486,7 @@ document.addEventListener("DOMContentLoaded", function () {
             
         });
         
-// Add sort functionality to each column header in the employee-table
+//========= Employee Table Sorting Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
   const employeeTable = document.getElementById("employee-table");
   if (employeeTable) {
@@ -525,7 +503,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const rows = Array.from(employeeTable.querySelector("tbody > tr"));
-        // +1 offset: skip the first checkbox column
         rows.sort((a, b) => {
           const cellA = a.children[index + 1].textContent.trim().toLowerCase();
           const cellB = b.children[index + 1].textContent.trim().toLowerCase();
@@ -539,7 +516,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-// Toggle modal for selecting visible table columns
 const editBtn = document.getElementById("edit-columns-btn");
 const columnModal = document.getElementById("column-selector");
 
@@ -558,6 +534,7 @@ if (editBtn && columnModal) {
   });
 }
 
+//========= Column Toggle Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
     const editBtn = document.getElementById("edit-columns-btn");
     const columnModal = document.getElementById("column-selector");
@@ -580,34 +557,31 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Column selector buttons toggle logic with background color update
+    // ========= Column Toggle Logic ==========
     document.querySelectorAll('.column-toggle-btn').forEach(button => {
       const input = button.nextElementSibling;
 
-      // Set initial color based on 'active' class
       if (button.classList.contains('active')) {
-        button.style.backgroundColor = '#28a745'; // green
+        button.style.backgroundColor = '#28a745'; 
       } else {
-        button.style.backgroundColor = '#dc3545'; // red
+        button.style.backgroundColor = '#dc3545'; 
       }
 
       button.addEventListener('click', () => {
         const isActive = button.classList.toggle('active');
         input.disabled = !isActive;
 
-        // Update color based on active state
         if (isActive) {
-          button.style.backgroundColor = '#28a745'; // green
+          button.style.backgroundColor = '#28a745'; 
         } else {
-          button.style.backgroundColor = '#dc3545'; // red
+          button.style.backgroundColor = '#dc3545';
         }
       });
     });
 });
 
-
+//========= Edit Mode Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
-    // Toggle inline edit mode for table rows and handle click-to-edit behavior
     const editBtn = document.getElementById("edit-mode-btn");
     const cancelEditBtn = document.getElementById("cancel-edit-btn");
     let originalTableHTML = null;
@@ -615,9 +589,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const undoBtn = document.getElementById("undo-delete-btn");
     let editing = false;
 
-    // Only enable device deletion logic if on the laptop dashboard (device management page)
     const deviceTable = document.querySelector("#device-table");
-    // Robustly check for a table header labeled "Asset Tag"
     const isDevicePage = deviceTable && Array.from(deviceTable.querySelectorAll('th')).some(th => th.textContent.trim() === "Asset Tag");
 
     if (isDevicePage && deleteBtn) {
@@ -650,10 +622,9 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    // Undo delete logic for laptops
+    //========= Undo Delete Logic ==========
     if (undoBtn) {
       undoBtn.addEventListener("click", function () {
-        // Optionally, confirm undo
         if (!confirm("Are you sure you want to undo the last delete?")) return;
         fetch("/Forms/Assets/undo_delete.php", {
           method: "POST",
@@ -674,12 +645,11 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    // Toggle editing mode
+    // ========= Edit Mode Toggle Logic ==========
     editBtn.addEventListener("click", () => {
         editing = !editing;
         document.body.classList.toggle("editing-mode", editing);
 
-        // Always add .editable-cell class and enable/disable checkboxes
         document.querySelectorAll(".device-table td").forEach(cell => {
             cell.classList.add("editable-cell");
         });
@@ -692,7 +662,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (deleteBtn) deleteBtn.style.display = "inline-block";
             if (undoBtn) undoBtn.style.display = "inline-block";
         } else {
-            // Remove editable-cell class and disable checkboxes when exiting edit mode
             document.querySelectorAll(".device-table td").forEach(cell => {
                 cell.classList.remove("editable-cell");
             });
@@ -705,19 +674,18 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
     
+    //========== Cancel Edit Logic ==========
     if (cancelEditBtn) {
         cancelEditBtn.addEventListener("click", () => {
             if (originalTableHTML) {
                 const tbody = document.querySelector(".device-table tbody");
                 tbody.innerHTML = originalTableHTML;
 
-                // Clear old double-click handlers by replacing each row with its clone
                 const refreshedRows = document.querySelectorAll(".device-table .clickable-row");
                 refreshedRows.forEach(row => {
                   const clone = row.cloneNode(true);
                   row.parentNode.replaceChild(clone, row);
                 });
-                // Rebind double-click modal logic for clickable-row
                 document.querySelectorAll(".device-table .clickable-row").forEach(row => {
                   row.addEventListener("dblclick", function (e) {
                     if (document.body.classList.contains("editing-mode")) {
@@ -750,7 +718,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (deleteBtn) deleteBtn.style.display = "none";
             if (undoBtn) undoBtn.style.display = "none";
 
-            // Rebind inline editing after cancel
+            //========= Rebind double-click handlers on reverted rows ==========
             document.querySelectorAll(".device-table td").forEach(cell => {
                 cell.addEventListener("dblclick", function (e) {
                     if (!document.body.classList.contains("editing-mode")) return;
@@ -819,7 +787,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Initial .clickable-row logic: open modal only on double-click
+    //========== Rebind double-click modal logic for clickable-row ==========
     document.querySelectorAll(".clickable-row").forEach(row => {
       row.addEventListener("dblclick", function (e) {
         if (document.body.classList.contains("editing-mode")) {
@@ -845,8 +813,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+//========= Create Device Modal Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
-    // Handle Create Device modal open, close, and form submission
     const openBtn = document.getElementById("open-create-modal");
     const modal = document.querySelector(".create-device-modal");
     const closeBtn = document.getElementById("close-create-modal");
@@ -895,6 +863,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+//========= Inline Editing Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
     const selectOptions = {
         status: ['Active', 'Pending Return', 'Shelf-CC', 'Shelf-MD', 'Shelf-HS', 'Lost', 'Decommissioned'],
@@ -907,13 +876,12 @@ document.addEventListener("DOMContentLoaded", function () {
             'Executive',
             'HR'
         ],
-        assigned_to: window.employeeOptions || []  // will be injected from PHP
+        assigned_to: window.employeeOptions || [] 
     };
 
-    // 1. Add a new object to store pending edits
     let pendingEdits = {};
 
-    // Enable inline editing for supported fields (dropdown or text input)
+    //========= Inline Editing Logic ==========
     document.querySelectorAll(".device-table td").forEach(cell => {
         cell.addEventListener("dblclick", function (e) {
             if (!document.body.classList.contains("editing-mode")) return;
@@ -951,7 +919,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 select.addEventListener("blur", () => {
                     const newValue = select.value;
-                    // 2. Store pending edit instead of sending update
                     if (!pendingEdits[deviceId]) pendingEdits[deviceId] = {};
                     pendingEdits[deviceId][column] = newValue;
                     cell.textContent = newValue;
@@ -969,7 +936,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 input.addEventListener("blur", () => {
                     const newValue = input.value.trim();
-                    // 2. Store pending edit instead of sending update
                     if (!pendingEdits[deviceId]) pendingEdits[deviceId] = {};
                     pendingEdits[deviceId][column] = newValue;
                     cell.textContent = newValue;
@@ -987,13 +953,13 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // 3. Modify the "Save Table" button logic
     const editBtn = document.getElementById("edit-mode-btn");
     const cancelEditBtn = document.getElementById("cancel-edit-btn");
     const deleteBtn = document.getElementById("delete-selected-btn");
     let originalTableHTML = null;
     let editing = false;
 
+    //========= Edit Mode Toggle Logic ==========
     editBtn.addEventListener("click", () => {
         editing = !editing;
         document.body.classList.toggle("editing-mode", editing);
@@ -1007,7 +973,6 @@ document.addEventListener("DOMContentLoaded", function () {
             editBtn.textContent = "Edit Table";
             cancelEditBtn.style.display = "none";
             if (deleteBtn) deleteBtn.style.display = "none";
-            // Submit all pending edits
             const promises = [];
             for (const deviceId in pendingEdits) {
                 for (const column in pendingEdits[deviceId]) {
@@ -1034,7 +999,6 @@ document.addEventListener("DOMContentLoaded", function () {
             cancelEditBtn.style.display = "none";
             if (deleteBtn) deleteBtn.style.display = "none";
 
-            // Re-enable double click handlers on reverted rows
             document.querySelectorAll(".clickable-row").forEach(row => {
                 row.addEventListener("dblclick", function (e) {
                     const isEditing = document.body.classList.contains("editing-mode");
@@ -1048,7 +1012,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             });
 
-            // Rebind inline editing after cancel
+            // ========== Rebind inline editing after cancel ==========
             document.querySelectorAll(".device-table td").forEach(cell => {
                 cell.addEventListener("dblclick", function (e) {
                     if (!document.body.classList.contains("editing-mode")) return;
@@ -1119,13 +1083,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             });
 
-            // 4. Clear unsaved changes
             pendingEdits = {};
         });
     }
 });
 
-// Import Modal Script
+// ======== Import Laptop Modal Logic ==========
 document.addEventListener("DOMContentLoaded", function () {
     const importModal = document.getElementById("importLaptopModal");
     const openImportBtn = document.getElementById("openImportLaptopModal");
@@ -1147,7 +1110,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// Helper function to bind row events
+// ====== Helper function to bind row events for double-click modal ======
 function bindRowEvents() {
     document.querySelectorAll(".clickable-row").forEach(row => {
         row.addEventListener("click", function (e) {
@@ -1155,7 +1118,6 @@ function bindRowEvents() {
             e.stopPropagation();
         });
         row.addEventListener("dblclick", function (e) {
-            // Retrieve asset tag from the row's asset_tag cell
             const assetTagCell = this.querySelector('td[data-column="asset_tag"]');
             const assetTag = assetTagCell ? assetTagCell.textContent.trim() : null;
             if (assetTag) {
@@ -1172,6 +1134,7 @@ function bindRowEvents() {
         });
     });
 
+    //========== Inline Editing Logic ==========
     document.querySelectorAll(".device-table td").forEach(cell => {
         cell.addEventListener("dblclick", function (e) {
             if (!document.body.classList.contains("editing-mode")) return;
@@ -1240,7 +1203,7 @@ function bindRowEvents() {
 }
 
 
-// Import Laptop CSV Form Submission (AJAX)
+// ======== Import Laptop CSV Form Submission (AJAX) ==========
 document.addEventListener("DOMContentLoaded", () => {
   const importForm = document.getElementById("importLaptopForm");
   const importResult = document.getElementById("import-result-message");
@@ -1296,10 +1259,8 @@ function fetchEmployeeDetails(emp_code) {
 
 // ========== Flexible Phone Input Pattern for Employee Creation ==========
 document.addEventListener("DOMContentLoaded", function () {
-  // Find the employee creation phone input (by name attribute)
   const phoneInputs = document.querySelectorAll('input[type="tel"][name="phone_number"]');
   phoneInputs.forEach(input => {
-    // Update pattern and placeholder for flexible phone number formats
     input.setAttribute('pattern', '\\(?\\d{3}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}');
     input.setAttribute('placeholder', '(123) 456-7890');
   });
