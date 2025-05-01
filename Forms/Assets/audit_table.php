@@ -104,7 +104,17 @@ while (($row = fgetcsv($csvFile)) !== false) {
             continue;
         }
 
-        $insert = $conn->prepare("INSERT INTO Employees (emp_code, first_name, last_name, active) VALUES (?, ?, ?, 1)");
+        // Dynamically check if 'active' column exists in Employees table
+        $hasActiveColumn = false;
+        $colCheck = $conn->query("SHOW COLUMNS FROM Employees LIKE 'active'");
+        if ($colCheck && $colCheck->num_rows > 0) {
+            $hasActiveColumn = true;
+        }
+        if ($hasActiveColumn) {
+            $insert = $conn->prepare("INSERT INTO Employees (emp_code, first_name, last_name, active) VALUES (?, ?, ?, 1)");
+        } else {
+            $insert = $conn->prepare("INSERT INTO Employees (emp_code, first_name, last_name) VALUES (?, ?, ?)");
+        }
         if ($insert) {
             $insert->bind_param("sss", $empId, $firstName, $lastName);
             if (!$insert->execute()) {
@@ -132,20 +142,28 @@ if (!empty($employeeIds)) {
     $placeholders = implode(',', array_fill(0, count($employeeIds), '?'));
     $types = str_repeat('s', count($employeeIds));
     $stmt = $conn->prepare("UPDATE Employees SET active = 1 WHERE REPLACE(emp_code, ' ', '') IN ($placeholders)");
-    $stmt->bind_param($types, ...$employeeIds);
-    $stmt->execute();
-    $stmt->close();
+    if ($stmt) {
+        $stmt->bind_param($types, ...$employeeIds);
+        $stmt->execute();
+        $stmt->close();
+    } else {
+        error_log("Prepare failed in emp_code-based audit update: " . $conn->error);
+    }
     $activated = $employeeIds;
 }
 
 foreach ($namePairs as $pair) {
     $stmt = $conn->prepare("UPDATE Employees SET active = 1 WHERE LOWER(first_name) = ? AND LOWER(last_name) = ?");
-    $stmt->bind_param("ss", $pair['first_name'], $pair['last_name']);
-    $stmt->execute();
-    // LOG: Each employee flagged as active during audit (name-based)
-    $logMessage = date("Y-m-d | h:i:s A") . " | Event: Employee Reactivated (Audit) | Name: {$pair['first_name']} {$pair['last_name']}" . PHP_EOL;
-    file_put_contents(__DIR__ . '/../../logs/device_event_log.txt', $logMessage, FILE_APPEND);
-    $stmt->close();
+    if ($stmt) {
+        $stmt->bind_param("ss", $pair['first_name'], $pair['last_name']);
+        $stmt->execute();
+        // LOG: Each employee flagged as active during audit (name-based)
+        $logMessage = date("Y-m-d | h:i:s A") . " | Event: Employee Reactivated (Audit) | Name: {$pair['first_name']} {$pair['last_name']}" . PHP_EOL;
+        file_put_contents(__DIR__ . '/../../logs/device_event_log.txt', $logMessage, FILE_APPEND);
+        $stmt->close();
+    } else {
+        error_log("Prepare failed in name-based audit update: " . $conn->error);
+    }
 }
 
 $_SESSION['active_employee_ids'] = array_merge($employeeIds, array_map(fn($p) => $p['first_name'] . ' ' . $p['last_name'], $namePairs));
