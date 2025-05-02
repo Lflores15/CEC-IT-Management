@@ -17,6 +17,9 @@ CEC IT Management is a PHP- and MySQL-based inventory system designed to track I
 - Assign devices to employees using a dropdown interface
 - Role-based access and authentication
 - CSV import/export functionality
+  - Auditing employees to laptops
+  - Importing asset inventory
+  - Export of laptop inventory
 - Responsive UI built with JavaScript and PHP
 - Dockerized for simple setup and deployment
 
@@ -29,7 +32,11 @@ To run this project locally using Docker:
 ### Prerequisites
 
 - Docker
-- Docker Compose
+- Database files (automated setup):
+  - 01-create-tables.sql
+  - 02-seed-from-csv.sql
+  - 03-seed-admin.sql
+  - SparkList_Inventory
 
 ### Steps to Start
 
@@ -41,8 +48,8 @@ docker-compose build
 docker-compose up
 ```
 
-1. Access the app at [http://localhost:8080]
-2. Access phpmyadmin : Database at [http://localhost:8081]
+1. Access the app at [http://localhost:8080] (local use)
+2. Access phpmyadmin : Database at [http://localhost:8081] (local use)
 
 ### Stopping Containers
 
@@ -50,6 +57,11 @@ To stop all running containers:
 
 ```bash
 docker-compose down
+```
+
+### Clearing Volume for Database Files (Just in Case)
+```bash
+docker-compose down -v
 ```
 
 ---
@@ -63,9 +75,12 @@ Example `.env.dev`:
 ```
 MYSQL_ROOT_PASSWORD=root
 MYSQL_DATABASE=cec_it_management
-MYSQL_USER=root
-MYSQL_PASSWORD=root
+MYSQL_USER=test
+MYSQL_PASSWORD=test
 MYSQL_SERVERNAME=db
+
+USER_LOG_PATH=/var/www/html/logs/user_event_log.txt
+DEVICE_LOG_PATH=/var/www/html/logs/device_event_log.txt
 ```
 
 Make sure to copy `.env.dev` and rename to `.env` so that all environment variables work with application.

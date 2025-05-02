@@ -39,13 +39,13 @@ if (array_key_exists($currentPage, $pageTitles)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle; ?> | CEC-IT</title>
-    <link rel="stylesheet" href="/Assets/styles.css">
+    <link rel="stylesheet" href="../../Assets/styles.css">
 </head>
 <body>
 
     <!-- Top Navbar -->
     <div class="top-navbar">
-        <img src="/Assets/CEC-Logo.png" alt="CEC-IT Logo" class="logo">
+        <img src="../../Assets/CEC-Logo.png" alt="CEC-IT Logo" class="logo">
 
         <div class="navbar-right">
         <!-- Depricated Search Bar 
@@ -86,6 +86,6 @@ if (array_key_exists($currentPage, $pageTitles)) {
     <!-- Main Content Wrapper -->
     <div class="<?php echo $isAssetPage ? 'asset-content' : 'main-content'; ?>">
     <!-- Script Link -->
-    <script src="/Assets/script.js?v=<?php echo time(); ?>"></script>
+    <script src="../../Assets/script.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

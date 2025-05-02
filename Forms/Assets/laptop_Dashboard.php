@@ -95,8 +95,8 @@ $conn->close();
     <meta charset="UTF-8">
     <title>Laptops Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/Assets/styles.css">
-    <script src="/Assets/script.js?v=<?php echo time(); ?>" defer></script> 
+    <link rel="stylesheet" href="../../Assets/styles.css">
+    <script src="../../Assets/script.js?v=<?php echo time(); ?>" defer></script> 
 </head>
 <body>
 <div class="main-layout">
