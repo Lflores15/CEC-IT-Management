@@ -148,11 +148,18 @@ if ($imported > 0) {
 }
 
 header('Content-Type: application/json');
+$uniqueErrors = array_unique(array_map(function ($error) {
+    if (str_contains($error, "Missing asset_tag")) return "Missing asset_tag";
+    if (str_contains($error, "Invalid status")) return "Invalid status";
+    if (str_contains($error, "Duplicate asset_tag")) return "Duplicate asset_tag";
+    return "Other error";
+}, $errors));
+
+$reasonSummary = count($uniqueErrors) > 0 ? " Reason(s): " . implode(", ", $uniqueErrors) . "." : "";
+
 echo json_encode([
     "status" => $imported > 0 ? (count($errors) > 0 ? "partial" : "success") : "error",
-    "message" => $imported > 0
-        ? "✅ Imported $imported laptop(s)." . (count($errors) ? "<br>⚠️ Some issues: " . implode(" | ", $errors) : "")
-        : "❌ No laptops imported. Errors: " . implode(" | ", $errors)
+    "message" => "Imported $imported of " . ($imported + count($errors)) . " laptop(s)." . $reasonSummary
 ]);
 exit;
 ?>
